@@ -270,19 +270,42 @@
             "final-GH_MD_HASHAGENT_MD_batch4.json"
           ],
           "confirmed_files": [
-            "_INDEX_AGENT.MD.md", "_INDEX_AGENT.MD.smartmerge.md",
-            "AGENT.md", "AGENTS.md", "CLAUDE.md",
+            "_INDEX_AGENT.MD.md",
+            "_INDEX_AGENT.MD.smartmerge.md",
+            "AGENT.md",
+            "AGENTS.md",
+            "CLAUDE.md",
             "accessibility-checklist.md",
-            "agent-mission.merged.md", "agent-reach-config.merged.yaml", "agent-reach-router.yaml",
-            "avatar-engine.merged.js", "build.md", "claude-code.md",
-            "code-reviewer.md", "code-simplify.md", "CONTRIBUTING.merged.md",
-            "copilot-setup.md", "cursor-setup.md", "opencode-setup.md", "windsurf-setup.md", "vscode-gadget.md",
-            "decoder-conceptor.merged.md", "deep-research-prompt.md",
-            "examples.md", "frameworks.md", "refinement-criteria.md",
-            "obliteratus.md", "OpenMultiAgent core.md", "performance-checklist.md",
-            "preflight_agent.py", "R³ VOLT-AGENT_DESIGN.MD",
-            "R³_AGENTENFÄHIGKEITEN.MD", "R³_AGENTENFÄHIGKEITEN_BASIC-Prompt.md",
-            "review.md", "test-engineer.md", "test.md", "testing-patterns.md",
+            "agent-mission.merged.md",
+            "agent-reach-config.merged.yaml",
+            "agent-reach-router.yaml",
+            "avatar-engine.merged.js",
+            "build.md",
+            "claude-code.md",
+            "code-reviewer.md",
+            "code-simplify.md",
+            "CONTRIBUTING.merged.md",
+            "copilot-setup.md",
+            "cursor-setup.md",
+            "opencode-setup.md",
+            "windsurf-setup.md",
+            "vscode-gadget.md",
+            "decoder-conceptor.merged.md",
+            "deep-research-prompt.md",
+            "examples.md",
+            "frameworks.md",
+            "refinement-criteria.md",
+            "obliteratus.md",
+            "OpenMultiAgent core.md",
+            "performance-checklist.md",
+            "preflight_agent.py",
+            "R³ VOLT-AGENT_DESIGN.MD",
+            "R³_AGENTENFÄHIGKEITEN.MD",
+            "R³_AGENTENFÄHIGKEITEN_BASIC-Prompt.md",
+            "review.md",
+            "test-engineer.md",
+            "test.md",
+            "testing-patterns.md",
             "Mountpoint-Matrix_workplace-live-3.json",
             "+ 24 more (omitted in export batches)"
           ]
@@ -441,8 +464,22 @@
         "re-output-collector": ["collector.py"],
         "re-preflight-agent": ["preflight_agent.py", "preflight-report.json"],
         "re-prompt-router": ["prompt_router.py", "router-config.yaml"],
-        "re-social-connectors": ["social-connectors.yaml", "specialty-connectors.yaml"],
-        "g0dm0d3_hybrid_agent": ["data/", "public/", "scripts/", "skills/", ".env.example", ".env.local", ".env.runtime", ".runtime-env-summary.json", "docker-compose.yml", "package.json"]
+        "re-social-connectors": [
+          "social-connectors.yaml",
+          "specialty-connectors.yaml"
+        ],
+        "g0dm0d3_hybrid_agent": [
+          "data/",
+          "public/",
+          "scripts/",
+          "skills/",
+          ".env.example",
+          ".env.local",
+          ".env.runtime",
+          ".runtime-env-summary.json",
+          "docker-compose.yml",
+          "package.json"
+        ]
       }
     },
 
@@ -455,9 +492,32 @@
         "final-GH_MD_Dashboard_START.json"
       ],
       "structure": {
-        "CANONICAL_JS_MASTER": ["server.js", "R3-AUTO-MOUNT-HOOK.js", "r3-mount-api.js", "lib/(6 files)", "src/"],
-        "LOGICAL_MASTER_JS": ["server.js", "R3-AUTO-MOUNT-HOOK.js", "r3-mount-api.js", "lib/(6 files)", "src/"],
-        "Dashboard_START": ["server.js", "registry.js", "R3-AUTO-MOUNT-HOOK.js", "r3-mount-api.js", "ConnectorsModal.tsx", "r3-hidden-launcher.vbs", "R3-RUN.ps1", "R3-START-SILENT.ps1", "R3-STOP-SERVERS.ps1", "R3-NODE-CONNECTOR.ps1"]
+        "CANONICAL_JS_MASTER": [
+          "server.js",
+          "R3-AUTO-MOUNT-HOOK.js",
+          "r3-mount-api.js",
+          "lib/(6 files)",
+          "src/"
+        ],
+        "LOGICAL_MASTER_JS": [
+          "server.js",
+          "R3-AUTO-MOUNT-HOOK.js",
+          "r3-mount-api.js",
+          "lib/(6 files)",
+          "src/"
+        ],
+        "Dashboard_START": [
+          "server.js",
+          "registry.js",
+          "R3-AUTO-MOUNT-HOOK.js",
+          "r3-mount-api.js",
+          "ConnectorsModal.tsx",
+          "r3-hidden-launcher.vbs",
+          "R3-RUN.ps1",
+          "R3-START-SILENT.ps1",
+          "R3-STOP-SERVERS.ps1",
+          "R3-NODE-CONNECTOR.ps1"
+        ]
       }
     },
 
@@ -474,6 +534,92 @@
         "re-prompt-router",
         "re-provider-registry",
         "re-social-connectors"
+      ]
+    }
+  },
+
+  "content_snapshots": {
+    "_description": "File CONTENT exports (not just tree). Each entry maps to a content-p*.json file in r3-nodes/. Status: PENDING until file is uploaded and processed.",
+    "P1_registry_files": {
+      "output_file": "content-p1-registry-files.json",
+      "status": "PENDING",
+      "covers": [
+        "engine-registry.json",
+        "SOURCE/data/R3_VIBE_REGISTRY.json",
+        "docker/.env.example",
+        "docker/docker-compose.yml",
+        "package.json",
+        "tsconfig.json",
+        "r3-vibe-dash-struktur.yaml"
+      ]
+    },
+    "P2_gre_generator_specs": {
+      "output_file": "content-p2-gre-generator-specs.json",
+      "status": "PENDING",
+      "covers": [
+        "MODULES/re-gre-generator/generator-spec.yaml",
+        "MODULES/re-gre-generator/generator-output-spec.yaml",
+        "MODULES/re-gre-generator/preflight-spec.yaml",
+        "MODULES/re-gre-generator/policy.yaml",
+        "MODULES/re-gre-generator/agent-reach-config.yaml",
+        "MODULES/re-gre-generator/bundle-manifest.yaml",
+        "MODULES/re-gre-generator/*.py (all build scripts)",
+        "MODULES/re-gre-generator/pyproject.toml",
+        "MODULES/re-gre-generator/README.md"
+      ]
+    },
+    "P3_ki_api": {
+      "output_file": "content-p3-ki-api.json",
+      "status": "PENDING",
+      "covers": [
+        "services/ki-api/app.py",
+        "services/ki-api/routing_engine.py",
+        "services/ki-api/requirements.txt",
+        "services/ki-api/Dockerfile"
+      ]
+    },
+    "P4_chat_legs_lib": {
+      "output_file": "content-p4-chat-legs-lib.json",
+      "status": "PENDING",
+      "covers": [
+        "SOURCE/chat-legs/lib/providers.js",
+        "SOURCE/chat-legs/lib/router.js",
+        "SOURCE/chat-legs/lib/registry.js",
+        "SOURCE/chat-legs/lib/runtime-env.js",
+        "SOURCE/chat-legs/lib/avatar-engine.js",
+        "SOURCE/chat-legs/lib/skills.js"
+      ]
+    },
+    "P5_agent_skills": {
+      "output_file": "content-p5-agent-skills.json",
+      "status": "PENDING",
+      "covers": [
+        "MODULES/agent-skills/skills/*/SKILL.md (all 21 skill definitions)"
+      ]
+    },
+    "P6_strategy_docs": {
+      "output_file": "content-p6-strategy-docs.json",
+      "status": "PENDING",
+      "covers": [
+        "GH_MD/#STRATEGY.MD/R³ CORE STRATEGY.md",
+        "GH_MD/#STRATEGY.MD/R3-DASHBOARD-SPEC.merged.md",
+        "GH_MD/#STRATEGY.MD/generator-spec.merged.yaml",
+        "GH_MD/#STRATEGY.MD/generator-output-spec.merged.yaml",
+        "GH_MD/#STRATEGY.MD/preflight-spec.merged.yaml",
+        "GH_MD/#STRATEGY.MD/incident-log.merged.md",
+        "GH_MD/#STRATEGY.MD/plan.md",
+        "GH_MD/#STRATEGY.MD/r3-mod07-v3-handoff-spec.md + .json",
+        "GH_MD/#STRATEGY.MD/MOD-07-STAMMDATEN-GENERATOR-SPEC.md"
+      ]
+    },
+    "BONUS_agent_skills_config": {
+      "output_file": "content-bonus-agent-skills-config.json",
+      "status": "PENDING",
+      "covers": [
+        "MODULES/agent-skills/AGENTS.md",
+        "MODULES/agent-skills/CLAUDE.md",
+        "MODULES/agent-skills/CONTRIBUTING.md",
+        "MODULES/agent-skills/README.md"
       ]
     }
   },
