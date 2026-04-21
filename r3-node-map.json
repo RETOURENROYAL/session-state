@@ -1,0 +1,553 @@
+{
+  "_meta": {
+    "project": "R3-DASHBOARD",
+    "local_root": "C:\\Users\\mail\\R3-DASHBOARD",
+    "export_dir": "C:\\Users\\mail\\R3-DASHBOARD\\r3-nodes",
+    "generated": "2026-04-21",
+    "description": "Master deep-read index: maps every r3-nodes export file to its logical domain. Use 'read_order' per goal to navigate efficiently."
+  },
+
+  "domains": {
+    "01_core_infrastructure": {
+      "description": "Container stack, DB init, reverse proxy, engine registry",
+      "completeness": "FULL",
+      "export_files": ["node-docker.json", "node-engine-registry.json"],
+      "key_paths": [
+        "docker/docker-compose.yml",
+        "docker/init.sql",
+        "docker/nginx.conf",
+        "docker/nginx-vault.conf",
+        "docker/.env.example",
+        "engine-registry.json"
+      ]
+    },
+
+    "02_ai_proxy_layer": {
+      "description": "Chat-Legs proxy server (ports 8420/8421), OpenAI bridge (8512), Perplexity bridge (8511), HuggingFace proxy",
+      "completeness": "FULL",
+      "export_files": [
+        "subsub-chat-legs_ROOT.json",
+        "subsub-chat-legs_bridges.json",
+        "subsub-chat-legs_hf_proxy.json",
+        "subsub-chat-legs_lib.json"
+      ],
+      "key_paths": [
+        "SOURCE/chat-legs/bridges/openai-8512/",
+        "SOURCE/chat-legs/bridges/perplexity-8511/",
+        "SOURCE/chat-legs/hf-proxy/server.js",
+        "SOURCE/chat-legs/lib/providers.js",
+        "SOURCE/chat-legs/lib/router.js",
+        "SOURCE/chat-legs/lib/registry.js",
+        "SOURCE/chat-legs/lib/runtime-env.js",
+        "SOURCE/chat-legs/lib/avatar-engine.js"
+      ]
+    },
+
+    "03_control_plane": {
+      "description": "Matrix control plane (port 8422), guardrail scheduler, overview APIs, fix bundles",
+      "completeness": "FULL (runtime dirs excluded)",
+      "export_files": [
+        "subsub-chat-legs_r3_control_plane_live_package.json",
+        "subsub-chat-legs_r3_fix_bundle_v6.json",
+        "subsub-chat-legs_r3_matrix_control_plane_pack.json",
+        "subsub-chat-legs_r3_next_step_package.json",
+        "subsub-chat-legs_r3_next_step_package_rebuilt.json",
+        "subsub-chat-legs_R3_Canonical_JS_Hardened_Toolchain_v4_Fix.json"
+      ],
+      "key_paths": [
+        "SOURCE/chat-legs/r3_control_plane_live_package/control-plane-dashboard-router.js",
+        "SOURCE/chat-legs/r3_fix_bundle_v6/r3-control-plane-overview-api-v3.cjs",
+        "SOURCE/chat-legs/r3_next_step_package/r3-control-plane-overview-api.js",
+        "SOURCE/chat-legs/r3_next_step_package/002_r3_guardrail_control_plane.sql"
+      ],
+      "note": "_runtime/ contains live working copies — excluded from deep map (too large, ephemeral)"
+    },
+
+    "04_frontend_ui": {
+      "description": "React/TSX frontend, dashboard HTML, public assets",
+      "completeness": "FULL",
+      "export_files": [
+        "subsub-chat-legs_src.json",
+        "subsub-chat-legs_public.json",
+        "subsub-chat-legs_payload.json",
+        "final-chat-legs-src.json"
+      ],
+      "src_structure": {
+        "components": ["ConnectorsModal.tsx"],
+        "lib": ["avatar-engine.js", "config.js", "db.js", "+ more"],
+        "providers": "multiple provider integration files",
+        "root": ["ConnectorsModal.tsx", "server.js"]
+      },
+      "key_paths": [
+        "SOURCE/chat-legs/src/components/",
+        "SOURCE/chat-legs/src/ConnectorsModal.tsx",
+        "SOURCE/chat-legs/src/lib/",
+        "SOURCE/chat-legs/public/index.html",
+        "SOURCE/chat-legs/payload/src/",
+        "dashboard.html",
+        "SOURCE/r3-master-hub*.html"
+      ]
+    },
+
+    "05_ki_api_service": {
+      "description": "Python Flask AI routing API — provider selection, model dispatch",
+      "completeness": "FULL",
+      "export_files": ["node-services.json"],
+      "key_paths": [
+        "services/ki-api/app.py",
+        "services/ki-api/routing_engine.py",
+        "services/ki-api/Dockerfile",
+        "services/ki-api/requirements.txt",
+        "services/r3-rec/index.js"
+      ]
+    },
+
+    "06_automation_scripts": {
+      "description": "PowerShell guardrail, audit, canonical-JS activation scripts",
+      "completeness": "FULL",
+      "export_files": [
+        "node-_automation.json",
+        "subsub-chat-legs_scripts.json"
+      ],
+      "key_paths": [
+        "_automation/Run-R3-Canonical-JS-Guardrail-Daily.ps1",
+        "_automation/Run-R3-Canonical-JS-PostDeployment-Integrity-Audit.ps1",
+        "_automation/R3-Connector-Audit-PostRun.ps1",
+        "SOURCE/chat-legs/scripts/windows/apply-r3-live-status-patch.ps1"
+      ]
+    },
+
+    "07_agent_skills_module": {
+      "description": "MODULES/agent-skills — 21 SKILL.md skills, AGENTS.md, CLAUDE.md, hooks, docs, references",
+      "completeness": "FULL",
+      "export_files": [
+        "sub-MODULES_agent-skills.json",
+        "subsub-agent-skills_skill_api_and_interface_design.json",
+        "subsub-agent-skills_skill_browser_testing_with_devtools.json",
+        "subsub-agent-skills_skill_ci_cd_and_automation.json",
+        "subsub-agent-skills_skill_code_review_and_quality.json",
+        "subsub-agent-skills_skill_code_simplification.json",
+        "subsub-agent-skills_skill_context_engineering.json",
+        "subsub-agent-skills_skill_debugging_and_error_recovery.json",
+        "subsub-agent-skills_skill_deprecation_and_migration.json",
+        "subsub-agent-skills_skill_documentation_and_adrs.json",
+        "subsub-agent-skills_skill_frontend_ui_engineering.json",
+        "subsub-agent-skills_skill_git_workflow_and_versioning.json",
+        "subsub-agent-skills_skill_idea_refine.json",
+        "subsub-agent-skills_skill_incremental_implementation.json",
+        "subsub-agent-skills_skill_performance_optimization.json",
+        "subsub-agent-skills_skill_planning_and_task_breakdown.json",
+        "subsub-agent-skills_skill_security_and_hardening.json",
+        "subsub-agent-skills_skill_shipping_and_launch.json",
+        "subsub-agent-skills_skill_source_driven_development.json",
+        "subsub-agent-skills_skill_spec_driven_development.json",
+        "subsub-agent-skills_skill_test_driven_development.json",
+        "subsub-agent-skills_skill_using_agent_skills.json"
+      ],
+      "skills_inventory": [
+        "api-and-interface-design",
+        "browser-testing-with-devtools",
+        "ci-cd-and-automation",
+        "code-review-and-quality",
+        "code-simplification",
+        "context-engineering",
+        "debugging-and-error-recovery",
+        "deprecation-and-migration",
+        "documentation-and-adrs",
+        "frontend-ui-engineering",
+        "git-workflow-and-versioning",
+        "idea-refine",
+        "incremental-implementation",
+        "performance-optimization",
+        "planning-and-task-breakdown",
+        "security-and-hardening",
+        "shipping-and-launch",
+        "source-driven-development",
+        "spec-driven-development",
+        "test-driven-development",
+        "using-agent-skills"
+      ],
+      "note": "idea-refine is the only skill with extra files (examples.md, frameworks.md, refinement-criteria.md)"
+    },
+
+    "08_agent_reach_hq": {
+      "description": "MODULES/agent-reach-hq — HQ prompts, connector matrix, router config",
+      "completeness": "FULL",
+      "export_files": ["sub-MODULES_agent-reach-hq.json"],
+      "key_paths": [
+        "MODULES/agent-reach-hq/agent-reach-router.yaml",
+        "MODULES/agent-reach-hq/connector-matrix.yaml",
+        "MODULES/agent-reach-hq/hq-coding-prompt.md",
+        "MODULES/agent-reach-hq/hq-scripter-prompt.md",
+        "MODULES/agent-reach-hq/deep-research-prompt.md",
+        "MODULES/agent-reach-hq/obliteratus.md",
+        "MODULES/agent-reach-hq/claude-code.md",
+        "MODULES/agent-reach-hq/vscode-gadget.md",
+        "MODULES/agent-reach-hq/README.md"
+      ]
+    },
+
+    "09_obliteratus_module": {
+      "description": "MODULES/obliteratus — Python ML model abliteration toolkit, pip-installable, Dockerfile, HF Spaces",
+      "completeness": "FULL",
+      "export_files": [
+        "sub-MODULES_obliteratus.json",
+        "subsub-obliteratus_pkg.json"
+      ],
+      "key_paths": [
+        "MODULES/obliteratus/app.py",
+        "MODULES/obliteratus/obliteratus/abliterate.py",
+        "MODULES/obliteratus/obliteratus/cli.py",
+        "MODULES/obliteratus/obliteratus/config.py",
+        "MODULES/obliteratus/obliteratus/adaptive_defaults.py",
+        "MODULES/obliteratus/obliteratus/bayesian_optimizer.py",
+        "MODULES/obliteratus/obliteratus/architecture_profiles.py",
+        "MODULES/obliteratus/obliteratus/informed_pipeline.py",
+        "MODULES/obliteratus/Dockerfile",
+        "MODULES/obliteratus/pyproject.toml",
+        "MODULES/obliteratus/hf-spaces/"
+      ],
+      "package_modules": [
+        "__init__",
+        "__main__",
+        "abliterate",
+        "adaptive_defaults",
+        "architecture_profiles",
+        "bayesian_optimizer",
+        "cli",
+        "community",
+        "config",
+        "device",
+        "informed_pipeline",
+        "evaluator",
+        "presets",
+        "probing_classifiers",
+        "remote",
+        "reader",
+        "render",
+        "emitter"
+      ]
+    },
+
+    "10_re_gre_generator": {
+      "description": "MODULES/re-gre-generator — core output generator, spec-driven, install-plan runner",
+      "completeness": "FULL",
+      "export_files": ["sub-MODULES_re-gre-generator.json"],
+      "key_paths": [
+        "MODULES/re-gre-generator/generator-spec.yaml",
+        "MODULES/re-gre-generator/generator-output-spec.yaml",
+        "MODULES/re-gre-generator/preflight-spec.yaml",
+        "MODULES/re-gre-generator/install_plan.py",
+        "MODULES/re-gre-generator/build.py",
+        "MODULES/re-gre-generator/serve.py",
+        "MODULES/re-gre-generator/register_connector.py",
+        "MODULES/re-gre-generator/policy.yaml"
+      ]
+    },
+
+    "11_n8n_workflows": {
+      "description": "n8n workflow engine, browser-dash, bridge scripts",
+      "completeness": "FULL",
+      "export_files": ["node-n8n-workflows.json"],
+      "key_paths": [
+        "n8n-workflows/browser-dash/r3-master-hub-v2.html",
+        "n8n-workflows/browser-dash/docker-compose.yml",
+        "n8n-workflows/workflow-agents/.claude.json"
+      ]
+    },
+
+    "12_knowledge_base_GH_MD": {
+      "description": "GH_MD/ — merged knowledge files for all AI agents, indexed by category",
+      "completeness": "MOSTLY FULL",
+      "subdomains": {
+        "#AGENT.MD": {
+          "files_total": 65,
+          "completeness": "FULL — all 4 batches confirmed, 65/65 files",
+          "export_files": [
+            "final-GH_MD_HASHAGENT_MD_batch1.json",
+            "final-GH_MD_HASHAGENT_MD_batch2.json",
+            "final-GH_MD_HASHAGENT_MD_batch3.json",
+            "final-GH_MD_HASHAGENT_MD_batch4.json"
+          ],
+          "confirmed_files": [
+            "_INDEX_AGENT.MD.md", "_INDEX_AGENT.MD.smartmerge.md",
+            "AGENT.md", "AGENTS.md", "CLAUDE.md",
+            "accessibility-checklist.md",
+            "agent-mission.merged.md", "agent-reach-config.merged.yaml", "agent-reach-router.yaml",
+            "avatar-engine.merged.js", "build.md", "claude-code.md",
+            "code-reviewer.md", "code-simplify.md", "CONTRIBUTING.merged.md",
+            "copilot-setup.md", "cursor-setup.md", "opencode-setup.md", "windsurf-setup.md", "vscode-gadget.md",
+            "decoder-conceptor.merged.md", "deep-research-prompt.md",
+            "examples.md", "frameworks.md", "refinement-criteria.md",
+            "obliteratus.md", "OpenMultiAgent core.md", "performance-checklist.md",
+            "preflight_agent.py", "R³ VOLT-AGENT_DESIGN.MD",
+            "R³_AGENTENFÄHIGKEITEN.MD", "R³_AGENTENFÄHIGKEITEN_BASIC-Prompt.md",
+            "review.md", "test-engineer.md", "test.md", "testing-patterns.md",
+            "Mountpoint-Matrix_workplace-live-3.json",
+            "+ 24 more (omitted in export batches)"
+          ]
+        },
+        "#KNOWLEDGE.MD": {
+          "files_total": 18,
+          "completeness": "FULL",
+          "export_files": ["sub-GH_MD_#KNOWLEDGE.MD.json"],
+          "notable": [
+            "KNOWLEDGE.md",
+            "preset_knowledge.yaml",
+            "OLLAMA_OLLAMA.MD",
+            "n8n Blueprint – LLM Integration.md"
+          ]
+        },
+        "#MEMORY.MD": {
+          "files_total": 14,
+          "completeness": "FULL",
+          "export_files": ["sub-GH_MD_#MEMORY.MD.json"],
+          "notable": [
+            "MEMORY.md",
+            "mempalace.md",
+            "Mountpoint-Matrix_*.merged.json",
+            "mountpoints.merged.js"
+          ]
+        },
+        "#SKILLS.MD": {
+          "files_total": 9,
+          "completeness": "FULL",
+          "export_files": ["subsub-GH_MD_HASHSKILLS_MD_batch1.json"],
+          "notable": [
+            "SKILL.merged.md",
+            "AI Marketing Skills.md",
+            "CLAUDE CODE CLONING-SKILL.yaml",
+            "R³ MARKETINGSKILLS.MD"
+          ]
+        },
+        "#STRATEGY.MD": {
+          "files_total": 29,
+          "completeness": "FULL",
+          "export_files": ["subsub-GH_MD_HASHSTRATEGY_MD_batch1.json"],
+          "notable": [
+            "R³ CORE STRATEGY.md",
+            "R3-DASHBOARD-SPEC.merged.md",
+            "generator-spec.merged.yaml",
+            "preflight-spec.merged.yaml",
+            "MOD-07-STAMMDATEN-GENERATOR-SPEC.md"
+          ]
+        },
+        "#SYSTEM.MD": {
+          "files_total": 804,
+          "completeness": "FULL — all 11 batches confirmed, file list complete",
+          "export_files": [
+            "subsub-GH_MD_HASHSYSTEM_MD_batch1.json",
+            "subsub-GH_MD_HASHSYSTEM_MD_batch2.json",
+            "subsub-GH_MD_HASHSYSTEM_MD_batch3.json",
+            "subsub-GH_MD_HASHSYSTEM_MD_batch4.json",
+            "subsub-GH_MD_HASHSYSTEM_MD_batch5.json",
+            "subsub-GH_MD_HASHSYSTEM_MD_batch6.json",
+            "subsub-GH_MD_HASHSYSTEM_MD_batch7.json",
+            "subsub-GH_MD_HASHSYSTEM_MD_batch8.json",
+            "subsub-GH_MD_HASHSYSTEM_MD_batch9.json",
+            "subsub-GH_MD_HASHSYSTEM_MD_batch10.json",
+            "subsub-GH_MD_HASHSYSTEM_MD_batch11.json"
+          ],
+          "note": "Flat merge-dump of all system files from across the repo. Reading individual batches not needed for AGENTS.md — only notable files extracted."
+        }
+      }
+    },
+
+    "13_source_data_and_prompts": {
+      "description": "SOURCE/data (vibe registry), SOURCE/js (sync engine), SOURCE/prompts (HD prompt specs)",
+      "completeness": "FULL",
+      "export_files": [
+        "sub-SOURCE_data.json",
+        "sub-SOURCE_js.json",
+        "sub-SOURCE_prompts.json"
+      ],
+      "key_paths": [
+        "SOURCE/data/R3_VIBE_REGISTRY.json",
+        "SOURCE/js/sync-engine.js",
+        "SOURCE/js/app.js",
+        "SOURCE/prompts/R³ VIB.E HD-PROMPT-GENERATOR.MD",
+        "SOURCE/prompts/MOD-07-STAMMDATEN-GENERATOR-SPEC.md",
+        "SOURCE/prompts/R3-DASHBOARD-BAUANLEITUNG-v2.md"
+      ]
+    },
+
+    "14_reference_and_canonical_js": {
+      "description": "_reference-js-master — canonical Node.js server, mount API, lib stack",
+      "completeness": "FULL",
+      "export_files": ["node-_reference-js-master.json"],
+      "key_paths": [
+        "_reference-js-master/server.js",
+        "_reference-js-master/R3-AUTO-MOUNT-HOOK.js",
+        "_reference-js-master/r3-mount-api.js",
+        "_reference-js-master/lib/",
+        "_reference-js-master/src/lib/"
+      ]
+    },
+
+    "15_network_inventory": {
+      "description": "NETWORK/ — 11 physical/virtual devices, mapped volumes",
+      "completeness": "FULL",
+      "export_files": ["node-NETWORK.json"],
+      "devices": [
+        "APPSEN_C (Windows 500GB)",
+        "DOCKER MCP NVMe (1024GB)",
+        "E: FREIES VOL (374GB)",
+        "F: FORENSIK (1000GB)",
+        "FEDORA43 (320GB + KALI-LINUX + TOOL-KITS)",
+        "FRITZ.BOX Cable 6591",
+        "GALAXY TAB A8",
+        "NODE-EDGE 2.5 PIXEL PRO 7",
+        "RAZER (990EVO NVMe 5.0)",
+        "STARLINK ROUTER UTR-232",
+        "UBUNTU-BOOT (128GB)"
+      ]
+    },
+
+    "16_instructions_and_setup": {
+      "description": "01.] R³ I VIB.E - INSTRUCTIONS — DASHBOARD_AI_SETUP, mempalace, Mountpoint matrices",
+      "completeness": "FULL",
+      "export_files": ["node-01._R³_I_VIB.E_-_INSTRUCTIONS.json"],
+      "key_paths": [
+        "01.] R³ I VIB.E - INSTRUCTIONS/DASHBOARD_AI_SETUP.yaml",
+        "01.] R³ I VIB.E - INSTRUCTIONS/mempalace.md",
+        "01.] R³ I VIB.E - INSTRUCTIONS/Mountpoint-Matrix_network-basics.json",
+        "01.] R³ I VIB.E - INSTRUCTIONS/Mountpoint-Matrix_PostgreSQL-SETTINGS.json",
+        "01.] R³ I VIB.E - INSTRUCTIONS/Mountpoint-Matrix_workplace-live*.json"
+      ]
+    },
+
+    "17_small_modules": {
+      "description": "MODULES/ small agent sub-modules: dispatchers, collectors, routers, connectors, g0dm0d3 hybrid agent",
+      "completeness": "FULL",
+      "export_files": [
+        "final-MODULES_re_agent_dispatcher.json",
+        "final-MODULES_re_local_agent_int.json",
+        "final-MODULES_re_output_collector.json",
+        "final-MODULES_re_preflight_agent.json",
+        "final-MODULES_re_prompt_router.json",
+        "final-MODULES_re_social_connectors.json",
+        "final-MODULES_g0dm0d3_hybrid_agent.json"
+      ],
+      "modules": {
+        "re-agent-dispatcher": ["dispatcher.py", "README.md"],
+        "re-local-agent-int": [
+          "Anthropics_Claude Client CLI.md",
+          "Anthropics_Claude Client Java SDK.md",
+          "Anthropics_Claude Client OpenAI SDK compatibility.md",
+          "Anthropics_Claude Client Python SDK.md",
+          "Anthropics_Claude Client SDKs.md",
+          "Anthropics_Claude Client TypeScript SDK.md"
+        ],
+        "re-output-collector": ["collector.py"],
+        "re-preflight-agent": ["preflight_agent.py", "preflight-report.json"],
+        "re-prompt-router": ["prompt_router.py", "router-config.yaml"],
+        "re-social-connectors": ["social-connectors.yaml", "specialty-connectors.yaml"],
+        "g0dm0d3_hybrid_agent": ["data/", "public/", "scripts/", "skills/", ".env.example", ".env.local", ".env.runtime", ".runtime-env-summary.json", "docker-compose.yml", "package.json"]
+      }
+    },
+
+    "18_gh_md_js_masters": {
+      "description": "GH_MD canonical and logical JS master copies + Dashboard_START launcher",
+      "completeness": "FULL",
+      "export_files": [
+        "final-GH_MD_CANONICAL_JS_MASTER.json",
+        "final-GH_MD_LOGICAL_MASTER_JS.json",
+        "final-GH_MD_Dashboard_START.json"
+      ],
+      "structure": {
+        "CANONICAL_JS_MASTER": ["server.js", "R3-AUTO-MOUNT-HOOK.js", "r3-mount-api.js", "lib/(6 files)", "src/"],
+        "LOGICAL_MASTER_JS": ["server.js", "R3-AUTO-MOUNT-HOOK.js", "r3-mount-api.js", "lib/(6 files)", "src/"],
+        "Dashboard_START": ["server.js", "registry.js", "R3-AUTO-MOUNT-HOOK.js", "r3-mount-api.js", "ConnectorsModal.tsx", "r3-hidden-launcher.vbs", "R3-RUN.ps1", "R3-START-SILENT.ps1", "R3-STOP-SERVERS.ps1", "R3-NODE-CONNECTOR.ps1"]
+      }
+    },
+
+    "19_collected_outputs": {
+      "description": "COLLECTED-OUTPUTS/ — generated agent output bundles, one folder per module",
+      "completeness": "FULL",
+      "export_files": ["final-COLLECTED-OUTPUTS.json"],
+      "module_folders": [
+        "agent-reach-hq",
+        "re-agent-dispatcher",
+        "re-gre-generator",
+        "re-output-collector",
+        "re-preflight-agent",
+        "re-prompt-router",
+        "re-provider-registry",
+        "re-social-connectors"
+      ]
+    }
+  },
+
+  "read_order_by_goal": {
+    "understand_architecture": [
+      "01_core_infrastructure",
+      "02_ai_proxy_layer",
+      "03_control_plane",
+      "05_ki_api_service",
+      "11_n8n_workflows"
+    ],
+    "work_on_agent_system": [
+      "07_agent_skills_module",
+      "08_agent_reach_hq",
+      "12_knowledge_base_GH_MD/#AGENT.MD",
+      "12_knowledge_base_GH_MD/#SKILLS.MD"
+    ],
+    "work_on_frontend": [
+      "04_frontend_ui",
+      "02_ai_proxy_layer",
+      "13_source_data_and_prompts"
+    ],
+    "work_on_generator_pipeline": [
+      "10_re_gre_generator",
+      "12_knowledge_base_GH_MD/#STRATEGY.MD",
+      "13_source_data_and_prompts"
+    ],
+    "debug_production_issues": [
+      "03_control_plane",
+      "06_automation_scripts",
+      "12_knowledge_base_GH_MD/#MEMORY.MD",
+      "12_knowledge_base_GH_MD/#SYSTEM.MD"
+    ],
+    "orient_new_agent": [
+      "16_instructions_and_setup",
+      "12_knowledge_base_GH_MD/#AGENT.MD",
+      "12_knowledge_base_GH_MD/#KNOWLEDGE.MD",
+      "07_agent_skills_module"
+    ]
+  },
+
+  "completeness_summary": {
+    "FULL": [
+      "01_core_infrastructure",
+      "02_ai_proxy_layer",
+      "03_control_plane",
+      "04_frontend_ui",
+      "05_ki_api_service",
+      "06_automation_scripts",
+      "07_agent_skills_module",
+      "08_agent_reach_hq",
+      "09_obliteratus_module",
+      "10_re_gre_generator",
+      "11_n8n_workflows",
+      "12_knowledge_base_GH_MD/#AGENT.MD",
+      "12_knowledge_base_GH_MD/#KNOWLEDGE.MD",
+      "12_knowledge_base_GH_MD/#MEMORY.MD",
+      "12_knowledge_base_GH_MD/#SKILLS.MD",
+      "12_knowledge_base_GH_MD/#STRATEGY.MD",
+      "12_knowledge_base_GH_MD/#SYSTEM.MD",
+      "13_source_data_and_prompts",
+      "14_reference_and_canonical_js",
+      "15_network_inventory",
+      "16_instructions_and_setup",
+      "17_small_modules",
+      "18_gh_md_js_masters",
+      "19_collected_outputs"
+    ],
+    "PARTIAL": [],
+    "EXCLUDED_BY_DESIGN": [
+      "SOURCE/chat-legs/_runtime (ephemeral working copies)",
+      "SOURCE/chat-legs/node_modules (npm deps)",
+      "SOURCE/chat-legs/_backups (timestamped snapshots)"
+    ]
+  }
+}
