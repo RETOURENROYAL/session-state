@@ -658,11 +658,10 @@
       "output_file": "content-p6-strategy-docs.json",
       "status": "FULL",
       "file_count": 10,
-      "size_kb": 78.1,
+      "size_kb": 83.0,
       "scanned": "2026-04-22 01:40",
-      "notes": "WARNING: 'R3 CORE STRATEGY.md' returned [NOT FOUND] - actual filename uses R-cubed (U+00B3): 'R\u00b3 CORE STRATEGY.md'. Fix: update scan script path.",
       "covers": [
-        "GH_MD/#STRATEGY.MD/R\u00b3 CORE STRATEGY.md  [NOT FOUND - filename encoding mismatch]",
+        "GH_MD/#STRATEGY.MD/R\u00b3 CORE STRATEGY.md",
         "GH_MD/#STRATEGY.MD/R3-DASHBOARD-SPEC.merged.md",
         "GH_MD/#STRATEGY.MD/generator-spec.merged.yaml",
         "GH_MD/#STRATEGY.MD/generator-output-spec.merged.yaml",
@@ -674,8 +673,8 @@
         "GH_MD/#STRATEGY.MD/MOD-07-STAMMDATEN-GENERATOR-SPEC.md"
       ],
       "key_findings": [
-        "9/10 files captured successfully",
-        "R3-DASHBOARD-SPEC.merged.md: canonical system spec",
+        "10/10 files captured successfully (R\u00b3 CORE STRATEGY.md path fixed via [char]0xB3)",
+        "R\u00b3 CORE STRATEGY.md: canonical system strategy document",
         "generator-spec.merged.yaml + generator-output-spec.merged.yaml: merged spec versions",
         "MOD-07-STAMMDATEN-GENERATOR-SPEC.md: module 07 stammdaten generator spec",
         "r3-mod07-v3-handoff-spec: handoff spec for mod07 v3 (md + json both captured)",
