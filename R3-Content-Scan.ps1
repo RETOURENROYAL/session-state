@@ -126,7 +126,7 @@ Write-ScanFile -OutDir $OutDir -FileName "content-p5-agent-skills.json" -ScanNam
 # P6 - strategy docs
 Write-Host "" ; Write-Host "[P6] GH_MD/#STRATEGY.MD strategy docs..." -ForegroundColor Cyan
 $p6_map = Build-FileMap -Root $Root -RelPaths @(
-    "GH_MD\#STRATEGY.MD\R3 CORE STRATEGY.md",
+    ("GH_MD\#STRATEGY.MD\R" + [char]0xB3 + " CORE STRATEGY.md"),
     "GH_MD\#STRATEGY.MD\R3-DASHBOARD-SPEC.merged.md",
     "GH_MD\#STRATEGY.MD\generator-spec.merged.yaml",
     "GH_MD\#STRATEGY.MD\generator-output-spec.merged.yaml",

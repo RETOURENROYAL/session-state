@@ -539,10 +539,13 @@
   },
 
   "content_snapshots": {
-    "_description": "File CONTENT exports (not just tree). Each entry maps to a content-p*.json file in r3-nodes/. Status: PENDING until file is uploaded and processed.",
+    "_description": "File CONTENT exports (not just tree). Each entry maps to a content-p*.json file in r3-nodes/. Status: FULL = uploaded and processed 2026-04-22.",
     "P1_registry_files": {
       "output_file": "content-p1-registry-files.json",
-      "status": "PENDING",
+      "status": "FULL",
+      "file_count": 7,
+      "size_kb": 65.1,
+      "scanned": "2026-04-22 01:40",
       "covers": [
         "engine-registry.json",
         "SOURCE/data/R3_VIBE_REGISTRY.json",
@@ -551,11 +554,21 @@
         "package.json",
         "tsconfig.json",
         "r3-vibe-dash-struktur.yaml"
+      ],
+      "key_findings": [
+        "Live engine registry with ports 8420/8421/8422/8511/8512",
+        "VIBE_REGISTRY: provider account registry for all connectors",
+        "docker-compose.yml: full container stack definition",
+        "package.json: root Node.js manifest with all npm scripts",
+        "r3-vibe-dash-struktur.yaml: architecture YAML (canonical reference)"
       ]
     },
     "P2_gre_generator_specs": {
       "output_file": "content-p2-gre-generator-specs.json",
-      "status": "PENDING",
+      "status": "FULL",
+      "file_count": 17,
+      "size_kb": 17.0,
+      "scanned": "2026-04-22 01:40",
       "covers": [
         "MODULES/re-gre-generator/generator-spec.yaml",
         "MODULES/re-gre-generator/generator-output-spec.yaml",
@@ -566,21 +579,42 @@
         "MODULES/re-gre-generator/*.py (all build scripts)",
         "MODULES/re-gre-generator/pyproject.toml",
         "MODULES/re-gre-generator/README.md"
+      ],
+      "key_findings": [
+        "Pipeline: preflight -> policy_check -> render_templates -> write_outputs -> package_zip",
+        "Mode: manifest-driven, output_dir: output, dist_dir: dist, zip: re-gre-generator.zip",
+        "Policy: free-only resources; no paid/premium dependencies allowed",
+        "Preflight checks: OS, python>=3.10, node, npm, git, pipx, venv, gh, yt-dlp, mcp, rdt, twitter",
+        "Output artifacts: rendered_templates (9), config_copies (5), generated (5), packaged zip",
+        "Consumers: engine-registry, local HTTP port 8003, n8n, Ollama/LLM pipelines",
+        "Quality rules: free_only, no_paid_deps, preflight_required, all_outputs_utf8_no_bom"
       ]
     },
     "P3_ki_api": {
       "output_file": "content-p3-ki-api.json",
-      "status": "PENDING",
+      "status": "FULL",
+      "file_count": 4,
+      "size_kb": 7.9,
+      "scanned": "2026-04-22 01:40",
       "covers": [
         "services/ki-api/app.py",
         "services/ki-api/routing_engine.py",
         "services/ki-api/requirements.txt",
         "services/ki-api/Dockerfile"
+      ],
+      "key_findings": [
+        "Flask-based AI routing gateway",
+        "routing_engine.py: provider selection, load balancing, fallback logic",
+        "app.py: REST endpoints for AI request routing",
+        "Dockerized service in the main container stack"
       ]
     },
     "P4_chat_legs_lib": {
       "output_file": "content-p4-chat-legs-lib.json",
-      "status": "PENDING",
+      "status": "FULL",
+      "file_count": 6,
+      "size_kb": 35.6,
+      "scanned": "2026-04-22 01:40",
       "covers": [
         "SOURCE/chat-legs/lib/providers.js",
         "SOURCE/chat-legs/lib/router.js",
@@ -588,38 +622,84 @@
         "SOURCE/chat-legs/lib/runtime-env.js",
         "SOURCE/chat-legs/lib/avatar-engine.js",
         "SOURCE/chat-legs/lib/skills.js"
+      ],
+      "key_findings": [
+        "6 core library modules for the Node.js proxy server (ports 8420/8421)",
+        "providers.js: provider definitions and credentials",
+        "router.js: request routing logic across providers",
+        "registry.js: engine/provider registry management",
+        "runtime-env.js: environment variable loading and validation",
+        "avatar-engine.js: avatar/persona system",
+        "skills.js: skill loading and dispatch for agent capabilities"
       ]
     },
     "P5_agent_skills": {
       "output_file": "content-p5-agent-skills.json",
-      "status": "PENDING",
+      "status": "FULL",
+      "file_count": 21,
+      "size_kb": 238.0,
+      "scanned": "2026-04-22 01:40",
       "covers": [
         "MODULES/agent-skills/skills/*/SKILL.md (all 21 skill definitions)"
+      ],
+      "key_findings": [
+        "All 21 SKILL.md files captured (238 KB total - largest scan group)",
+        "Skills: api-and-interface-design, browser-testing-with-devtools, ci-cd-and-automation",
+        "Skills: code-review-and-quality, code-simplification, context-engineering",
+        "Skills: debugging-and-error-recovery, deprecation-and-migration, documentation-and-adrs",
+        "Skills: frontend-ui-engineering, git-workflow-and-versioning, idea-refine",
+        "Skills: incremental-implementation, performance-optimization, planning-and-task-breakdown",
+        "Skills: security-and-hardening, shipping-and-launch, source-driven-development",
+        "Skills: spec-driven-development, test-driven-development, using-agent-skills",
+        "Full instruction content available for all 21 domains"
       ]
     },
     "P6_strategy_docs": {
       "output_file": "content-p6-strategy-docs.json",
-      "status": "PENDING",
+      "status": "FULL",
+      "file_count": 10,
+      "size_kb": 78.1,
+      "scanned": "2026-04-22 01:40",
+      "notes": "WARNING: 'R3 CORE STRATEGY.md' returned [NOT FOUND] - actual filename uses R-cubed (U+00B3): 'R\u00b3 CORE STRATEGY.md'. Fix: update scan script path.",
       "covers": [
-        "GH_MD/#STRATEGY.MD/R³ CORE STRATEGY.md",
+        "GH_MD/#STRATEGY.MD/R\u00b3 CORE STRATEGY.md  [NOT FOUND - filename encoding mismatch]",
         "GH_MD/#STRATEGY.MD/R3-DASHBOARD-SPEC.merged.md",
         "GH_MD/#STRATEGY.MD/generator-spec.merged.yaml",
         "GH_MD/#STRATEGY.MD/generator-output-spec.merged.yaml",
         "GH_MD/#STRATEGY.MD/preflight-spec.merged.yaml",
         "GH_MD/#STRATEGY.MD/incident-log.merged.md",
         "GH_MD/#STRATEGY.MD/plan.md",
-        "GH_MD/#STRATEGY.MD/r3-mod07-v3-handoff-spec.md + .json",
+        "GH_MD/#STRATEGY.MD/r3-mod07-v3-handoff-spec.md",
+        "GH_MD/#STRATEGY.MD/r3-mod07-v3-handoff-spec.json",
         "GH_MD/#STRATEGY.MD/MOD-07-STAMMDATEN-GENERATOR-SPEC.md"
+      ],
+      "key_findings": [
+        "9/10 files captured successfully",
+        "R3-DASHBOARD-SPEC.merged.md: canonical system spec",
+        "generator-spec.merged.yaml + generator-output-spec.merged.yaml: merged spec versions",
+        "MOD-07-STAMMDATEN-GENERATOR-SPEC.md: module 07 stammdaten generator spec",
+        "r3-mod07-v3-handoff-spec: handoff spec for mod07 v3 (md + json both captured)",
+        "incident-log.merged.md: incident history",
+        "plan.md: current execution plan"
       ]
     },
     "BONUS_agent_skills_config": {
       "output_file": "content-bonus-agent-skills-config.json",
-      "status": "PENDING",
+      "status": "FULL",
+      "file_count": 4,
+      "size_kb": 27.9,
+      "scanned": "2026-04-22 01:40",
       "covers": [
         "MODULES/agent-skills/AGENTS.md",
         "MODULES/agent-skills/CLAUDE.md",
         "MODULES/agent-skills/CONTRIBUTING.md",
         "MODULES/agent-skills/README.md"
+      ],
+      "key_findings": [
+        "AGENTS.md: agent system configuration and skill routing instructions",
+        "CLAUDE.md: Claude-specific agent setup and managed skill blocks",
+        "CONTRIBUTING.md: contribution guidelines for skill development",
+        "README.md: module overview and usage documentation"
       ]
     }
   },
