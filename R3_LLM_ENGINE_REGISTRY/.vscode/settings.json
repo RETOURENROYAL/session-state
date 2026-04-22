@@ -13,11 +13,8 @@
       "r3-chatlegs-shadow": {
         "type": "sse",
         "url": "http://localhost:8421/mcp"
-      },
-      "r3-matrix-control": {
-        "type": "sse",
-        "url": "http://localhost:8422/mcp"
       }
+      // r3-matrix-control :8422 does not expose /mcp — omitted
     }
   },
 
@@ -76,5 +73,16 @@
   "files.associations": {
     "*.json": "jsonc"
   },
-  "editor.formatOnSave": false
+  "editor.formatOnSave": false,
+
+  // ── ACP (Agent Client Protocol) ─────────────────────────
+  // GitHub Copilot CLI connects automatically when workspace is trusted.
+  // Use /ide in CLI to manage VS Code connection + diff toggle.
+  // ACP config: R3_LLM_ENGINE_REGISTRY/config/acp-config.json
+  // providers/set routes ACP agent LLM calls → localhost:4000
+  "github.copilot.advanced": {
+    "debug.overrideProxyUrl": "http://localhost:4000/v1"
+  },
+  "github.copilot.chat.localeOverride": "de",
+  "chat.agent.enabled": true
 }

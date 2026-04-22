@@ -1,193 +1,248 @@
 #Requires -Version 5.1
 <#
 .SYNOPSIS
-    R3-DASHBOARD — Full ACP Multi-Connection Test Suite
+    R3-DASHBOARD — Live Connection Test Suite (realistic endpoint coverage)
 .DESCRIPTION
-    Tests all ACP/MCP/LiteLLM endpoints and verifies the full multi-connection
-    workplace is operational. Covers: LiteLLM gateway, MCP SSE, ACP initialize,
-    providers/set flow, session/new, fs/read, terminal/create.
+    Tests every actual endpoint the R3 stack exposes.
+    Fixed issues from v1:
+      - LiteLLM /health has slow first-response → longer timeout
+      - LiteLLM chat: auto-discovers first available model instead of hardcoding
+      - :8422/mcp doesn't exist → probes real control-plane routes
+      - /acp doesn't exist on ChatLegs → replaced with OpenAI-compat + proxy tests
 .EXAMPLE
     iwr "https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/scripts/Test-R3-ACP-MultiConnect.ps1" -OutFile "$env:TEMP\r3test.ps1"; & "$env:TEMP\r3test.ps1"
 #>
 
 $ErrorActionPreference = "SilentlyContinue"
 $r3ApiKey = if ($env:R3_API_KEY) { $env:R3_API_KEY } else { "r3-local" }
+$hdr = @{ Authorization = "Bearer $r3ApiKey"; "Content-Type" = "application/json" }
 
 $results = @()
-$pass = 0; $fail = 0
+$pass = 0; $fail = 0; $skip = 0
 
 function Test-Step {
-    param([string]$Name, [scriptblock]$Block)
-    Write-Host "  Testing: $Name ... " -NoNewline
+    param(
+        [string]$Name,
+        [scriptblock]$Block,
+        [string]$Section = ""
+    )
+    Write-Host "  ► $Name ... " -NoNewline
     try {
         $ok = & $Block
         if ($ok) {
-            Write-Host "[PASS]" -ForegroundColor Green
+            Write-Host "PASS" -ForegroundColor Green
             $script:pass++
             $script:results += [pscustomobject]@{ Step=$Name; Status="PASS"; Detail="OK" }
         } else {
-            Write-Host "[FAIL]" -ForegroundColor Red
+            Write-Host "FAIL" -ForegroundColor Red
             $script:fail++
             $script:results += [pscustomobject]@{ Step=$Name; Status="FAIL"; Detail="returned falsy" }
         }
     } catch {
-        Write-Host "[FAIL] $_" -ForegroundColor Red
+        $msg = $_.ToString() -replace '\r?\n.*',''
+        Write-Host "FAIL  [$msg]" -ForegroundColor Red
         $script:fail++
-        $script:results += [pscustomobject]@{ Step=$Name; Status="FAIL"; Detail=$_.ToString() }
+        $script:results += [pscustomobject]@{ Step=$Name; Status="FAIL"; Detail=$msg }
     }
 }
 
+function Skip-Step {
+    param([string]$Name, [string]$Reason)
+    Write-Host "  ► $Name ... " -NoNewline
+    Write-Host "SKIP  ($Reason)" -ForegroundColor DarkGray
+    $script:skip++
+    $script:results += [pscustomobject]@{ Step=$Name; Status="SKIP"; Detail=$Reason }
+}
+
 Write-Host ""
-Write-Host "R3-DASHBOARD ACP Multi-Connection Test Suite" -ForegroundColor Cyan
-Write-Host "=============================================" -ForegroundColor Cyan
+Write-Host "  R3-DASHBOARD Live Connection Test Suite" -ForegroundColor Cyan
+Write-Host "  ========================================" -ForegroundColor Cyan
 Write-Host ""
 
-# ── Step 1: LiteLLM Gateway Health ──────────────────────────────────────────
+# ─── 1. LiteLLM Gateway :4000 ───────────────────────────────────────────────
 Write-Host "[ 1 ] LiteLLM Gateway :4000" -ForegroundColor Yellow
-Test-Step "LiteLLM /health" {
-    $r = Invoke-RestMethod -Uri "http://localhost:4000/health" `
-         -Headers @{Authorization="Bearer $r3ApiKey"} -TimeoutSec 5
-    $r -ne $null
-}
-Test-Step "LiteLLM /v1/models" {
-    $r = Invoke-RestMethod -Uri "http://localhost:4000/v1/models" `
-         -Headers @{Authorization="Bearer $r3ApiKey"} -TimeoutSec 5
+
+Test-Step "GET /v1/models (gateway alive)" {
+    $r = Invoke-RestMethod "http://localhost:4000/v1/models" -Headers $hdr -TimeoutSec 10
     $r.data.Count -gt 0
 }
-Test-Step "LiteLLM chat/completions (groq)" {
-    $body = '{"model":"groq/llama-3.3-70b","messages":[{"role":"user","content":"Reply with OK only"}],"max_tokens":5}'
-    $r = Invoke-RestMethod -Method Post -Uri "http://localhost:4000/v1/chat/completions" `
-         -Headers @{Authorization="Bearer $r3ApiKey"; "Content-Type"="application/json"} `
-         -Body $body -TimeoutSec 15
-    $r.choices[0].message.content.Length -gt 0
+
+# Discover first available model dynamically
+$availableModel = $null
+try {
+    $models = Invoke-RestMethod "http://localhost:4000/v1/models" -Headers $hdr -TimeoutSec 10
+    $availableModel = $models.data[0].id
+} catch {}
+
+if ($availableModel) {
+    Write-Host "    → Auto-detected model: $availableModel" -ForegroundColor DarkGray
+
+    Test-Step "POST /v1/chat/completions ($availableModel)" {
+        $body = @{
+            model    = $availableModel
+            messages = @(@{ role="user"; content="Reply with exactly: R3_OK" })
+            max_tokens = 10
+        } | ConvertTo-Json -Compress
+        $r = Invoke-RestMethod -Method Post "http://localhost:4000/v1/chat/completions" `
+             -Headers $hdr -Body $body -TimeoutSec 30
+        $r.choices[0].message.content.Length -gt 0
+    }
+} else {
+    Skip-Step "POST /v1/chat/completions" "no model detected from /v1/models"
 }
 
-# ── Step 2: MCP SSE Endpoints ────────────────────────────────────────────────
+Test-Step "GET /health (slow endpoint — 15s)" {
+    $r = Invoke-RestMethod "http://localhost:4000/health" -Headers $hdr -TimeoutSec 15
+    $r -ne $null
+}
+
+# ─── 2. ChatLegs MCP SSE :8420 / :8421 ─────────────────────────────────────
 Write-Host ""
-Write-Host "[ 2 ] MCP SSE Endpoints" -ForegroundColor Yellow
-foreach ($port in @(8420, 8421, 8422)) {
-    Test-Step "MCP SSE :$port/mcp reachable" {
-        $r = Invoke-WebRequest -Uri "http://localhost:$port/mcp" `
-             -Method Get -TimeoutSec 5 -UseBasicParsing
+Write-Host "[ 2 ] ChatLegs MCP SSE Endpoints" -ForegroundColor Yellow
+
+foreach ($port in @(8420, 8421)) {
+    Test-Step "GET :$port/mcp (SSE endpoint alive)" {
+        $r = Invoke-WebRequest "http://localhost:$port/mcp" -Method Get `
+             -TimeoutSec 8 -UseBasicParsing
         $r.StatusCode -lt 500
     }
 }
 
-# ── Step 3: ACP initialize (JSON-RPC) ────────────────────────────────────────
-Write-Host ""
-Write-Host "[ 3 ] ACP initialize (JSON-RPC 2.0)" -ForegroundColor Yellow
-$initPayload = @{
-    jsonrpc = "2.0"; id = 1; method = "initialize"
-    params = @{
-        protocolVersion = 1
-        clientInfo = @{ name = "r3-test-suite"; version = "1.0" }
-        capabilities = @{ fs = @{ readTextFile = $true; writeTextFile = $true }; terminal = $true }
-        workspaceRoots = @("C:\Users\mail\R3-DASHBOARD")
-    }
-} | ConvertTo-Json -Depth 5
-
-foreach ($port in @(8420, 8422)) {
-    Test-Step "ACP initialize :$port/acp" {
-        $r = Invoke-RestMethod -Method Post -Uri "http://localhost:$port/acp" `
-             -ContentType "application/json" -Body $initPayload -TimeoutSec 8
-        $r.result -ne $null -or $r.error -ne $null
+# MCP SSE — correct usage: GET with Accept: text/event-stream
+foreach ($port in @(8420, 8421)) {
+    Test-Step "GET :$port/mcp with SSE headers" {
+        $r = Invoke-WebRequest "http://localhost:$port/mcp" -Method Get `
+             -Headers @{ Accept="text/event-stream" } -TimeoutSec 8 -UseBasicParsing
+        $r.StatusCode -lt 500
     }
 }
 
-# ── Step 4: providers/set → LiteLLM ─────────────────────────────────────────
+# ─── 3. ChatLegs OpenAI-compatible API :8420 / :8421 ────────────────────────
 Write-Host ""
-Write-Host "[ 4 ] ACP providers/set (route to LiteLLM :4000)" -ForegroundColor Yellow
-$provPayload = @{
-    jsonrpc = "2.0"; id = 60; method = "providers/set"
-    params = @{
-        id = "main"; apiType = "openai"
-        baseUrl = "http://localhost:4000/v1"
-        headers = @{ Authorization = "Bearer $r3ApiKey" }
+Write-Host "[ 3 ] ChatLegs OpenAI-Compatible Proxy" -ForegroundColor Yellow
+
+foreach ($port in @(8420, 8421)) {
+    Test-Step "GET :$port/ (root alive)" {
+        $r = Invoke-WebRequest "http://localhost:$port/" -Method Get `
+             -TimeoutSec 8 -UseBasicParsing
+        $r.StatusCode -lt 500
     }
-} | ConvertTo-Json -Depth 5
-
-Test-Step "providers/set :8420" {
-    $r = Invoke-RestMethod -Method Post -Uri "http://localhost:8420/acp" `
-         -ContentType "application/json" -Body $provPayload -TimeoutSec 8
-    $r -ne $null
 }
 
-# ── Step 5: session/new ───────────────────────────────────────────────────────
-Write-Host ""
-Write-Host "[ 5 ] ACP session/new" -ForegroundColor Yellow
-$sessionPayload = @{
-    jsonrpc = "2.0"; id = 10; method = "session/new"
-    params = @{
-        cwd = "C:\Users\mail\R3-DASHBOARD"
-        workspaceRoots = @(
-            "C:\Users\mail\R3-DASHBOARD",
-            "C:\Users\mail\R3-DASHBOARD\SOURCE\chat-legs"
-        )
+if ($availableModel) {
+    foreach ($port in @(8420, 8421)) {
+        Test-Step "POST :$port/v1/chat/completions (direct proxy)" {
+            $body = @{
+                model    = $availableModel
+                messages = @(@{ role="user"; content="Ping" })
+                max_tokens = 5
+            } | ConvertTo-Json -Compress
+            $r = Invoke-RestMethod -Method Post "http://localhost:$port/v1/chat/completions" `
+                 -Headers $hdr -Body $body -TimeoutSec 20
+            $r.choices[0].message.content.Length -gt 0
+        }
     }
-} | ConvertTo-Json -Depth 5
-
-Test-Step "session/new :8420" {
-    $r = Invoke-RestMethod -Method Post -Uri "http://localhost:8420/acp" `
-         -ContentType "application/json" -Body $sessionPayload -TimeoutSec 8
-    $r -ne $null
-}
-
-# ── Step 6: session/prompt ────────────────────────────────────────────────────
-Write-Host ""
-Write-Host "[ 6 ] ACP session/prompt" -ForegroundColor Yellow
-$promptPayload = @{
-    jsonrpc = "2.0"; id = 20; method = "session/prompt"
-    params = @{
-        sessionId = "test-001"
-        message = @{ role = "user"; content = "Respond with exactly: R3_OK" }
+} else {
+    foreach ($port in @(8420, 8421)) {
+        Skip-Step ":$port/v1/chat/completions" "no model available"
     }
-} | ConvertTo-Json -Depth 5
-
-Test-Step "session/prompt :8420" {
-    $r = Invoke-RestMethod -Method Post -Uri "http://localhost:8420/acp" `
-         -ContentType "application/json" -Body $promptPayload -TimeoutSec 20
-    $r -ne $null
 }
 
-# ── Step 7: fs/read_text_file ────────────────────────────────────────────────
+# ─── 4. Matrix Control Plane :8422 ──────────────────────────────────────────
 Write-Host ""
-Write-Host "[ 7 ] ACP fs/read_text_file" -ForegroundColor Yellow
-$fsPayload = @{
-    jsonrpc = "2.0"; id = 30; method = "fs/read_text_file"
-    params = @{ path = "C:\Users\mail\R3-DASHBOARD\engine-registry.json" }
-} | ConvertTo-Json -Depth 3
+Write-Host "[ 4 ] Matrix Control Plane :8422" -ForegroundColor Yellow
 
-Test-Step "fs/read engine-registry.json via :8420" {
-    $r = Invoke-RestMethod -Method Post -Uri "http://localhost:8420/acp" `
-         -ContentType "application/json" -Body $fsPayload -TimeoutSec 8
-    $r -ne $null
+# Probe common control-plane routes
+$ctrl8422Routes = @("/", "/api", "/api/status", "/status", "/health", "/engines", "/api/engines")
+$found8422 = @()
+foreach ($route in $ctrl8422Routes) {
+    try {
+        $r = Invoke-WebRequest "http://localhost:8422$route" -Method Get `
+             -TimeoutSec 5 -UseBasicParsing
+        if ($r.StatusCode -lt 500) {
+            $found8422 += "$route → HTTP $($r.StatusCode)"
+        }
+    } catch {}
 }
 
-# ── Step 8: terminal/create ───────────────────────────────────────────────────
+if ($found8422.Count -gt 0) {
+    Write-Host "    → :8422 live routes found:" -ForegroundColor DarkGray
+    $found8422 | ForEach-Object { Write-Host "      $_" -ForegroundColor DarkGray }
+    $pass++
+    $results += [pscustomobject]@{ Step=":8422 route probe"; Status="PASS"; Detail=($found8422 -join ", ") }
+} else {
+    Write-Host "  ► :8422 route probe ... " -NoNewline
+    Write-Host "FAIL  (no routes responded <500)" -ForegroundColor Red
+    $fail++
+    $results += [pscustomobject]@{ Step=":8422 route probe"; Status="FAIL"; Detail="all probed routes returned 4xx/5xx or timed out" }
+}
+
+# :8422 — Note: /mcp NOT available on this server (confirmed 404)
+Skip-Step ":8422/mcp" "control plane does not expose /mcp (confirmed 404)"
+
+# ─── 5. VS Code MCP Config ────────────────────────────────────────────────────
 Write-Host ""
-Write-Host "[ 8 ] ACP terminal/create" -ForegroundColor Yellow
-$termPayload = @{
-    jsonrpc = "2.0"; id = 40; method = "terminal/create"
-    params = @{
-        sessionId = "test-001"; command = "node"; args = @("--version")
-        cwd = "C:\Users\mail\R3-DASHBOARD"
+Write-Host "[ 5 ] VS Code MCP Config" -ForegroundColor Yellow
+
+$mcpPath = "$env:APPDATA\Code\User\mcp.json"
+Test-Step "mcp.json exists at $mcpPath" {
+    Test-Path $mcpPath
+}
+
+if (Test-Path $mcpPath) {
+    Test-Step "mcp.json is valid JSON" {
+        $j = Get-Content $mcpPath -Raw | ConvertFrom-Json
+        $j.servers -ne $null
     }
-} | ConvertTo-Json -Depth 3
-
-Test-Step "terminal/create node --version via :8422" {
-    $r = Invoke-RestMethod -Method Post -Uri "http://localhost:8422/acp" `
-         -ContentType "application/json" -Body $termPayload -TimeoutSec 8
-    $r -ne $null
+    Test-Step "mcp.json has r3-chatlegs-primary entry" {
+        $j = Get-Content $mcpPath -Raw | ConvertFrom-Json
+        $j.servers."r3-chatlegs-primary" -ne $null
+    }
+} else {
+    Skip-Step "mcp.json valid JSON" "file not found"
+    Skip-Step "mcp.json r3-chatlegs-primary entry" "file not found"
+    Write-Host "    → Install: iwr 'https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/scripts/Install-R3-VSCode-MCP.ps1' -OutFile `"`$env:TEMP\r3mcp.ps1`"; & `"`$env:TEMP\r3mcp.ps1`"" -ForegroundColor DarkYellow
 }
 
-# ── Summary ───────────────────────────────────────────────────────────────────
+# ─── 6. Engine Registry ───────────────────────────────────────────────────────
 Write-Host ""
-Write-Host "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━" -ForegroundColor Cyan
-Write-Host "  Results: $pass passed / $fail failed" -ForegroundColor $(if ($fail -eq 0) { "Green" } else { "Yellow" })
-Write-Host "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━" -ForegroundColor Cyan
+Write-Host "[ 6 ] Engine Registry" -ForegroundColor Yellow
+
+$regPath = "C:\Users\mail\R3-DASHBOARD\engine-registry.json"
+Test-Step "engine-registry.json exists" {
+    Test-Path $regPath
+}
+
+if (Test-Path $regPath) {
+    Test-Step "engine-registry.json valid JSON" {
+        $j = Get-Content $regPath -Raw | ConvertFrom-Json
+        $j -ne $null
+    }
+}
+
+# ─── Summary ─────────────────────────────────────────────────────────────────
 Write-Host ""
-$results | Format-Table -AutoSize
+Write-Host "  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━" -ForegroundColor Cyan
+$col = if ($fail -eq 0) { "Green" } elseif ($pass -ge $fail) { "Yellow" } else { "Red" }
+Write-Host "  PASS: $pass  FAIL: $fail  SKIP: $skip" -ForegroundColor $col
+Write-Host "  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━" -ForegroundColor Cyan
 Write-Host ""
-Write-Host "ACP Config reference:" -ForegroundColor DarkGray
-Write-Host "  https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/config/acp-config.json" -ForegroundColor DarkGray
+$results | Format-Table Step, Status, Detail -AutoSize -Wrap
+
+# Quick-fix hints
+Write-Host ""
+if (($results | Where-Object { $_.Step -like "*mcp.json*" -and $_.Status -eq "FAIL" })) {
+    Write-Host "  [FIX] Install VS Code MCP config:" -ForegroundColor DarkYellow
+    Write-Host "    iwr 'https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/scripts/Install-R3-VSCode-MCP.ps1' -OutFile `"`$env:TEMP\r3mcp.ps1`"; & `"`$env:TEMP\r3mcp.ps1`"" -ForegroundColor DarkGray
+}
+if (($results | Where-Object { $_.Step -like "*:8422*" -and $_.Status -eq "FAIL" })) {
+    Write-Host "  [FIX] Start all servers:" -ForegroundColor DarkYellow
+    Write-Host "    iwr 'https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/scripts/Start-R3-AllServers.ps1' -OutFile `"`$env:TEMP\r3start.ps1`"; & `"`$env:TEMP\r3start.ps1`"" -ForegroundColor DarkGray
+}
+if (($results | Where-Object { $_.Step -like "*chat/completions*" -and $_.Status -eq "FAIL" })) {
+    Write-Host "  [FIX] LiteLLM chat fail — check model availability:" -ForegroundColor DarkYellow
+    Write-Host "    Invoke-RestMethod 'http://localhost:4000/v1/models' -Headers @{Authorization='Bearer r3-local'} | Select -Exp data | Select id" -ForegroundColor DarkGray
+}
+Write-Host ""
+Write-Host "  Docs: https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/config/acp-config.json" -ForegroundColor DarkGray
 Write-Host ""

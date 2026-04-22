@@ -1,10 +1,23 @@
 {
-  "_comment": "R3-DASHBOARD — Agent Client Protocol (ACP) Full Multi-Connection Workplace Config",
+  "_comment": "R3-DASHBOARD — Multi-Connection Workplace Config (MCP + LiteLLM + ACP reference)",
   "_spec": "https://agentclientprotocol.com",
   "_spec_index": "https://agentclientprotocol.com/llms.txt",
   "_protocol": "JSON-RPC 2.0",
   "_litellm_gateway": "http://localhost:4000/v1",
   "_updated": "2026-04-22",
+  "_IMPORTANT": {
+    "what_is_live": [
+      "LiteLLM gateway :4000 — OpenAI-compatible API (/v1/models, /v1/chat/completions)",
+      "ChatLegs :8420/:8421 — MCP SSE at /mcp (confirmed), OpenAI-proxy at /v1/chat/completions",
+      "Matrix control :8422 — custom control-plane REST (no /mcp, no /acp)"
+    ],
+    "what_is_not_live": [
+      "/acp endpoint — R3 servers do NOT implement the ACP JSON-RPC protocol natively",
+      "ACP coding-agent protocol requires a dedicated ACP server (e.g. Claude Code, Copilot Workspace)",
+      ":8422/mcp — returns 404, control plane does not expose MCP SSE"
+    ],
+    "acp_sections_below": "acp_agents / proxy_chain / mcp_over_acp are reference config for when an ACP-native agent is added"
+  },
 
   "transports": {
     "_doc": "https://agentclientprotocol.com/protocol/transports.md",
@@ -15,8 +28,8 @@
     },
     "streamable-http": {
       "description": "HTTP-based transport (draft). For long-running server agents on known ports.",
-      "use_for": ["r3-chatlegs-primary", "r3-chatlegs-shadow", "r3-matrix-control"],
-      "notes": "Draft status. R3 servers expose /acp (streamable-http) + /mcp (SSE fallback)."
+      "use_for": ["future-acp-agent"],
+      "notes": "R3 ChatLegs servers do NOT expose /acp. They expose /mcp (SSE) + OpenAI-compatible /v1/chat/completions."
     },
     "mcp-over-acp": {
       "description": "MCP servers tunnelled through ACP channel — no separate process.",
@@ -421,7 +434,7 @@
     "mcp_servers": {
       "r3-chatlegs-primary": { "type": "sse", "url": "http://localhost:8420/mcp" },
       "r3-chatlegs-shadow":  { "type": "sse", "url": "http://localhost:8421/mcp" },
-      "r3-matrix-control":   { "type": "sse", "url": "http://localhost:8422/mcp" }
+      "r3-matrix-control":   { "_note": "CONFIRMED: :8422 has no /mcp endpoint. Remove from mcp.json.", "type": "sse", "url": "http://localhost:8422/mcp", "status": "404-not-found" }
     },
     "copilot_proxy": {
       "github.copilot.advanced": { "debug.overrideProxyUrl": "http://localhost:4000/v1" }
@@ -435,14 +448,16 @@
   },
 
   "quick_test_commands": {
-    "_comment": "Run in PowerShell — verify all live connections",
-    "litellm_health":  "Invoke-RestMethod -Uri 'http://localhost:4000/health' -Headers @{Authorization='Bearer r3-local'}",
-    "litellm_models":  "Invoke-RestMethod -Uri 'http://localhost:4000/v1/models' -Headers @{Authorization='Bearer r3-local'} | ConvertTo-Json -Depth 3",
-    "litellm_chat":    "Invoke-RestMethod -Method Post -Uri 'http://localhost:4000/v1/chat/completions' -Headers @{Authorization='Bearer r3-local';'Content-Type'='application/json'} -Body '{\"model\":\"groq/llama-3.3-70b\",\"messages\":[{\"role\":\"user\",\"content\":\"Ping\"}]}' | ConvertTo-Json",
-    "mcp_8420":        "Invoke-RestMethod -Uri 'http://localhost:8420/mcp'",
-    "mcp_8421":        "Invoke-RestMethod -Uri 'http://localhost:8421/mcp'",
-    "mcp_8422":        "Invoke-RestMethod -Uri 'http://localhost:8422/mcp'",
-    "acp_init_8420":   "Invoke-RestMethod -Method Post -Uri 'http://localhost:8420/acp' -ContentType 'application/json' -Body '{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"initialize\",\"params\":{\"protocolVersion\":1,\"clientInfo\":{\"name\":\"r3-test\",\"version\":\"1.0\"},\"capabilities\":{\"fs\":{\"readTextFile\":true,\"writeTextFile\":true},\"terminal\":true}}}'",
-    "full_test_script": "iwr 'https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/scripts/Test-R3-ACP-MultiConnect.ps1' -OutFile \"$env:TEMP\\r3test.ps1\"; & \"$env:TEMP\\r3test.ps1\""
+    "_comment": "Run in PowerShell — verified working commands only",
+    "_note": "All /acp commands removed — R3 servers do not implement ACP JSON-RPC. Use /mcp (SSE) and /v1/ (OpenAI) instead.",
+
+    "STEP1_list_models":     "(Invoke-RestMethod 'http://localhost:4000/v1/models' -Headers @{Authorization='Bearer r3-local'}).data | Select id",
+    "STEP2_chat_auto_model": "$m=(Invoke-RestMethod 'http://localhost:4000/v1/models' -Headers @{Authorization='Bearer r3-local'}).data[0].id; Invoke-RestMethod -Method Post 'http://localhost:4000/v1/chat/completions' -Headers @{Authorization='Bearer r3-local';'Content-Type'='application/json'} -Body \"{`\"model`\":`\"$m`\",`\"messages`\":[{`\"role`\":`\"user`\",`\"content`\":`\"Ping`\"}],`\"max_tokens`\":5}\" | ConvertTo-Json",
+    "STEP3_mcp_8420":        "Invoke-WebRequest 'http://localhost:8420/mcp' -UseBasicParsing | Select StatusCode,StatusDescription",
+    "STEP4_mcp_8421":        "Invoke-WebRequest 'http://localhost:8421/mcp' -UseBasicParsing | Select StatusCode,StatusDescription",
+    "STEP5_8422_probe":      "@('/','/api','/status','/health','/engines') | ForEach-Object { try { $r=Invoke-WebRequest \"http://localhost:8422$_\" -TimeoutSec 3 -UseBasicParsing; Write-Host \"$_ => $($r.StatusCode)\" } catch { Write-Host \"$_ => ERR\" } }",
+    "full_test_suite":       "iwr 'https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/scripts/Test-R3-ACP-MultiConnect.ps1' -OutFile \"$env:TEMP\\r3test.ps1\"; & \"$env:TEMP\\r3test.ps1\"",
+    "install_mcp_config":    "iwr 'https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/scripts/Install-R3-VSCode-MCP.ps1' -OutFile \"$env:TEMP\\r3mcp.ps1\"; & \"$env:TEMP\\r3mcp.ps1\"",
+    "start_all_servers":     "iwr 'https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/scripts/Start-R3-AllServers.ps1' -OutFile \"$env:TEMP\\r3start.ps1\"; & \"$env:TEMP\\r3start.ps1\""
   }
 }
