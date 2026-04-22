@@ -1,4 +1,26 @@
 {
+  // R3-DASHBOARD — Zero-Cost Engine Orchestration
+  // Master cluster: R3_LLM_ENGINE_REGISTRY/r3-engine-cluster.json
+  // MCP servers:    R3_LLM_ENGINE_REGISTRY/config/mcp-servers.json
+  // Node map:       r3-node-map.json
+
+  "mcp": {
+    "servers": {
+      "r3-chatlegs-primary": {
+        "type": "sse",
+        "url": "http://localhost:8420/mcp"
+      },
+      "r3-chatlegs-shadow": {
+        "type": "sse",
+        "url": "http://localhost:8421/mcp"
+      },
+      "r3-matrix-control": {
+        "type": "sse",
+        "url": "http://localhost:8422/mcp"
+      }
+    }
+  },
+
   "continue.models": [
     {
       "title": "⚡ LiteLLM → Groq Llama 3.3 70B",

@@ -1,0 +1,844 @@
+{
+  "_meta": {
+    "id": "r3-engine-cluster",
+    "version": "1.0.0",
+    "milestone": "M1 — Zero-Cost Local Engine Orchestration",
+    "generated": "2026-04-22",
+    "description": "Master cluster JSON: binds every r3-nodes export file to its domain, maps all engine registry entries, defines dependency graph, and routes all agent tasks to zero-cost engines first. This is the single source of truth for navigating, editing, and orchestrating the entire R3-DASHBOARD tree.",
+    "root_windows": "C:\\Users\\mail\\R3-DASHBOARD",
+    "root_codespace": "/workspaces/session-state",
+    "nodes_dir_windows": "C:\\Users\\mail\\R3-DASHBOARD\\r3-nodes",
+    "engine_registry_dir": "R3_LLM_ENGINE_REGISTRY",
+    "node_map_ref": "r3-node-map.json"
+  },
+
+  "zero_cost_policy": {
+    "description": "All agent tasks MUST route through this chain. Paid APIs only as explicit override.",
+    "priority_order": [
+      "litellm-gateway → groq/llama-3.3-70b",
+      "litellm-gateway → cerebras/llama-3.3-70b",
+      "litellm-gateway → sambanova/llama-3.3-70b",
+      "litellm-gateway → openrouter/auto",
+      "ollama-razer → gemma2:2b",
+      "ollama-appsen → llama3.2"
+    ],
+    "paid_engines": ["gpt-4o", "claude-3-5-sonnet", "gemini-2.0-flash"],
+    "paid_use_condition": "Only when explicitly requested by user or task requires model capabilities unavailable in free tier",
+    "gateway_endpoint": "http://localhost:4000/v1",
+    "gateway_key": "r3-local",
+    "ollama_endpoint": "http://localhost:11434",
+    "autocomplete_model": "groq/llama-3.1-8b"
+  },
+
+  "mcp_servers": {
+    "_description": "R3 local MCP endpoints — chatlegs-primary (8420), chatlegs-shadow (8421), matrix-control (8422). Register these in VS Code via MCP: Open User Configuration.",
+    "chatlegs-primary": {
+      "id": "chatlegs-primary",
+      "port": 8420,
+      "role": "Primary AI chat proxy",
+      "type": "http",
+      "url": "http://localhost:8420",
+      "vscode_mcp_entry": {
+        "type": "sse",
+        "url": "http://localhost:8420/mcp"
+      },
+      "status": "active",
+      "depends_on": ["litellm-gateway", "node-SOURCE"],
+      "node_refs": ["subsub-chat-legs_ROOT.json", "subsub-chat-legs_lib.json"]
+    },
+    "chatlegs-shadow": {
+      "id": "chatlegs-shadow",
+      "port": 8421,
+      "role": "Shadow / fallback AI chat proxy",
+      "type": "http",
+      "url": "http://localhost:8421",
+      "vscode_mcp_entry": {
+        "type": "sse",
+        "url": "http://localhost:8421/mcp"
+      },
+      "status": "active",
+      "depends_on": ["litellm-gateway", "node-SOURCE"],
+      "node_refs": [
+        "subsub-chat-legs_ROOT.json",
+        "subsub-chat-legs_bridges.json"
+      ]
+    },
+    "matrix-control": {
+      "id": "matrix-control",
+      "port": 8422,
+      "role": "Control plane — routing decisions, guardrail scheduler, overview API",
+      "type": "http",
+      "url": "http://localhost:8422",
+      "vscode_mcp_entry": {
+        "type": "sse",
+        "url": "http://localhost:8422/mcp"
+      },
+      "status": "active",
+      "depends_on": ["chatlegs-primary", "node-docker"],
+      "node_refs": [
+        "subsub-chat-legs_r3_control_plane_live_package.json",
+        "subsub-chat-legs_r3_fix_bundle_v6.json",
+        "subsub-chat-legs__runtime.json"
+      ]
+    }
+  },
+
+  "engine_registry": {
+    "_index": "R3_LLM_ENGINE_REGISTRY/engines/",
+    "local": {
+      "_tier": "local",
+      "_cost": "zero",
+      "engines": {
+        "litellm-gateway": {
+          "file": "engines/local/litellm-gateway.json",
+          "api_base": "http://localhost:4000",
+          "models": [
+            "groq/llama-3.3-70b",
+            "cerebras/llama-3.3-70b",
+            "sambanova/llama-3.3-70b",
+            "openrouter/auto",
+            "groq/llama-3.1-8b"
+          ],
+          "status": "running",
+          "zero_cost": true
+        },
+        "ollama-razer": {
+          "file": "engines/local/ollama-razer.json",
+          "api_base": "http://localhost:11434",
+          "models": ["gemma2:2b", "llama3.2"],
+          "status": "running",
+          "zero_cost": true
+        },
+        "ollama-appsen": {
+          "file": "engines/local/ollama-appsen.json",
+          "api_base": "http://APPSEN_C:11434",
+          "models": ["llama3.2", "mistral"],
+          "status": "network-dependent",
+          "zero_cost": true
+        }
+      }
+    },
+    "free_cloud": {
+      "_tier": "free-cloud",
+      "_cost": "zero (rate-limited)",
+      "engines": {
+        "groq": {
+          "file": "engines/free/groq.json",
+          "default_model": "llama-3.3-70b-versatile",
+          "free_limit": "14400 req/day"
+        },
+        "cerebras": {
+          "file": "engines/free/cerebras.json",
+          "default_model": "llama-3.3-70b"
+        },
+        "sambanova": {
+          "file": "engines/free/sambanova.json",
+          "default_model": "llama-3.3-70b"
+        },
+        "openrouter": {
+          "file": "engines/free/openrouter.json",
+          "default_model": "auto"
+        },
+        "chutes": { "file": "engines/free/chutes.json" },
+        "glama": { "file": "engines/free/glama.json" },
+        "huggingface": { "file": "engines/free/huggingface.json" }
+      }
+    },
+    "paid": {
+      "_tier": "paid",
+      "_cost": "billed",
+      "_policy": "Use only on explicit request",
+      "engines": {
+        "openai": { "file": "engines/paid/openai.json", "model": "gpt-4o" },
+        "claude": {
+          "file": "engines/paid/claude.json",
+          "model": "claude-3-5-sonnet"
+        },
+        "gemini": {
+          "file": "engines/paid/gemini.json",
+          "model": "gemini-2.0-flash"
+        },
+        "mistral": { "file": "engines/paid/mistral.json" },
+        "perplexity": { "file": "engines/paid/perplexity.json" }
+      }
+    },
+    "agent_modules": {
+      "_tier": "agent",
+      "_cost": "zero (local execution)",
+      "modules": {
+        "re-gre-generator": {
+          "file": "engines/agents/re-gre-generator.json",
+          "depends_on": [
+            "re-agent-dispatcher",
+            "re-output-collector",
+            "re-provider-registry"
+          ]
+        },
+        "re-agent-dispatcher": {
+          "file": "engines/agents/re-agent-dispatcher.json"
+        },
+        "re-prompt-router": { "file": "engines/agents/re-prompt-router.json" },
+        "re-output-collector": {
+          "file": "engines/agents/re-output-collector.json"
+        },
+        "re-preflight-agent": {
+          "file": "engines/agents/re-preflight-agent.json"
+        },
+        "re-provider-registry": {
+          "file": "engines/agents/re-provider-registry.json"
+        },
+        "re-local-agent-int": {
+          "file": "engines/agents/re-local-agent-int.json"
+        },
+        "re-social-connectors": {
+          "file": "engines/agents/re-social-connectors.json"
+        },
+        "agent-skills": { "file": "engines/agents/agent-skills.json" },
+        "agent-reach-hq": { "file": "engines/agents/agent-reach-hq.json" },
+        "obliteratus": { "file": "engines/agents/obliteratus.json" },
+        "g0dm0d3-hybrid-agent": {
+          "file": "engines/agents/g0dm0d3-hybrid-agent.json"
+        },
+        "github-copilot-cloud-agent": {
+          "file": "engines/agents/github-copilot-cloud-agent.json"
+        },
+        "gemini-instructions-api": {
+          "file": "engines/agents/gemini-instructions-api.json"
+        },
+        "mod-01-06": { "file": "engines/agents/mod-01-06.json" }
+      }
+    }
+  },
+
+  "orchestration_routing": {
+    "_description": "Maps each R3-DASHBOARD domain to the optimal zero-cost engine + fallback chain",
+    "domains": {
+      "01_core_infrastructure": {
+        "tasks": [
+          "docker-compose edits",
+          "nginx config",
+          "init.sql",
+          "engine-registry updates"
+        ],
+        "primary_engine": "litellm-gateway",
+        "primary_model": "groq/llama-3.3-70b",
+        "fallback": ["cerebras/llama-3.3-70b", "ollama/gemma2:2b"],
+        "node_files": ["node-docker.json"],
+        "agent_module": null
+      },
+      "02_ai_proxy_layer": {
+        "tasks": [
+          "proxy server edits",
+          "bridge config",
+          "provider routing logic"
+        ],
+        "primary_engine": "litellm-gateway",
+        "primary_model": "groq/llama-3.3-70b",
+        "fallback": ["cerebras/llama-3.3-70b", "sambanova/llama-3.3-70b"],
+        "node_files": [
+          "subsub-chat-legs_ROOT.json",
+          "subsub-chat-legs_bridges.json",
+          "subsub-chat-legs_hf_proxy.json",
+          "subsub-chat-legs_lib.json",
+          "subsub-chat-legs__backups.json",
+          "subsub-chat-legs__runtime.json",
+          "subsub-chat-legs_node_modules.json",
+          "subsub-chat-legs_workspace.json"
+        ],
+        "mcp_endpoint": "http://localhost:8420/mcp"
+      },
+      "03_control_plane": {
+        "tasks": [
+          "guardrail updates",
+          "overview API patches",
+          "control plane routing"
+        ],
+        "primary_engine": "litellm-gateway",
+        "primary_model": "groq/llama-3.3-70b",
+        "fallback": ["cerebras/llama-3.3-70b"],
+        "node_files": [
+          "subsub-chat-legs_r3_control_plane_live_package.json",
+          "subsub-chat-legs_r3_fix_bundle_v6.json",
+          "subsub-chat-legs_r3_matrix_control_plane_pack.json",
+          "subsub-chat-legs_r3_next_step_package.json",
+          "subsub-chat-legs_r3_next_step_package_rebuilt.json",
+          "subsub-chat-legs_R3_Canonical_JS_Hardened_Toolchain_v4_Fix.json"
+        ],
+        "mcp_endpoint": "http://localhost:8422/mcp"
+      },
+      "04_frontend_ui": {
+        "tasks": ["React/TSX component edits", "dashboard HTML", "UI logic"],
+        "primary_engine": "litellm-gateway",
+        "primary_model": "groq/llama-3.3-70b",
+        "fallback": ["openrouter/auto", "ollama/gemma2:2b"],
+        "node_files": [
+          "subsub-chat-legs_src.json",
+          "subsub-chat-legs_public.json",
+          "subsub-chat-legs_payload.json",
+          "final-chat-legs-src.json"
+        ],
+        "mcp_endpoint": "http://localhost:8420/mcp"
+      },
+      "05_ki_api_service": {
+        "tasks": [
+          "Flask routing edits",
+          "provider dispatch",
+          "Dockerfile updates"
+        ],
+        "primary_engine": "litellm-gateway",
+        "primary_model": "groq/llama-3.3-70b",
+        "fallback": ["cerebras/llama-3.3-70b"],
+        "node_files": ["node-services.json"],
+        "agent_module": "re-prompt-router"
+      },
+      "06_automation_scripts": {
+        "tasks": [
+          "PowerShell script edits",
+          "audit runners",
+          "canonical-JS activation"
+        ],
+        "primary_engine": "litellm-gateway",
+        "primary_model": "groq/llama-3.3-70b",
+        "fallback": ["ollama/gemma2:2b"],
+        "node_files": [
+          "node-_automation.json",
+          "node-_upgrade.json",
+          "subsub-chat-legs_scripts.json"
+        ]
+      },
+      "07_agent_skills_module": {
+        "tasks": ["SKILL.md generation", "skill updates", "agent config"],
+        "primary_engine": "litellm-gateway",
+        "primary_model": "groq/llama-3.3-70b",
+        "fallback": ["cerebras/llama-3.3-70b", "sambanova/llama-3.3-70b"],
+        "node_files": [
+          "sub-MODULES_agent-skills.json",
+          "content-p5-agent-skills.json",
+          "content-bonus-agent-skills-config.json",
+          "subsub-agent-skills_skill_api_and_interface_design.json",
+          "subsub-agent-skills_skill_browser_testing_with_devtools.json",
+          "subsub-agent-skills_skill_ci_cd_and_automation.json",
+          "subsub-agent-skills_skill_code_review_and_quality.json",
+          "subsub-agent-skills_skill_code_simplification.json",
+          "subsub-agent-skills_skill_context_engineering.json",
+          "subsub-agent-skills_skill_debugging_and_error_recovery.json",
+          "subsub-agent-skills_skill_deprecation_and_migration.json",
+          "subsub-agent-skills_skill_documentation_and_adrs.json",
+          "subsub-agent-skills_skill_frontend_ui_engineering.json",
+          "subsub-agent-skills_skill_git_workflow_and_versioning.json",
+          "subsub-agent-skills_skill_idea_refine.json",
+          "subsub-agent-skills_skill_incremental_implementation.json",
+          "subsub-agent-skills_skill_performance_optimization.json",
+          "subsub-agent-skills_skill_planning_and_task_breakdown.json",
+          "subsub-agent-skills_skill_security_and_hardening.json",
+          "subsub-agent-skills_skill_shipping_and_launch.json",
+          "subsub-agent-skills_skill_source_driven_development.json",
+          "subsub-agent-skills_skill_spec_driven_development.json",
+          "subsub-agent-skills_skill_test_driven_development.json",
+          "subsub-agent-skills_skill_using_agent_skills.json"
+        ],
+        "agent_module": "agent-skills"
+      },
+      "08_agent_reach_hq": {
+        "tasks": [
+          "HQ prompt edits",
+          "connector matrix updates",
+          "router config"
+        ],
+        "primary_engine": "litellm-gateway",
+        "primary_model": "groq/llama-3.3-70b",
+        "fallback": ["cerebras/llama-3.3-70b"],
+        "node_files": ["sub-MODULES_agent-reach-hq.json"],
+        "agent_module": "agent-reach-hq"
+      },
+      "09_obliteratus_module": {
+        "tasks": ["ML abliteration logic", "Flask app edits", "test suite"],
+        "primary_engine": "litellm-gateway",
+        "primary_model": "cerebras/llama-3.3-70b",
+        "fallback": ["groq/llama-3.3-70b", "ollama/gemma2:2b"],
+        "node_files": [
+          "sub-MODULES_obliteratus.json",
+          "subsub-obliteratus_pkg.json",
+          "final-obliteratus_docs.json",
+          "final-obliteratus_examples.json",
+          "final-obliteratus_hf-spaces.json",
+          "final-obliteratus_notebooks.json",
+          "final-obliteratus_tests.json"
+        ],
+        "agent_module": "obliteratus"
+      },
+      "10_gre_generator": {
+        "tasks": [
+          "spec-driven generation",
+          "install-plan runs",
+          "registry expansion"
+        ],
+        "primary_engine": "litellm-gateway",
+        "primary_model": "groq/llama-3.3-70b",
+        "fallback": ["cerebras/llama-3.3-70b"],
+        "node_files": [
+          "sub-MODULES_re-gre-generator.json",
+          "content-p2-gre-generator-specs.json"
+        ],
+        "agent_module": "re-gre-generator"
+      },
+      "11_agent_modules": {
+        "tasks": [
+          "dispatcher edits",
+          "prompt router",
+          "output collector",
+          "social connectors"
+        ],
+        "primary_engine": "litellm-gateway",
+        "primary_model": "groq/llama-3.3-70b",
+        "fallback": ["ollama/gemma2:2b"],
+        "node_files": [
+          "final-MODULES_re_agent_dispatcher.json",
+          "final-MODULES_re_local_agent_int.json",
+          "final-MODULES_re_output_collector.json",
+          "final-MODULES_re_preflight_agent.json",
+          "final-MODULES_re_prompt_router.json",
+          "final-MODULES_re_social_connectors.json",
+          "final-MODULES_g0dm0d3_hybrid_agent.json"
+        ],
+        "agent_modules": [
+          "re-agent-dispatcher",
+          "re-prompt-router",
+          "re-output-collector",
+          "re-preflight-agent",
+          "re-social-connectors"
+        ]
+      },
+      "12_gh_md_knowledge": {
+        "tasks": [
+          "knowledge base reads",
+          "memory palace updates",
+          "strategy docs",
+          "agent setup docs"
+        ],
+        "primary_engine": "litellm-gateway",
+        "primary_model": "groq/llama-3.3-70b",
+        "fallback": ["openrouter/auto"],
+        "node_files": [
+          "node-GH_MD.json",
+          "sub-GH_MD_#AGENT.MD.json",
+          "sub-GH_MD_#KNOWLEDGE.MD.json",
+          "sub-GH_MD_#MEMORY.MD.json",
+          "sub-GH_MD_#SKILLS.MD.json",
+          "sub-GH_MD_#STRATEGY.MD.json",
+          "sub-GH_MD_#SYSTEM.MD.json",
+          "final-GH_MD_CANONICAL_JS_MASTER.json",
+          "final-GH_MD_Dashboard_START.json",
+          "final-GH_MD_LOGICAL_MASTER_JS.json",
+          "final-GH_MD_HASHAGENT_MD_batch1.json",
+          "final-GH_MD_HASHAGENT_MD_batch2.json",
+          "final-GH_MD_HASHAGENT_MD_batch3.json",
+          "final-GH_MD_HASHAGENT_MD_batch4.json",
+          "subsub-GH_MD_HASHAGENT_MD_batch1.json",
+          "subsub-GH_MD_HASHSKILLS_MD_batch1.json",
+          "subsub-GH_MD_HASHSTRATEGY_MD_batch1.json",
+          "subsub-GH_MD_HASHSYSTEM_MD_batch1.json",
+          "subsub-GH_MD_HASHSYSTEM_MD_batch2.json",
+          "subsub-GH_MD_HASHSYSTEM_MD_batch3.json",
+          "subsub-GH_MD_HASHSYSTEM_MD_batch4.json",
+          "subsub-GH_MD_HASHSYSTEM_MD_batch5.json",
+          "subsub-GH_MD_HASHSYSTEM_MD_batch6.json",
+          "subsub-GH_MD_HASHSYSTEM_MD_batch7.json",
+          "subsub-GH_MD_HASHSYSTEM_MD_batch8.json",
+          "subsub-GH_MD_HASHSYSTEM_MD_batch9.json",
+          "subsub-GH_MD_HASHSYSTEM_MD_batch10.json",
+          "subsub-GH_MD_HASHSYSTEM_MD_batch11.json"
+        ]
+      },
+      "13_source_data_registry": {
+        "tasks": [
+          "R3_VIBE_REGISTRY updates",
+          "JS modules",
+          "sync engine",
+          "prompts"
+        ],
+        "primary_engine": "litellm-gateway",
+        "primary_model": "groq/llama-3.3-70b",
+        "fallback": ["cerebras/llama-3.3-70b"],
+        "node_files": [
+          "node-SOURCE.json",
+          "sub-SOURCE_data.json",
+          "sub-SOURCE_js.json",
+          "sub-SOURCE_prompts.json",
+          "sub-SOURCE_chat-legs.json",
+          "content-p1-registry-files.json"
+        ]
+      },
+      "14_n8n_workflows": {
+        "tasks": [
+          "n8n workflow edits",
+          "browser-dash updates",
+          "workflow agents"
+        ],
+        "primary_engine": "litellm-gateway",
+        "primary_model": "groq/llama-3.3-70b",
+        "fallback": ["openrouter/auto"],
+        "node_files": ["node-n8n-workflows.json"]
+      },
+      "15_collected_outputs": {
+        "tasks": ["review output bundles", "module output inspection"],
+        "primary_engine": "litellm-gateway",
+        "primary_model": "groq/llama-3.1-8b",
+        "fallback": ["ollama/gemma2:2b"],
+        "node_files": [
+          "node-COLLECTED-OUTPUTS.json",
+          "final-COLLECTED-OUTPUTS.json"
+        ]
+      },
+      "16_ki_api_strategy": {
+        "tasks": [
+          "strategy docs",
+          "generator specs",
+          "KI API routing strategy"
+        ],
+        "primary_engine": "litellm-gateway",
+        "primary_model": "groq/llama-3.3-70b",
+        "fallback": ["cerebras/llama-3.3-70b"],
+        "node_files": [
+          "content-p3-ki-api.json",
+          "content-p4-chat-legs-lib.json",
+          "content-p6-strategy-docs.json"
+        ]
+      }
+    }
+  },
+
+  "dependency_graph": {
+    "_description": "Build and startup order for zero-cost local operation. Start engines first, then proxy layer, then control plane.",
+    "startup_sequence": [
+      {
+        "step": 1,
+        "id": "litellm-gateway",
+        "type": "engine",
+        "cmd": "litellm --config litellm-config.yaml --port 4000",
+        "check": "curl http://localhost:4000/health",
+        "required_for": [
+          "02_ai_proxy_layer",
+          "05_ki_api_service",
+          "all agent tasks"
+        ]
+      },
+      {
+        "step": 2,
+        "id": "ollama-razer",
+        "type": "engine",
+        "cmd": "ollama serve",
+        "check": "curl http://localhost:11434/api/tags",
+        "required_for": ["LOCAL-ONLY profile", "fallback chain"],
+        "optional": true
+      },
+      {
+        "step": 3,
+        "id": "chatlegs-primary",
+        "type": "mcp-server",
+        "port": 8420,
+        "depends_on": ["litellm-gateway"],
+        "cmd": "node SOURCE/chat-legs/server.js",
+        "required_for": ["02_ai_proxy_layer", "04_frontend_ui"]
+      },
+      {
+        "step": 4,
+        "id": "chatlegs-shadow",
+        "type": "mcp-server",
+        "port": 8421,
+        "depends_on": ["litellm-gateway"],
+        "required_for": ["02_ai_proxy_layer fallback"]
+      },
+      {
+        "step": 5,
+        "id": "matrix-control",
+        "type": "mcp-server",
+        "port": 8422,
+        "depends_on": ["chatlegs-primary"],
+        "required_for": ["03_control_plane"]
+      }
+    ],
+
+    "node_dependencies": {
+      "node-docker.json": {
+        "depends_on": [],
+        "required_by": [
+          "subsub-chat-legs_ROOT.json",
+          "node-services.json",
+          "node-n8n-workflows.json"
+        ]
+      },
+      "subsub-chat-legs_ROOT.json": {
+        "depends_on": ["node-docker.json", "subsub-chat-legs_lib.json"],
+        "required_by": [
+          "subsub-chat-legs_bridges.json",
+          "subsub-chat-legs_src.json",
+          "subsub-chat-legs__runtime.json"
+        ]
+      },
+      "subsub-chat-legs_lib.json": {
+        "depends_on": ["node-SOURCE.json"],
+        "required_by": [
+          "subsub-chat-legs_ROOT.json",
+          "content-p4-chat-legs-lib.json"
+        ]
+      },
+      "subsub-chat-legs_r3_control_plane_live_package.json": {
+        "depends_on": ["subsub-chat-legs_ROOT.json"],
+        "required_by": ["subsub-chat-legs__runtime.json"]
+      },
+      "node-services.json": {
+        "depends_on": ["node-docker.json"],
+        "required_by": ["content-p3-ki-api.json"]
+      },
+      "sub-MODULES_re-gre-generator.json": {
+        "depends_on": [
+          "final-MODULES_re_agent_dispatcher.json",
+          "final-MODULES_re_output_collector.json",
+          "final-MODULES_re_prompt_router.json"
+        ],
+        "required_by": ["node-COLLECTED-OUTPUTS.json"]
+      },
+      "sub-MODULES_agent-skills.json": {
+        "depends_on": [],
+        "required_by": [
+          "content-bonus-agent-skills-config.json",
+          "content-p5-agent-skills.json"
+        ]
+      },
+      "sub-GH_MD_#STRATEGY.MD.json": {
+        "depends_on": [
+          "sub-GH_MD_#KNOWLEDGE.MD.json",
+          "sub-GH_MD_#SYSTEM.MD.json"
+        ],
+        "required_by": [
+          "content-p6-strategy-docs.json",
+          "sub-MODULES_re-gre-generator.json"
+        ]
+      }
+    }
+  },
+
+  "node_index": {
+    "_total_files": 95,
+    "_dir": "C:\\Users\\mail\\R3-DASHBOARD\\r3-nodes",
+    "_description": "Complete index of all r3-nodes export files. Prefix indicates hierarchy level: node- = top-level dir, sub- = 2nd level, subsub- = 3rd level, final- = deep content, content- = file content batches.",
+
+    "top_level_nodes": [
+      "node-01._R_VIB.E_-_INSTRUCTIONS.json",
+      "node-_automation.json",
+      "node-_reference-js-master.json",
+      "node-_upgrade.json",
+      "node-COLLECTED-OUTPUTS.json",
+      "node-DASHBOARD-HUB-desktop.json",
+      "node-docker.json",
+      "node-GH_MD.json",
+      "node-MODULES.json",
+      "node-n8n-workflows.json",
+      "node-NETWORK.json",
+      "node-R_VIB.3_CENTRAL-DASHBOARD.json",
+      "node-services.json",
+      "node-SOURCE.json"
+    ],
+
+    "sub_nodes": [
+      "sub-GH_MD_#AGENT.MD.json",
+      "sub-GH_MD_#KNOWLEDGE.MD.json",
+      "sub-GH_MD_#MEMORY.MD.json",
+      "sub-GH_MD_#SKILLS.MD.json",
+      "sub-GH_MD_#STRATEGY.MD.json",
+      "sub-GH_MD_#SYSTEM.MD.json",
+      "sub-MODULES_agent-reach-hq.json",
+      "sub-MODULES_agent-skills.json",
+      "sub-MODULES_obliteratus.json",
+      "sub-MODULES_re-gre-generator.json",
+      "sub-SOURCE_chat-legs.json",
+      "sub-SOURCE_data.json",
+      "sub-SOURCE_js.json",
+      "sub-SOURCE_prompts.json"
+    ],
+
+    "subsub_nodes": {
+      "chat_legs": [
+        "subsub-chat-legs__backups.json",
+        "subsub-chat-legs__runtime.json",
+        "subsub-chat-legs_bridges.json",
+        "subsub-chat-legs_hf_proxy.json",
+        "subsub-chat-legs_lib.json",
+        "subsub-chat-legs_node_modules.json",
+        "subsub-chat-legs_payload.json",
+        "subsub-chat-legs_public.json",
+        "subsub-chat-legs_R3_Canonical_JS_Hardened_Toolchain_v4_Fix.json",
+        "subsub-chat-legs_r3_control_plane_live_package.json",
+        "subsub-chat-legs_r3_fix_bundle_v6.json",
+        "subsub-chat-legs_r3_matrix_control_plane_pack.json",
+        "subsub-chat-legs_r3_next_step_package.json",
+        "subsub-chat-legs_r3_next_step_package_rebuilt.json",
+        "subsub-chat-legs_ROOT.json",
+        "subsub-chat-legs_scripts.json",
+        "subsub-chat-legs_src.json",
+        "subsub-chat-legs_workspace.json"
+      ],
+      "agent_skills": [
+        "subsub-agent-skills_skill_api_and_interface_design.json",
+        "subsub-agent-skills_skill_browser_testing_with_devtools.json",
+        "subsub-agent-skills_skill_ci_cd_and_automation.json",
+        "subsub-agent-skills_skill_code_review_and_quality.json",
+        "subsub-agent-skills_skill_code_simplification.json",
+        "subsub-agent-skills_skill_context_engineering.json",
+        "subsub-agent-skills_skill_debugging_and_error_recovery.json",
+        "subsub-agent-skills_skill_deprecation_and_migration.json",
+        "subsub-agent-skills_skill_documentation_and_adrs.json",
+        "subsub-agent-skills_skill_frontend_ui_engineering.json",
+        "subsub-agent-skills_skill_git_workflow_and_versioning.json",
+        "subsub-agent-skills_skill_idea_refine.json",
+        "subsub-agent-skills_skill_incremental_implementation.json",
+        "subsub-agent-skills_skill_performance_optimization.json",
+        "subsub-agent-skills_skill_planning_and_task_breakdown.json",
+        "subsub-agent-skills_skill_security_and_hardening.json",
+        "subsub-agent-skills_skill_shipping_and_launch.json",
+        "subsub-agent-skills_skill_source_driven_development.json",
+        "subsub-agent-skills_skill_spec_driven_development.json",
+        "subsub-agent-skills_skill_test_driven_development.json",
+        "subsub-agent-skills_skill_using_agent_skills.json"
+      ],
+      "obliteratus": ["subsub-obliteratus_pkg.json"],
+      "gh_md_system": [
+        "subsub-GH_MD_HASHAGENT_MD_batch1.json",
+        "subsub-GH_MD_HASHSKILLS_MD_batch1.json",
+        "subsub-GH_MD_HASHSTRATEGY_MD_batch1.json",
+        "subsub-GH_MD_HASHSYSTEM_MD_batch1.json",
+        "subsub-GH_MD_HASHSYSTEM_MD_batch2.json",
+        "subsub-GH_MD_HASHSYSTEM_MD_batch3.json",
+        "subsub-GH_MD_HASHSYSTEM_MD_batch4.json",
+        "subsub-GH_MD_HASHSYSTEM_MD_batch5.json",
+        "subsub-GH_MD_HASHSYSTEM_MD_batch6.json",
+        "subsub-GH_MD_HASHSYSTEM_MD_batch7.json",
+        "subsub-GH_MD_HASHSYSTEM_MD_batch8.json",
+        "subsub-GH_MD_HASHSYSTEM_MD_batch9.json",
+        "subsub-GH_MD_HASHSYSTEM_MD_batch10.json",
+        "subsub-GH_MD_HASHSYSTEM_MD_batch11.json"
+      ]
+    },
+
+    "final_nodes": [
+      "final-COLLECTED-OUTPUTS.json",
+      "final-GH_MD_CANONICAL_JS_MASTER.json",
+      "final-GH_MD_Dashboard_START.json",
+      "final-GH_MD_HASHAGENT_MD_batch1.json",
+      "final-GH_MD_HASHAGENT_MD_batch2.json",
+      "final-GH_MD_HASHAGENT_MD_batch3.json",
+      "final-GH_MD_HASHAGENT_MD_batch4.json",
+      "final-GH_MD_LOGICAL_MASTER_JS.json",
+      "final-MODULES_g0dm0d3_hybrid_agent.json",
+      "final-MODULES_re_agent_dispatcher.json",
+      "final-MODULES_re_local_agent_int.json",
+      "final-MODULES_re_output_collector.json",
+      "final-MODULES_re_preflight_agent.json",
+      "final-MODULES_re_prompt_router.json",
+      "final-MODULES_re_social_connectors.json",
+      "final-obliteratus_docs.json",
+      "final-obliteratus_examples.json",
+      "final-obliteratus_hf-spaces.json",
+      "final-obliteratus_notebooks.json",
+      "final-obliteratus_tests.json",
+      "final-chat-legs-src.json"
+    ],
+
+    "content_batches": [
+      "content-bonus-agent-skills-config.json",
+      "content-p1-registry-files.json",
+      "content-p2-gre-generator-specs.json",
+      "content-p3-ki-api.json",
+      "content-p4-chat-legs-lib.json",
+      "content-p5-agent-skills.json",
+      "content-p6-strategy-docs.json"
+    ]
+  },
+
+  "profiles": {
+    "_dir": "R3_LLM_ENGINE_REGISTRY/profiles/",
+    "RAZER-FREE-ONLY": {
+      "file": "profiles/RAZER-FREE-ONLY.json",
+      "description": "Zero-cost daily driver — LiteLLM gateway + free cloud APIs",
+      "recommended_for": "all standard development tasks",
+      "default": true
+    },
+    "LOCAL-ONLY": {
+      "file": "profiles/LOCAL-ONLY.json",
+      "description": "Ollama only — fully offline, zero API calls",
+      "recommended_for": "offline work, privacy-sensitive tasks, rate-limit recovery"
+    },
+    "R3-PRODUCTION": {
+      "file": "profiles/R3-PRODUCTION.json",
+      "description": "Full production stack including paid APIs"
+    },
+    "APPSEN-FULL": {
+      "file": "profiles/APPSEN-FULL.json",
+      "description": "Full stack with APPSEN_C network Ollama node"
+    }
+  },
+
+  "vscode_integration": {
+    "settings_file": "R3_LLM_ENGINE_REGISTRY/.vscode/settings.json",
+    "continue_config": "R3_LLM_ENGINE_REGISTRY/config/vscode-settings-continue.json",
+    "mcp_config": "R3_LLM_ENGINE_REGISTRY/config/mcp-servers.json",
+    "workspace_file": "R3_LLM_ENGINE_REGISTRY/.vscode/r3-engine-registry.code-workspace",
+    "active_profile": "RAZER-FREE-ONLY",
+    "mcp_registration_guide": {
+      "step1": "Cmd+Shift+P → MCP: Open User Configuration",
+      "step2": "Add entries from config/mcp-servers.json into the 'servers' block",
+      "step3": "Save and reload VS Code window",
+      "note": "Ports 8420/8421/8422 must be running before VS Code connects to MCP"
+    }
+  },
+
+  "goal_navigation": {
+    "_description": "Quick lookup: given a goal, which node files + engine to use",
+    "understand_architecture": {
+      "start_with": [
+        "node-docker.json",
+        "subsub-chat-legs_lib.json",
+        "content-p1-registry-files.json"
+      ],
+      "engine": "groq/llama-3.3-70b via litellm-gateway"
+    },
+    "work_on_agent_system": {
+      "start_with": [
+        "sub-MODULES_agent-skills.json",
+        "sub-GH_MD_#AGENT.MD.json",
+        "sub-MODULES_agent-reach-hq.json"
+      ],
+      "engine": "groq/llama-3.3-70b via litellm-gateway"
+    },
+    "work_on_frontend": {
+      "start_with": [
+        "subsub-chat-legs_src.json",
+        "subsub-chat-legs_public.json"
+      ],
+      "engine": "groq/llama-3.3-70b via litellm-gateway"
+    },
+    "work_on_generator": {
+      "start_with": [
+        "sub-MODULES_re-gre-generator.json",
+        "content-p2-gre-generator-specs.json",
+        "sub-GH_MD_#STRATEGY.MD.json"
+      ],
+      "engine": "groq/llama-3.3-70b via litellm-gateway"
+    },
+    "debug_production": {
+      "start_with": [
+        "subsub-chat-legs__runtime.json",
+        "sub-GH_MD_#SYSTEM.MD.json"
+      ],
+      "engine": "cerebras/llama-3.3-70b via litellm-gateway"
+    },
+    "orient_new_agent": {
+      "start_with": [
+        "node-01._R_VIB.E_-_INSTRUCTIONS.json",
+        "sub-GH_MD_#KNOWLEDGE.MD.json"
+      ],
+      "engine": "groq/llama-3.3-70b via litellm-gateway"
+    }
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "_meta": {
+    "description": "R3 local MCP server registrations for VS Code. Paste the 'servers' block into MCP: Open User Configuration.",
+    "ports": {
+      "8420": "chatlegs-primary — Primary AI chat proxy",
+      "8421": "chatlegs-shadow — Shadow / fallback proxy",
+      "8422": "matrix-control — Control plane"
+    },
+    "prerequisite": "All three servers must be running before VS Code registers the MCP connections. Start with: node SOURCE/chat-legs/server.js (ports 8420+8421) and the control-plane server (8422)."
+  },
+  "servers": {
+    "r3-chatlegs-primary": {
+      "type": "sse",
+      "url": "http://localhost:8420/mcp",
+      "_comment": "Primary AI chat proxy — chatlegs port 8420"
+    },
+    "r3-chatlegs-shadow": {
+      "type": "sse",
+      "url": "http://localhost:8421/mcp",
+      "_comment": "Shadow / fallback proxy — chatlegs port 8421"
+    },
+    "r3-matrix-control": {
+      "type": "sse",
+      "url": "http://localhost:8422/mcp",
+      "_comment": "Control plane — matrix-control port 8422"
+    }
+  },
+  "inputs": [
+    {
+      "id": "litellm_key",
+      "type": "promptString",
+      "description": "LiteLLM master key (default: r3-local)",
+      "default": "r3-local",
+      "password": true
+    }
+  ]
+}
