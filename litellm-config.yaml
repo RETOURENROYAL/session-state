@@ -1,0 +1,69 @@
+model_list:
+  # --- FREE TIER ---
+  - model_name: groq/llama-3.3-70b
+    litellm_params:
+      model: groq/llama-3.3-70b-versatile
+      api_key: os.environ/GROQ_API_KEY
+
+  - model_name: groq/llama-3.1-8b
+    litellm_params:
+      model: groq/llama-3.1-8b-instant
+      api_key: os.environ/GROQ_API_KEY
+
+  - model_name: cerebras/llama-3.3-70b
+    litellm_params:
+      model: cerebras/llama3.3-70b
+      api_key: os.environ/CEREBRAS_API_KEY
+
+  - model_name: sambanova/llama-3.3-70b
+    litellm_params:
+      model: sambanova/Meta-Llama-3.3-70B-Instruct
+      api_key: os.environ/SAMBANOVA_API_KEY
+
+  - model_name: openrouter/auto
+    litellm_params:
+      model: openrouter/auto
+      api_key: os.environ/OPENROUTER_API_KEY
+
+  # --- LOCAL (RAZER / appsen — only reachable from Windows) ---
+  - model_name: ollama/gemma2:2b
+    litellm_params:
+      model: ollama/gemma2:2b
+      api_base: "http://host.docker.internal:11434"
+
+  - model_name: ollama/llama3.2
+    litellm_params:
+      model: ollama/llama3.2
+      api_base: "http://192.168.1.226:11434"
+
+  # --- PAID ---
+  - model_name: gpt-4o
+    litellm_params:
+      model: openai/gpt-4o
+      api_key: os.environ/OPENAI_API_KEY
+
+  - model_name: claude-3-5-sonnet
+    litellm_params:
+      model: anthropic/claude-3-5-sonnet-20241022
+      api_key: os.environ/ANTHROPIC_API_KEY
+
+  - model_name: gemini-2.0-flash
+    litellm_params:
+      model: gemini/gemini-2.0-flash
+      api_key: os.environ/GEMINI_API_KEY
+
+router_settings:
+  routing_strategy: least-busy
+  num_retries: 2
+  fallbacks:
+    - groq/llama-3.3-70b:
+        - cerebras/llama-3.3-70b
+    - cerebras/llama-3.3-70b:
+        - sambanova/llama-3.3-70b
+
+general_settings:
+  master_key: os.environ/LITELLM_MASTER_KEY
+
+litellm_settings:
+  drop_params: true
+  set_verbose: false

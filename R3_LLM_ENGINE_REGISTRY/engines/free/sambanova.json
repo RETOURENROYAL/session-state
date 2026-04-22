@@ -1,0 +1,13 @@
+{
+  "id": "sambanova",
+  "label": "SambaNova (Free Tier)",
+  "provider": "sambanova",
+  "api_base": "https://api.sambanova.ai/v1",
+  "key_env": "SAMBANOVA_API_KEY",
+  "signup_url": "https://cloud.sambanova.ai",
+  "models": ["Meta-Llama-3.3-70B-Instruct", "Meta-Llama-3.1-405B-Instruct"],
+  "default_model": "Meta-Llama-3.3-70B-Instruct",
+  "cost": "free",
+  "free_limit": "unlimited (rate limited)",
+  "litellm_prefix": "sambanova/"
+}

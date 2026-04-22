@@ -1,0 +1,12 @@
+{
+  "id": "ollama-razer",
+  "label": "Ollama RAZER LOCAL",
+  "provider": "ollama",
+  "api_base": "http://host.docker.internal:11434",
+  "models": ["gemma2:2b"],
+  "default_model": "gemma2:2b",
+  "cost": "free",
+  "requires_key": false,
+  "reachable_from": "windows-only",
+  "notes": "Only reachable from Windows host / Docker Desktop. Not accessible from Codespace."
+}

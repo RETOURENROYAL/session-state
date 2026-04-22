@@ -1,0 +1,58 @@
+{
+  "continue.models": [
+    {
+      "title": "⚡ LiteLLM → Groq Llama 3.3 70B",
+      "provider": "openai",
+      "model": "groq/llama-3.3-70b",
+      "apiBase": "http://localhost:4000/v1",
+      "apiKey": "r3-local"
+    },
+    {
+      "title": "⚡ LiteLLM → Cerebras 70B",
+      "provider": "openai",
+      "model": "cerebras/llama-3.3-70b",
+      "apiBase": "http://localhost:4000/v1",
+      "apiKey": "r3-local"
+    },
+    {
+      "title": "⚡ LiteLLM → OpenRouter Auto",
+      "provider": "openai",
+      "model": "openrouter/auto",
+      "apiBase": "http://localhost:4000/v1",
+      "apiKey": "r3-local"
+    },
+    {
+      "title": "🟢 Ollama RAZER — gemma2:2b",
+      "provider": "ollama",
+      "model": "gemma2:2b",
+      "apiBase": "http://host.docker.internal:11434"
+    },
+    {
+      "title": "💰 GPT-4o",
+      "provider": "openai",
+      "model": "gpt-4o",
+      "apiBase": "http://localhost:4000/v1",
+      "apiKey": "r3-local"
+    },
+    {
+      "title": "💰 Claude 3.5 Sonnet",
+      "provider": "openai",
+      "model": "claude-3-5-sonnet",
+      "apiBase": "http://localhost:4000/v1",
+      "apiKey": "r3-local"
+    }
+  ],
+  "continue.tabAutocompleteModel": {
+    "title": "Autocomplete — Groq 8B",
+    "provider": "openai",
+    "model": "groq/llama-3.1-8b",
+    "apiBase": "http://localhost:4000/v1",
+    "apiKey": "r3-local"
+  },
+  "continue.enableTabAutocomplete": true,
+  "continue.allowAnonymousTelemetry": false,
+  "files.associations": {
+    "*.json": "jsonc"
+  },
+  "editor.formatOnSave": false
+}

@@ -1,0 +1,12 @@
+{
+  "id": "openai",
+  "label": "OpenAI",
+  "provider": "openai",
+  "api_base": "https://api.openai.com/v1",
+  "key_env": "OPENAI_API_KEY",
+  "signup_url": "https://platform.openai.com",
+  "models": ["gpt-4o", "gpt-4o-mini", "o1-mini", "o3-mini"],
+  "default_model": "gpt-4o",
+  "cost": "paid",
+  "litellm_prefix": "openai/"
+}

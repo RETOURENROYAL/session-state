@@ -1,0 +1,16 @@
+{
+  "id": "claude",
+  "label": "Anthropic Claude",
+  "provider": "anthropic",
+  "api_base": "https://api.anthropic.com/v1",
+  "key_env": "ANTHROPIC_API_KEY",
+  "signup_url": "https://console.anthropic.com",
+  "models": [
+    "claude-3-5-sonnet-20241022",
+    "claude-3-5-haiku-20241022",
+    "claude-opus-4-5"
+  ],
+  "default_model": "claude-3-5-sonnet-20241022",
+  "cost": "paid",
+  "litellm_prefix": "anthropic/"
+}

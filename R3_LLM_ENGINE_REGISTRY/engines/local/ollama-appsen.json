@@ -1,0 +1,12 @@
+{
+  "id": "ollama-appsen",
+  "label": "Ollama appsen LAN",
+  "provider": "ollama",
+  "api_base": "http://192.168.1.226:11434",
+  "models": ["llama3.2", "nomic-embed-text"],
+  "default_model": "llama3.2",
+  "cost": "free",
+  "requires_key": false,
+  "reachable_from": "lan-only",
+  "notes": "LAN machine at 192.168.1.226. Not accessible from Codespace."
+}

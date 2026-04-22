@@ -1,0 +1,15 @@
+{
+  "id": "chutes",
+  "label": "Chutes.ai (Free Tier)",
+  "provider": "openai-compat",
+  "api_base": "https://llm.chutes.ai/v1",
+  "key_env": "CHUTES_API_KEY",
+  "signup_url": "https://chutes.ai",
+  "models": [
+    "deepseek-ai/DeepSeek-V3-0324",
+    "meta-llama/Llama-3.3-70B-Instruct"
+  ],
+  "default_model": "deepseek-ai/DeepSeek-V3-0324",
+  "cost": "free",
+  "litellm_prefix": "openai/"
+}

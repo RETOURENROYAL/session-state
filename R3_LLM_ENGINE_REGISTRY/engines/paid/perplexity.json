@@ -1,0 +1,12 @@
+{
+  "id": "perplexity",
+  "label": "Perplexity",
+  "provider": "perplexity",
+  "api_base": "https://api.perplexity.ai",
+  "key_env": "PERPLEXITY_API_KEY",
+  "signup_url": "https://www.perplexity.ai/settings/api",
+  "models": ["sonar-pro", "sonar", "sonar-reasoning"],
+  "default_model": "sonar-pro",
+  "cost": "paid",
+  "litellm_prefix": "perplexity/"
+}

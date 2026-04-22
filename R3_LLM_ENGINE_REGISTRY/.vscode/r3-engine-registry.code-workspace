@@ -1,0 +1,60 @@
+{
+  "folders": [
+    {
+      "name": "⚡ R3 Engine Registry",
+      "path": ".",
+    },
+    {
+      "name": "🟢 Ollama RAZER (host.docker.internal:11434)",
+      "path": "engines/local",
+    },
+    {
+      "name": "🆓 Free Engines",
+      "path": "engines/free",
+    },
+    {
+      "name": "💰 Paid Engines",
+      "path": "engines/paid",
+    },
+    {
+      "name": "📋 Profiles",
+      "path": "profiles",
+    },
+  ],
+  "settings": {
+    "continue.models": [
+      {
+        "title": "⚡ LiteLLM → Groq Llama 3.3 70B",
+        "provider": "openai",
+        "model": "groq/llama-3.3-70b",
+        "apiBase": "http://localhost:4000/v1",
+        "apiKey": "r3-local",
+      },
+      {
+        "title": "⚡ LiteLLM → Cerebras 70B",
+        "provider": "openai",
+        "model": "cerebras/llama-3.3-70b",
+        "apiBase": "http://localhost:4000/v1",
+        "apiKey": "r3-local",
+      },
+      {
+        "title": "🟢 Ollama RAZER — gemma2:2b",
+        "provider": "ollama",
+        "model": "gemma2:2b",
+        "apiBase": "http://host.docker.internal:11434",
+      },
+      {
+        "title": "💰 GPT-4o",
+        "provider": "openai",
+        "model": "gpt-4o",
+        "apiBase": "http://localhost:4000/v1",
+        "apiKey": "r3-local",
+      },
+    ],
+    "continue.enableTabAutocomplete": true,
+    "continue.allowAnonymousTelemetry": false,
+  },
+  "extensions": {
+    "recommendations": ["continue.continue", "rooveterinaryinc.roo-cline"],
+  },
+}

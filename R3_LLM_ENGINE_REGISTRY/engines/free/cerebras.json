@@ -1,0 +1,13 @@
+{
+  "id": "cerebras",
+  "label": "Cerebras (Free Tier)",
+  "provider": "cerebras",
+  "api_base": "https://api.cerebras.ai/v1",
+  "key_env": "CEREBRAS_API_KEY",
+  "signup_url": "https://cloud.cerebras.ai",
+  "models": ["llama3.3-70b", "llama3.1-8b"],
+  "default_model": "llama3.3-70b",
+  "cost": "free",
+  "free_limit": "unlimited (rate limited)",
+  "litellm_prefix": "cerebras/"
+}

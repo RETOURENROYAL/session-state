@@ -1,0 +1,12 @@
+{
+  "id": "glama",
+  "label": "Glama (Free Models)",
+  "provider": "openai-compat",
+  "api_base": "https://glama.ai/api/gateway/openai/v1",
+  "key_env": "GLAMA_API_KEY",
+  "signup_url": "https://glama.ai",
+  "models": ["claude-3-haiku", "llama-3-70b", "gemma-2-9b"],
+  "default_model": "llama-3-70b",
+  "cost": "free-tier-available",
+  "litellm_prefix": "openai/"
+}

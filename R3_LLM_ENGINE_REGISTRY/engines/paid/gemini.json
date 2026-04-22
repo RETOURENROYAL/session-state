@@ -1,0 +1,13 @@
+{
+  "id": "gemini",
+  "label": "Google Gemini",
+  "provider": "gemini",
+  "api_base": "https://generativelanguage.googleapis.com/v1beta",
+  "key_env": "GEMINI_API_KEY",
+  "signup_url": "https://aistudio.google.com/app/apikey",
+  "models": ["gemini-2.0-flash", "gemini-2.5-pro", "gemini-1.5-flash"],
+  "default_model": "gemini-2.0-flash",
+  "cost": "paid",
+  "free_limit": "gemini-2.0-flash has free quota",
+  "litellm_prefix": "gemini/"
+}

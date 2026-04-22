@@ -1,0 +1,32 @@
+{
+  "_name": "APPSEN-FULL",
+  "_description": "appsen LAN-Node + alle Engines (lokal + free + paid).",
+  "_use_case": "Vollausbau auf appsen — alle Modelle verfügbar",
+  "primary_engine": "ollama-appsen",
+  "engines": [
+    "ollama-appsen",
+    "ollama-razer",
+    "litellm-gateway",
+    "groq",
+    "cerebras",
+    "sambanova",
+    "openrouter",
+    "chutes",
+    "glama",
+    "huggingface",
+    "openai",
+    "claude",
+    "gemini",
+    "mistral",
+    "perplexity"
+  ],
+  "default_model": "ollama/llama3.2",
+  "fallback_chain": ["ollama/llama3.2", "groq/llama-3.3-70b", "gpt-4o"],
+  "required_keys": ["GROQ_API_KEY", "OPENAI_API_KEY", "ANTHROPIC_API_KEY"],
+  "optional_keys": [
+    "CEREBRAS_API_KEY",
+    "SAMBANOVA_API_KEY",
+    "GEMINI_API_KEY",
+    "MISTRAL_API_KEY"
+  ]
+}

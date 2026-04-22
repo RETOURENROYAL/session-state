@@ -1,0 +1,31 @@
+{
+  "_name": "RAZER-FREE-ONLY",
+  "_description": "Nur lokal (RAZER Ollama) + kostenlose Cloud-Engines. Kein paid API-Key nötig.",
+  "_use_case": "Daily driver auf RAZER für kostenlose Ausarbeitungen",
+  "primary_engine": "litellm-gateway",
+  "engines": [
+    "ollama-razer",
+    "groq",
+    "cerebras",
+    "sambanova",
+    "openrouter",
+    "chutes",
+    "glama",
+    "huggingface",
+    "litellm-gateway"
+  ],
+  "default_model": "groq/llama-3.3-70b",
+  "fallback_chain": [
+    "groq/llama-3.3-70b",
+    "cerebras/llama-3.3-70b",
+    "sambanova/llama-3.3-70b",
+    "ollama/gemma2:2b"
+  ],
+  "required_keys": ["GROQ_API_KEY", "CEREBRAS_API_KEY", "SAMBANOVA_API_KEY"],
+  "optional_keys": [
+    "OPENROUTER_API_KEY",
+    "CHUTES_API_KEY",
+    "GLAMA_API_KEY",
+    "HF_API_KEY"
+  ]
+}

@@ -1,0 +1,26 @@
+{
+  "id": "litellm-gateway",
+  "label": "LiteLLM Gateway",
+  "provider": "litellm",
+  "api_base": "http://localhost:4000",
+  "api_key": "r3-local",
+  "models": [
+    "groq/llama-3.3-70b",
+    "groq/llama-3.1-8b",
+    "cerebras/llama-3.3-70b",
+    "sambanova/llama-3.3-70b",
+    "openrouter/auto",
+    "ollama/gemma2:2b",
+    "ollama/llama3.2",
+    "gpt-4o",
+    "claude-3-5-sonnet",
+    "gemini-2.0-flash"
+  ],
+  "default_model": "groq/llama-3.3-70b",
+  "cost": "free-tier-available",
+  "requires_key": true,
+  "key_env": "LITELLM_MASTER_KEY",
+  "start_cmd": "litellm --config /workspaces/session-state/litellm-config.yaml --port 4000",
+  "reachable_from": "codespace",
+  "status": "running"
+}

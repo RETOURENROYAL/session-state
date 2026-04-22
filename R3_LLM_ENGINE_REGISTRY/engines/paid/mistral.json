@@ -1,0 +1,16 @@
+{
+  "id": "mistral",
+  "label": "Mistral AI",
+  "provider": "mistral",
+  "api_base": "https://api.mistral.ai/v1",
+  "key_env": "MISTRAL_API_KEY",
+  "signup_url": "https://console.mistral.ai",
+  "models": [
+    "mistral-large-latest",
+    "mistral-small-latest",
+    "codestral-latest"
+  ],
+  "default_model": "mistral-large-latest",
+  "cost": "paid",
+  "litellm_prefix": "mistral/"
+}

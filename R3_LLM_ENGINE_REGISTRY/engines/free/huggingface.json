@@ -1,0 +1,15 @@
+{
+  "id": "huggingface",
+  "label": "HuggingFace Inference",
+  "provider": "huggingface",
+  "api_base": "https://api-inference.huggingface.co/models",
+  "key_env": "HF_API_KEY",
+  "signup_url": "https://huggingface.co/settings/tokens",
+  "models": [
+    "mistralai/Mistral-7B-Instruct-v0.3",
+    "meta-llama/Meta-Llama-3-8B-Instruct"
+  ],
+  "default_model": "mistralai/Mistral-7B-Instruct-v0.3",
+  "cost": "free-tier-available",
+  "litellm_prefix": "huggingface/"
+}
