@@ -3,7 +3,7 @@
     "project": "R3-DASHBOARD",
     "local_root": "C:\\Users\\mail\\R3-DASHBOARD",
     "export_dir": "C:\\Users\\mail\\R3-DASHBOARD\\r3-nodes",
-    "generated": "2026-04-21",
+    "generated": "2026-04-22",
     "description": "Master deep-read index: maps every r3-nodes export file to its logical domain. Use 'read_order' per goal to navigate efficiently."
   },
 
@@ -11,7 +11,8 @@
     "01_core_infrastructure": {
       "description": "Container stack, DB init, reverse proxy, engine registry",
       "completeness": "FULL",
-      "export_files": ["node-docker.json", "node-engine-registry.json"],
+      "export_files": ["node-docker.json"],
+      "note": "node-engine-registry.json not present in r3-nodes (engine-registry.json lives at repo root, not exported).",
       "key_paths": [
         "docker/docker-compose.yml",
         "docker/init.sql",
@@ -29,7 +30,11 @@
         "subsub-chat-legs_ROOT.json",
         "subsub-chat-legs_bridges.json",
         "subsub-chat-legs_hf_proxy.json",
-        "subsub-chat-legs_lib.json"
+        "subsub-chat-legs_lib.json",
+        "subsub-chat-legs__backups.json",
+        "subsub-chat-legs__runtime.json",
+        "subsub-chat-legs_node_modules.json",
+        "subsub-chat-legs_workspace.json"
       ],
       "key_paths": [
         "SOURCE/chat-legs/bridges/openai-8512/",
@@ -107,6 +112,7 @@
       "completeness": "FULL",
       "export_files": [
         "node-_automation.json",
+        "node-_upgrade.json",
         "subsub-chat-legs_scripts.json"
       ],
       "key_paths": [
@@ -192,7 +198,12 @@
       "completeness": "FULL",
       "export_files": [
         "sub-MODULES_obliteratus.json",
-        "subsub-obliteratus_pkg.json"
+        "subsub-obliteratus_pkg.json",
+        "final-obliteratus_docs.json",
+        "final-obliteratus_examples.json",
+        "final-obliteratus_hf-spaces.json",
+        "final-obliteratus_notebooks.json",
+        "final-obliteratus_tests.json"
       ],
       "key_paths": [
         "MODULES/obliteratus/app.py",
@@ -232,7 +243,15 @@
     "10_re_gre_generator": {
       "description": "MODULES/re-gre-generator — core output generator, spec-driven, install-plan runner",
       "completeness": "FULL",
-      "export_files": ["sub-MODULES_re-gre-generator.json"],
+      "export_files": [
+        "sub-MODULES_re-gre-generator.json",
+        "final-MODULES_re_agent_dispatcher.json",
+        "final-MODULES_re_local_agent_int.json",
+        "final-MODULES_re_output_collector.json",
+        "final-MODULES_re_preflight_agent.json",
+        "final-MODULES_re_prompt_router.json",
+        "final-MODULES_re_social_connectors.json"
+      ],
       "key_paths": [
         "MODULES/re-gre-generator/generator-spec.yaml",
         "MODULES/re-gre-generator/generator-output-spec.yaml",
@@ -258,12 +277,15 @@
 
     "12_knowledge_base_GH_MD": {
       "description": "GH_MD/ — merged knowledge files for all AI agents, indexed by category",
-      "completeness": "MOSTLY FULL",
+      "completeness": "FULL",
+      "export_files_overview": ["node-GH_MD.json"],
       "subdomains": {
         "#AGENT.MD": {
           "files_total": 65,
           "completeness": "FULL — all 4 batches confirmed, 65/65 files",
           "export_files": [
+            "sub-GH_MD_#AGENT.MD.json",
+            "subsub-GH_MD_HASHAGENT_MD_batch1.json",
             "final-GH_MD_HASHAGENT_MD_batch1.json",
             "final-GH_MD_HASHAGENT_MD_batch2.json",
             "final-GH_MD_HASHAGENT_MD_batch3.json",
@@ -335,7 +357,10 @@
         "#SKILLS.MD": {
           "files_total": 9,
           "completeness": "FULL",
-          "export_files": ["subsub-GH_MD_HASHSKILLS_MD_batch1.json"],
+          "export_files": [
+            "sub-GH_MD_#SKILLS.MD.json",
+            "subsub-GH_MD_HASHSKILLS_MD_batch1.json"
+          ],
           "notable": [
             "SKILL.merged.md",
             "AI Marketing Skills.md",
@@ -346,7 +371,10 @@
         "#STRATEGY.MD": {
           "files_total": 29,
           "completeness": "FULL",
-          "export_files": ["subsub-GH_MD_HASHSTRATEGY_MD_batch1.json"],
+          "export_files": [
+            "sub-GH_MD_#STRATEGY.MD.json",
+            "subsub-GH_MD_HASHSTRATEGY_MD_batch1.json"
+          ],
           "notable": [
             "R³ CORE STRATEGY.md",
             "R3-DASHBOARD-SPEC.merged.md",
@@ -380,6 +408,8 @@
       "description": "SOURCE/data (vibe registry), SOURCE/js (sync engine), SOURCE/prompts (HD prompt specs)",
       "completeness": "FULL",
       "export_files": [
+        "node-SOURCE.json",
+        "sub-SOURCE_chat-legs.json",
         "sub-SOURCE_data.json",
         "sub-SOURCE_js.json",
         "sub-SOURCE_prompts.json"
@@ -429,7 +459,7 @@
     "16_instructions_and_setup": {
       "description": "01.] R³ I VIB.E - INSTRUCTIONS — DASHBOARD_AI_SETUP, mempalace, Mountpoint matrices",
       "completeness": "FULL",
-      "export_files": ["node-01._R³_I_VIB.E_-_INSTRUCTIONS.json"],
+      "export_files": ["node-01._R_VIB.E_-_INSTRUCTIONS.json"],
       "key_paths": [
         "01.] R³ I VIB.E - INSTRUCTIONS/DASHBOARD_AI_SETUP.yaml",
         "01.] R³ I VIB.E - INSTRUCTIONS/mempalace.md",
@@ -443,6 +473,7 @@
       "description": "MODULES/ small agent sub-modules: dispatchers, collectors, routers, connectors, g0dm0d3 hybrid agent",
       "completeness": "FULL",
       "export_files": [
+        "node-MODULES.json",
         "final-MODULES_re_agent_dispatcher.json",
         "final-MODULES_re_local_agent_int.json",
         "final-MODULES_re_output_collector.json",
@@ -524,7 +555,10 @@
     "19_collected_outputs": {
       "description": "COLLECTED-OUTPUTS/ — generated agent output bundles, one folder per module",
       "completeness": "FULL",
-      "export_files": ["final-COLLECTED-OUTPUTS.json"],
+      "export_files": [
+        "node-COLLECTED-OUTPUTS.json",
+        "final-COLLECTED-OUTPUTS.json"
+      ],
       "module_folders": [
         "agent-reach-hq",
         "re-agent-dispatcher",
@@ -535,6 +569,29 @@
         "re-provider-registry",
         "re-social-connectors"
       ]
+    },
+
+    "20_dashboard_hub_desktop": {
+      "description": "DASHBOARD-HUB-desktop — desktop dashboard entry point (Python/Docker), Azure voice setup, n8n analysis, module mapping",
+      "completeness": "FULL",
+      "export_files": ["node-DASHBOARD-HUB-desktop.json"],
+      "key_paths": [
+        "DASHBOARD-HUB-desktop/main.py",
+        "DASHBOARD-HUB-desktop/docker-compose.yml",
+        "DASHBOARD-HUB-desktop/docker/Dockerfile.backend",
+        "DASHBOARD-HUB-desktop/docker/Dockerfile.frontend",
+        "DASHBOARD-HUB-desktop/nginx-web/html/index.html",
+        "DASHBOARD-HUB-desktop/AZURE-VOICE-SETUP.md",
+        "DASHBOARD-HUB-desktop/MODULE_MAPPING.md",
+        "DASHBOARD-HUB-desktop/N8N_WORKFLOW_ANALYSIS.md"
+      ]
+    },
+
+    "21_central_dashboard": {
+      "description": "R_VIB.3_CENTRAL-DASHBOARD — central dashboard sub-module",
+      "completeness": "FULL",
+      "export_files": ["node-R_VIB.3_CENTRAL-DASHBOARD.json"],
+      "key_paths": ["R_VIB.3_CENTRAL-DASHBOARD/"]
     }
   },
 
@@ -766,13 +823,15 @@
       "16_instructions_and_setup",
       "17_small_modules",
       "18_gh_md_js_masters",
-      "19_collected_outputs"
+      "19_collected_outputs",
+      "20_dashboard_hub_desktop",
+      "21_central_dashboard"
     ],
     "PARTIAL": [],
     "EXCLUDED_BY_DESIGN": [
-      "SOURCE/chat-legs/_runtime (ephemeral working copies)",
-      "SOURCE/chat-legs/node_modules (npm deps)",
-      "SOURCE/chat-legs/_backups (timestamped snapshots)"
+      "SOURCE/chat-legs/_runtime (ephemeral working copies — indexed via subsub-chat-legs__runtime.json)",
+      "SOURCE/chat-legs/node_modules (npm deps — indexed via subsub-chat-legs_node_modules.json)",
+      "SOURCE/chat-legs/_backups (timestamped snapshots — indexed via subsub-chat-legs__backups.json)"
     ]
   }
 }
