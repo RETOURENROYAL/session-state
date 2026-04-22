@@ -50,13 +50,13 @@ function Write-Banner {
   Write-Host ""
 }
 
-function Test-Endpoint($url, $label) {
+function Test-Endpoint($url, $label, [switch]$Silent) {
   try {
     $r = Invoke-WebRequest "$url" -TimeoutSec 3 -UseBasicParsing -EA Stop
-    Write-Host "  ✓ $label — online" -ForegroundColor Green
+    if (-not $Silent) { Write-Host "  ✓ $label — online" -ForegroundColor Green }
     return $true
   } catch {
-    Write-Host "  ✗ $label — offline" -ForegroundColor Red
+    if (-not $Silent) { Write-Host "  ✗ $label — offline" -ForegroundColor Red }
     return $false
   }
 }
@@ -133,8 +133,52 @@ $litellmOnline= Test-Endpoint "$LiteLLM/health"    "LiteLLM localhost:4000"
 Write-Host ""
 
 if (-not $litellmOnline) {
-  Write-Host "  ⚠  LiteLLM nicht erreichbar. Starte mit: docker compose up litellm -d" -ForegroundColor Yellow
-  Write-Host "     oder: cd C:\Users\mail\R3-DASHBOARD && docker compose up -d" -ForegroundColor DarkGray
+  Write-Host "  ⚠  LiteLLM offline — versuche Auto-Start..." -ForegroundColor Yellow
+
+  # Try 1: Named service in R3-DASHBOARD docker-compose
+  $R3Root = "C:\Users\mail\R3-DASHBOARD"
+  $ComposeFile = "$R3Root\docker\docker-compose.yml"
+  $Started = $false
+
+  if (Test-Path $ComposeFile) {
+    Write-Host "  ▶ docker compose -f $ComposeFile up litellm -d" -ForegroundColor DarkGray
+    docker compose -f $ComposeFile up litellm -d 2>&1 | Out-Null
+    $Started = $true
+  } else {
+    # Try 2: generic compose in R3-DASHBOARD root
+    $RootCompose = "$R3Root\docker-compose.yml"
+    if (Test-Path $RootCompose) {
+      Write-Host "  ▶ docker compose -f $RootCompose up litellm -d" -ForegroundColor DarkGray
+      docker compose -f $RootCompose up litellm -d 2>&1 | Out-Null
+      $Started = $true
+    } else {
+      # Try 3: standalone LiteLLM container (minimal, no config needed for Ollama-only)
+      Write-Host "  ▶ Starte standalone LiteLLM container auf :4000..." -ForegroundColor DarkGray
+      docker run -d --name r3-litellm `
+        -p 4000:4000 `
+        -e LITELLM_MASTER_KEY="r3-local" `
+        ghcr.io/berriai/litellm:main-latest `
+        --port 4000 2>&1 | Out-Null
+      $Started = $true
+    }
+  }
+
+  if ($Started) {
+    Write-Host "  ⏳ Warte auf LiteLLM (max 30s)..." -ForegroundColor DarkGray
+    $waited = 0
+    do {
+      Start-Sleep -Seconds 3
+      $waited += 3
+      $litellmOnline = Test-Endpoint "$LiteLLM/health" "LiteLLM localhost:4000" -Silent
+    } while (-not $litellmOnline -and $waited -lt 30)
+  }
+
+  if (-not $litellmOnline) {
+    Write-Host "  ✗ LiteLLM konnte nicht gestartet werden." -ForegroundColor Red
+    Write-Host "    Manuell starten:" -ForegroundColor DarkGray
+    Write-Host "      cd C:\Users\mail\R3-DASHBOARD\docker && docker compose up litellm -d" -ForegroundColor DarkGray
+    Write-Host "    Danach erneut ausführen: .\Register-R3-Ollama.ps1" -ForegroundColor DarkGray
+  }
 }
 
 # 2. Scan live models
