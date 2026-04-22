@@ -1,391 +1,1459 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="de">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>R3 GitHub API — n8n Workflow Dashboard</title>
-<style>
-  *{box-sizing:border-box;margin:0;padding:0}
-  body{font-family:'Segoe UI',system-ui,sans-serif;background:#0f172a;color:#e2e8f0;min-height:100vh}
-  header{background:#1e293b;border-bottom:1px solid #334155;padding:16px 24px;display:flex;align-items:center;gap:16px}
-  header h1{font-size:1.4rem;font-weight:700;color:#f8fafc}
-  header .badge{background:#6366f1;color:#fff;padding:3px 10px;border-radius:20px;font-size:.75rem;font-weight:600}
-  .toolbar{background:#1e293b;padding:12px 24px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;border-bottom:1px solid #334155}
-  .toolbar input{background:#0f172a;border:1px solid #475569;color:#e2e8f0;padding:7px 12px;border-radius:8px;font-size:.85rem;width:260px;outline:none}
-  .toolbar input:focus{border-color:#6366f1}
-  .toolbar .tlink{background:#1d4ed8;color:#fff;text-decoration:none;padding:7px 16px;border-radius:8px;font-size:.82rem;font-weight:600}
-  .toolbar .tlink:hover{background:#2563eb}
-  .toolbar .tlink.green{background:#059669}.toolbar .tlink.green:hover{background:#10b981}
-  .toolbar .tlink.gray{background:#475569}.toolbar .tlink.gray:hover{background:#64748b}
-  .status-bar{background:#0f172a;padding:8px 24px;font-size:.78rem;color:#94a3b8;border-bottom:1px solid #1e293b}
-  .status-bar span{margin-right:20px}
-  .status-bar .ok{color:#4ade80}.status-bar .warn{color:#fbbf24}.status-bar .err{color:#f87171}
-  main{padding:20px 24px;display:grid;grid-template-columns:repeat(auto-fill,minmax(360px,1fr));gap:18px}
-  .panel{background:#1e293b;border-radius:12px;overflow:hidden;border:1px solid #334155;transition:box-shadow .2s}
-  .panel:hover{box-shadow:0 4px 24px rgba(0,0,0,.4)}
-  .panel-header{padding:12px 16px;display:flex;align-items:center;gap:10px;color:#fff}
-  .panel-icon{font-size:1.2rem}
-  .panel-title{font-weight:700;font-size:.9rem;letter-spacing:.04em;flex:1}
-  .panel-count{background:rgba(0,0,0,.25);padding:2px 8px;border-radius:12px;font-size:.72rem}
-  .panel-body{padding:10px;display:flex;flex-direction:column;gap:6px}
-  .card{background:#0f172a;border:1px solid #334155;border-radius:8px;padding:10px 12px;display:flex;align-items:center;gap:8px;transition:border-color .15s}
-  .card:hover{border-color:#6366f1}
-  .card-op{flex:1;font-size:.82rem;color:#cbd5e1;font-weight:500}
-  .card-actions{display:flex;gap:5px;flex-shrink:0}
-  .btn{border:none;cursor:pointer;border-radius:6px;font-size:.72rem;font-weight:600;padding:4px 9px;transition:opacity .15s}
-  .btn:hover{opacity:.8}
-  .btn-raw{background:#334155;color:#94a3b8;text-decoration:none;display:inline-flex;align-items:center}
-  .btn-copy{background:#1e40af;color:#bfdbfe}
-  .btn-import{background:#059669;color:#d1fae5}
-  .modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:100;align-items:center;justify-content:center}
-  .modal.open{display:flex}
-  .modal-box{background:#1e293b;border-radius:16px;padding:28px;max-width:560px;width:90%;border:1px solid #475569}
-  .modal-box h3{margin-bottom:12px;color:#f8fafc}
-  .modal-box pre{background:#0f172a;padding:14px;border-radius:8px;overflow-x:auto;font-size:.8rem;color:#a5f3fc;margin:10px 0}
-  .modal-box .close-btn{background:#475569;color:#e2e8f0;border:none;padding:8px 18px;border-radius:8px;cursor:pointer;font-weight:600;margin-top:8px}
-  footer{text-align:center;padding:20px;color:#475569;font-size:.75rem;border-top:1px solid #1e293b}
-  .hidden{display:none!important}
-</style>
-</head>
-<body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>R3 GitHub API — n8n Workflow Dashboard</title>
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        font-family: "Segoe UI", system-ui, sans-serif;
+        background: #0f172a;
+        color: #e2e8f0;
+        min-height: 100vh;
+      }
+      header {
+        background: #1e293b;
+        border-bottom: 1px solid #334155;
+        padding: 16px 24px;
+        display: flex;
+        align-items: center;
+        gap: 16px;
+      }
+      header h1 {
+        font-size: 1.4rem;
+        font-weight: 700;
+        color: #f8fafc;
+      }
+      header .badge {
+        background: #6366f1;
+        color: #fff;
+        padding: 3px 10px;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 600;
+      }
+      .toolbar {
+        background: #1e293b;
+        padding: 12px 24px;
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        flex-wrap: wrap;
+        border-bottom: 1px solid #334155;
+      }
+      .toolbar input {
+        background: #0f172a;
+        border: 1px solid #475569;
+        color: #e2e8f0;
+        padding: 7px 12px;
+        border-radius: 8px;
+        font-size: 0.85rem;
+        width: 260px;
+        outline: none;
+      }
+      .toolbar input:focus {
+        border-color: #6366f1;
+      }
+      .toolbar .tlink {
+        background: #1d4ed8;
+        color: #fff;
+        text-decoration: none;
+        padding: 7px 16px;
+        border-radius: 8px;
+        font-size: 0.82rem;
+        font-weight: 600;
+      }
+      .toolbar .tlink:hover {
+        background: #2563eb;
+      }
+      .toolbar .tlink.green {
+        background: #059669;
+      }
+      .toolbar .tlink.green:hover {
+        background: #10b981;
+      }
+      .toolbar .tlink.gray {
+        background: #475569;
+      }
+      .toolbar .tlink.gray:hover {
+        background: #64748b;
+      }
+      .status-bar {
+        background: #0f172a;
+        padding: 8px 24px;
+        font-size: 0.78rem;
+        color: #94a3b8;
+        border-bottom: 1px solid #1e293b;
+      }
+      .status-bar span {
+        margin-right: 20px;
+      }
+      .status-bar .ok {
+        color: #4ade80;
+      }
+      .status-bar .warn {
+        color: #fbbf24;
+      }
+      .status-bar .err {
+        color: #f87171;
+      }
+      main {
+        padding: 20px 24px;
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+        gap: 18px;
+      }
+      .panel {
+        background: #1e293b;
+        border-radius: 12px;
+        overflow: hidden;
+        border: 1px solid #334155;
+        transition: box-shadow 0.2s;
+      }
+      .panel:hover {
+        box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
+      }
+      .panel-header {
+        padding: 12px 16px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        color: #fff;
+      }
+      .panel-icon {
+        font-size: 1.2rem;
+      }
+      .panel-title {
+        font-weight: 700;
+        font-size: 0.9rem;
+        letter-spacing: 0.04em;
+        flex: 1;
+      }
+      .panel-count {
+        background: rgba(0, 0, 0, 0.25);
+        padding: 2px 8px;
+        border-radius: 12px;
+        font-size: 0.72rem;
+      }
+      .panel-body {
+        padding: 10px;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+      .card {
+        background: #0f172a;
+        border: 1px solid #334155;
+        border-radius: 8px;
+        padding: 10px 12px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        transition: border-color 0.15s;
+      }
+      .card:hover {
+        border-color: #6366f1;
+      }
+      .card-op {
+        flex: 1;
+        font-size: 0.82rem;
+        color: #cbd5e1;
+        font-weight: 500;
+      }
+      .card-actions {
+        display: flex;
+        gap: 5px;
+        flex-shrink: 0;
+      }
+      .btn {
+        border: none;
+        cursor: pointer;
+        border-radius: 6px;
+        font-size: 0.72rem;
+        font-weight: 600;
+        padding: 4px 9px;
+        transition: opacity 0.15s;
+      }
+      .btn:hover {
+        opacity: 0.8;
+      }
+      .btn-raw {
+        background: #334155;
+        color: #94a3b8;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+      }
+      .btn-copy {
+        background: #1e40af;
+        color: #bfdbfe;
+      }
+      .btn-import {
+        background: #059669;
+        color: #d1fae5;
+      }
+      .modal {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.7);
+        z-index: 100;
+        align-items: center;
+        justify-content: center;
+      }
+      .modal.open {
+        display: flex;
+      }
+      .modal-box {
+        background: #1e293b;
+        border-radius: 16px;
+        padding: 28px;
+        max-width: 560px;
+        width: 90%;
+        border: 1px solid #475569;
+      }
+      .modal-box h3 {
+        margin-bottom: 12px;
+        color: #f8fafc;
+      }
+      .modal-box pre {
+        background: #0f172a;
+        padding: 14px;
+        border-radius: 8px;
+        overflow-x: auto;
+        font-size: 0.8rem;
+        color: #a5f3fc;
+        margin: 10px 0;
+      }
+      .modal-box .close-btn {
+        background: #475569;
+        color: #e2e8f0;
+        border: none;
+        padding: 8px 18px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 600;
+        margin-top: 8px;
+      }
+      footer {
+        text-align: center;
+        padding: 20px;
+        color: #475569;
+        font-size: 0.75rem;
+        border-top: 1px solid #1e293b;
+      }
+      .hidden {
+        display: none !important;
+      }
+      /* Tabs */
+      .tabs {
+        background: #1e293b;
+        display: flex;
+        gap: 2px;
+        padding: 0 24px;
+        border-bottom: 2px solid #334155;
+      }
+      .tab {
+        padding: 10px 20px;
+        cursor: pointer;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #94a3b8;
+        border-bottom: 3px solid transparent;
+        margin-bottom: -2px;
+        transition: all 0.15s;
+        user-select: none;
+      }
+      .tab:hover {
+        color: #e2e8f0;
+      }
+      .tab.active {
+        color: #818cf8;
+        border-bottom-color: #818cf8;
+      }
+      .tab-panel {
+        display: none;
+      }
+      .tab-panel.active {
+        display: block;
+      }
+      /* GitHub Mount tab */
+      #mountPanel {
+        padding: 24px;
+      }
+      .mount-url-box {
+        background: #0f172a;
+        border: 1px solid #6366f1;
+        border-radius: 10px;
+        padding: 16px 20px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 24px;
+      }
+      .mount-url-box code {
+        flex: 1;
+        font-size: 0.82rem;
+        color: #a5f3fc;
+        word-break: break-all;
+      }
+      .mount-tag {
+        background: #6366f1;
+        color: #fff;
+        font-size: 0.7rem;
+        font-weight: 700;
+        padding: 2px 8px;
+        border-radius: 6px;
+        white-space: nowrap;
+      }
+      .mount-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        gap: 14px;
+      }
+      .mount-cat {
+        background: #1e293b;
+        border-radius: 10px;
+        overflow: hidden;
+        border: 1px solid #334155;
+      }
+      .mount-cat-hdr {
+        padding: 10px 14px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-weight: 700;
+        font-size: 0.85rem;
+        color: #fff;
+      }
+      .mount-wf {
+        padding: 7px 14px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        border-top: 1px solid #0f172a;
+        font-size: 0.8rem;
+        color: #cbd5e1;
+      }
+      .mount-wf:hover {
+        background: #0f172a;
+      }
+      .mount-wf span {
+        flex: 1;
+      }
+      .mount-wf a,
+      .mount-wf button {
+        font-size: 0.7rem;
+      }
+      .import-all-bar {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        flex-wrap: wrap;
+        margin-bottom: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div>
+        <h1>⚡ R3 GitHub API — n8n Workflow Dashboard</h1>
+      </div>
+      <span class="badge">27 Workflows · 11 Resources</span>
+    </header>
 
-<header>
-  <div>
-    <h1>⚡ R3 GitHub API — n8n Workflow Dashboard</h1>
-  </div>
-  <span class="badge">27 Workflows · 11 Resources</span>
-</header>
+    <div class="toolbar">
+      <input
+        type="text"
+        id="search"
+        placeholder="🔍 Filter workflows..."
+        oninput="filterCards()"
+      />
+      <a href="http://localhost:5678" target="_blank" class="tlink green"
+        >▶ n8n öffnen (localhost:5678)</a
+      >
+      <a
+        href="https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/n8n-github-universal.json"
+        target="_blank"
+        class="tlink"
+        >Universal Workflow JSON</a
+      >
+      <a
+        href="https://github.com/RETOURENROYAL/session-state/tree/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows"
+        target="_blank"
+        class="tlink gray"
+        >GitHub Repo</a
+      >
+      <button
+        class="btn btn-import"
+        style="font-size: 0.82rem; padding: 7px 14px"
+        onclick="showSetup()"
+      >
+        ⚙ Setup Guide
+      </button>
+    </div>
 
-<div class="toolbar">
-  <input type="text" id="search" placeholder="🔍 Filter workflows..." oninput="filterCards()">
-  <a href="http://localhost:5678" target="_blank" class="tlink green">▶ n8n öffnen (localhost:5678)</a>
-  <a href="https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/n8n-github-universal.json" target="_blank" class="tlink">Universal Workflow JSON</a>
-  <a href="https://github.com/RETOURENROYAL/session-state/tree/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows" target="_blank" class="tlink gray">GitHub Repo</a>
-  <button class="btn btn-import" style="font-size:.82rem;padding:7px 14px" onclick="showSetup()">⚙ Setup Guide</button>
-</div>
+    <div class="status-bar" id="statusBar">
+      <span>n8n: <span id="n8nStatus" class="warn">prüfe...</span></span>
+      <span>Workflows: <span class="ok">27 verfügbar</span></span>
+      <span>Letzte Aktualisierung: <span id="lastCheck">—</span></span>
+    </div>
 
-<div class="status-bar" id="statusBar">
-  <span>n8n: <span id="n8nStatus" class="warn">prüfe...</span></span>
-  <span>Workflows: <span class="ok">27 verfügbar</span></span>
-  <span>Letzte Aktualisierung: <span id="lastCheck">—</span></span>
-</div>
+    <div class="tabs">
+      <div class="tab active" onclick="switchTab('workflows')">⚡ Workflows</div>
+      <div class="tab" onclick="switchTab('github')">📌 GitHub Mount</div>
+    </div>
 
-<main id="mainGrid">
+    <div id="tab-workflows" class="tab-panel active">
+    <main id="mainGrid">
+      <div class="panel">
+        <div class="panel-header" style="background: #64748b">
+          <span class="panel-icon">🔐</span>
+          <span class="panel-title">AUTHENTICATION</span>
+          <span class="panel-count">2 workflows</span>
+        </div>
+        <div class="panel-body">
+          <div class="card" data-file="wf-auth-rate-limit.json">
+            <div class="card-op">Get Rate Limit</div>
+            <div class="card-actions">
+              <a
+                href="https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows/wf-auth-rate-limit.json"
+                target="_blank"
+                class="btn btn-raw"
+                title="View JSON"
+                >JSON</a
+              >
+              <button
+                class="btn btn-copy"
+                onclick="
+                  copyRaw(
+                    'https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows/wf-auth-rate-limit.json',
+                  )
+                "
+                title="Copy raw URL"
+              >
+                Copy URL
+              </button>
+              <button
+                class="btn btn-import"
+                onclick="
+                  n8nImport(
+                    'https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows/wf-auth-rate-limit.json',
+                  )
+                "
+                title="Import to local n8n"
+              >
+                Import ▶
+              </button>
+            </div>
+          </div>
+          <div class="card" data-file="wf-auth-user.json">
+            <div class="card-op">Get Authenticated User</div>
+            <div class="card-actions">
+              <a
+                href="https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows/wf-auth-user.json"
+                target="_blank"
+                class="btn btn-raw"
+                title="View JSON"
+                >JSON</a
+              >
+              <button
+                class="btn btn-copy"
+                onclick="
+                  copyRaw(
+                    'https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows/wf-auth-user.json',
+                  )
+                "
+                title="Copy raw URL"
+              >
+                Copy URL
+              </button>
+              <button
+                class="btn btn-import"
+                onclick="
+                  n8nImport(
+                    'https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows/wf-auth-user.json',
+                  )
+                "
+                title="Import to local n8n"
+              >
+                Import ▶
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-header" style="background: #8b5cf6">
+          <span class="panel-icon">💻</span>
+          <span class="panel-title">CODESPACES</span>
+          <span class="panel-count">4 workflows</span>
+        </div>
+        <div class="panel-body">
+          <div class="card" data-file="wf-codespaces-list.json">
+            <div class="card-op">List</div>
+            <div class="card-actions">
+              <a
+                href="https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows/wf-codespaces-list.json"
+                target="_blank"
+                class="btn btn-raw"
+                title="View JSON"
+                >JSON</a
+              >
+              <button
+                class="btn btn-copy"
+                onclick="
+                  copyRaw(
+                    'https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows/wf-codespaces-list.json',
+                  )
+                "
+                title="Copy raw URL"
+              >
+                Copy URL
+              </button>
+              <button
+                class="btn btn-import"
+                onclick="
+                  n8nImport(
+                    'https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows/wf-codespaces-list.json',
+                  )
+                "
+                title="Import to local n8n"
+              >
+                Import ▶
+              </button>
+            </div>
+          </div>
+          <div class="card" data-file="wf-codespaces-secrets-list.json">
+            <div class="card-op">List Secrets</div>
+            <div class="card-actions">
+              <a
+                href="https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows/wf-codespaces-secrets-list.json"
+                target="_blank"
+                class="btn btn-raw"
+                title="View JSON"
+                >JSON</a
+              >
+              <button
+                class="btn btn-copy"
+                onclick="
+                  copyRaw(
+                    'https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows/wf-codespaces-secrets-list.json',
+                  )
+                "
+                title="Copy raw URL"
+              >
+                Copy URL
+              </button>
+              <button
+                class="btn btn-import"
+                onclick="
+                  n8nImport(
+                    'https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows/wf-codespaces-secrets-list.json',
+                  )
+                "
+                title="Import to local n8n"
+              >
+                Import ▶
+              </button>
+            </div>
+          </div>
+          <div class="card" data-file="wf-codespaces-start.json">
+            <div class="card-op">Start</div>
+            <div class="card-actions">
+              <a
+                href="https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows/wf-codespaces-start.json"
+                target="_blank"
+                class="btn btn-raw"
+                title="View JSON"
+                >JSON</a
+              >
+              <button
+                class="btn btn-copy"
+                onclick="
+                  copyRaw(
+                    'https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows/wf-codespaces-start.json',
+                  )
+                "
+                title="Copy raw URL"
+              >
+                Copy URL
+              </button>
+              <button
+                class="btn btn-import"
+                onclick="
+                  n8nImport(
+                    'https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows/wf-codespaces-start.json',
+                  )
+                "
+                title="Import to local n8n"
+              >
+                Import ▶
+              </button>
+            </div>
+          </div>
+          <div class="card" data-file="wf-codespaces-stop.json">
+            <div class="card-op">Stop</div>
+            <div class="card-actions">
+              <a
+                href="https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows/wf-codespaces-stop.json"
+                target="_blank"
+                class="btn btn-raw"
+                title="View JSON"
+                >JSON</a
+              >
+              <button
+                class="btn btn-copy"
+                onclick="
+                  copyRaw(
+                    'https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows/wf-codespaces-stop.json',
+                  )
+                "
+                title="Copy raw URL"
+              >
+                Copy URL
+              </button>
+              <button
+                class="btn btn-import"
+                onclick="
+                  n8nImport(
+                    'https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows/wf-codespaces-stop.json',
+                  )
+                "
+                title="Import to local n8n"
+              >
+                Import ▶
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-header" style="background: #06b6d4">
+          <span class="panel-icon">🗄</span>
+          <span class="panel-title">GIT DATABASE</span>
+          <span class="panel-count">3 workflows</span>
+        </div>
+        <div class="panel-body">
+          <div class="card" data-file="wf-git-blob-create.json">
+            <div class="card-op">Create Blob</div>
+            <div class="card-actions">
+              <a
+                href="https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows/wf-git-blob-create.json"
+                target="_blank"
+                class="btn btn-raw"
+                title="View JSON"
+                >JSON</a
+              >
+              <button
+                class="btn btn-copy"
+                onclick="
+                  copyRaw(
+                    'https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows/wf-git-blob-create.json',
+                  )
+                "
+                title="Copy raw URL"
+              >
+                Copy URL
+              </button>
+              <button
+                class="btn btn-import"
+                onclick="
+                  n8nImport(
+                    'https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows/wf-git-blob-create.json',
+                  )
+                "
+                title="Import to local n8n"
+              >
+                Import ▶
+              </button>
+            </div>
+          </div>
+          <div class="card" data-file="wf-git-commit-create.json">
+            <div class="card-op">Create Commit</div>
+            <div class="card-actions">
+              <a
+                href="https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows/wf-git-commit-create.json"
+                target="_blank"
+                class="btn btn-raw"
+                title="View JSON"
+                >JSON</a
+              >
+              <button
+                class="btn btn-copy"
+                onclick="
+                  copyRaw(
+                    'https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows/wf-git-commit-create.json',
+                  )
+                "
+                title="Copy raw URL"
+              >
+                Copy URL
+              </button>
+              <button
+                class="btn btn-import"
+                onclick="
+                  n8nImport(
+                    'https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows/wf-git-commit-create.json',
+                  )
+                "
+                title="Import to local n8n"
+              >
+                Import ▶
+              </button>
+            </div>
+          </div>
+          <div class="card" data-file="wf-git-refs-list.json">
+            <div class="card-op">List Refs</div>
+            <div class="card-actions">
+              <a
+                href="https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows/wf-git-refs-list.json"
+                target="_blank"
+                class="btn btn-raw"
+                title="View JSON"
+                >JSON</a
+              >
+              <button
+                class="btn btn-copy"
+                onclick="
+                  copyRaw(
+                    'https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows/wf-git-refs-list.json',
+                  )
+                "
+                title="Copy raw URL"
+              >
+                Copy URL
+              </button>
+              <button
+                class="btn btn-import"
+                onclick="
+                  n8nImport(
+                    'https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows/wf-git-refs-list.json',
+                  )
+                "
+                title="Import to local n8n"
+              >
+                Import ▶
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-header" style="background: #ec4899">
+          <span class="panel-icon">🔌</span>
+          <span class="panel-title">INSTALLATIONS</span>
+          <span class="panel-count">1 workflows</span>
+        </div>
+        <div class="panel-body">
+          <div class="card" data-file="wf-installations-list.json">
+            <div class="card-op">List</div>
+            <div class="card-actions">
+              <a
+                href="https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows/wf-installations-list.json"
+                target="_blank"
+                class="btn btn-raw"
+                title="View JSON"
+                >JSON</a
+              >
+              <button
+                class="btn btn-copy"
+                onclick="
+                  copyRaw(
+                    'https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows/wf-installations-list.json',
+                  )
+                "
+                title="Copy raw URL"
+              >
+                Copy URL
+              </button>
+              <button
+                class="btn btn-import"
+                onclick="
+                  n8nImport(
+                    'https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows/wf-installations-list.json',
+                  )
+                "
+                title="Import to local n8n"
+              >
+                Import ▶
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-header" style="background: #84cc16">
+          <span class="panel-icon">🏢</span>
+          <span class="panel-title">ORGS</span>
+          <span class="panel-count">3 workflows</span>
+        </div>
+        <div class="panel-body">
+          <div class="card" data-file="wf-orgs-audit-log.json">
+            <div class="card-op">Get Audit Log</div>
+            <div class="card-actions">
+              <a
+                href="https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows/wf-orgs-audit-log.json"
+                target="_blank"
+                class="btn btn-raw"
+                title="View JSON"
+                >JSON</a
+              >
+              <button
+                class="btn btn-copy"
+                onclick="
+                  copyRaw(
+                    'https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows/wf-orgs-audit-log.json',
+                  )
+                "
+                title="Copy raw URL"
+              >
+                Copy URL
+              </button>
+              <button
+                class="btn btn-import"
+                onclick="
+                  n8nImport(
+                    'https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows/wf-orgs-audit-log.json',
+                  )
+                "
+                title="Import to local n8n"
+              >
+                Import ▶
+              </button>
+            </div>
+          </div>
+          <div class="card" data-file="wf-orgs-members-list.json">
+            <div class="card-op">List Members</div>
+            <div class="card-actions">
+              <a
+                href="https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows/wf-orgs-members-list.json"
+                target="_blank"
+                class="btn btn-raw"
+                title="View JSON"
+                >JSON</a
+              >
+              <button
+                class="btn btn-copy"
+                onclick="
+                  copyRaw(
+                    'https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows/wf-orgs-members-list.json',
+                  )
+                "
+                title="Copy raw URL"
+              >
+                Copy URL
+              </button>
+              <button
+                class="btn btn-import"
+                onclick="
+                  n8nImport(
+                    'https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows/wf-orgs-members-list.json',
+                  )
+                "
+                title="Import to local n8n"
+              >
+                Import ▶
+              </button>
+            </div>
+          </div>
+          <div class="card" data-file="wf-orgs-repos-list.json">
+            <div class="card-op">List Repos</div>
+            <div class="card-actions">
+              <a
+                href="https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows/wf-orgs-repos-list.json"
+                target="_blank"
+                class="btn btn-raw"
+                title="View JSON"
+                >JSON</a
+              >
+              <button
+                class="btn btn-copy"
+                onclick="
+                  copyRaw(
+                    'https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows/wf-orgs-repos-list.json',
+                  )
+                "
+                title="Copy raw URL"
+              >
+                Copy URL
+              </button>
+              <button
+                class="btn btn-import"
+                onclick="
+                  n8nImport(
+                    'https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows/wf-orgs-repos-list.json',
+                  )
+                "
+                title="Import to local n8n"
+              >
+                Import ▶
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-header" style="background: #3b82f6">
+          <span class="panel-icon">👥</span>
+          <span class="panel-title">RUNNER GROUPS</span>
+          <span class="panel-count">2 workflows</span>
+        </div>
+        <div class="panel-body">
+          <div class="card" data-file="wf-runner-groups-create.json">
+            <div class="card-op">Create For Org</div>
+            <div class="card-actions">
+              <a
+                href="https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows/wf-runner-groups-create.json"
+                target="_blank"
+                class="btn btn-raw"
+                title="View JSON"
+                >JSON</a
+              >
+              <button
+                class="btn btn-copy"
+                onclick="
+                  copyRaw(
+                    'https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows/wf-runner-groups-create.json',
+                  )
+                "
+                title="Copy raw URL"
+              >
+                Copy URL
+              </button>
+              <button
+                class="btn btn-import"
+                onclick="
+                  n8nImport(
+                    'https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows/wf-runner-groups-create.json',
+                  )
+                "
+                title="Import to local n8n"
+              >
+                Import ▶
+              </button>
+            </div>
+          </div>
+          <div class="card" data-file="wf-runner-groups-list.json">
+            <div class="card-op">List For Org</div>
+            <div class="card-actions">
+              <a
+                href="https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows/wf-runner-groups-list.json"
+                target="_blank"
+                class="btn btn-raw"
+                title="View JSON"
+                >JSON</a
+              >
+              <button
+                class="btn btn-copy"
+                onclick="
+                  copyRaw(
+                    'https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows/wf-runner-groups-list.json',
+                  )
+                "
+                title="Copy raw URL"
+              >
+                Copy URL
+              </button>
+              <button
+                class="btn btn-import"
+                onclick="
+                  n8nImport(
+                    'https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows/wf-runner-groups-list.json',
+                  )
+                "
+                title="Import to local n8n"
+              >
+                Import ▶
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-header" style="background: #10b981">
+          <span class="panel-icon">☁️</span>
+          <span class="panel-title">HOSTED RUNNERS</span>
+          <span class="panel-count">2 workflows</span>
+        </div>
+        <div class="panel-body">
+          <div class="card" data-file="wf-runners-hosted-images.json">
+            <div class="card-op">List Images</div>
+            <div class="card-actions">
+              <a
+                href="https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows/wf-runners-hosted-images.json"
+                target="_blank"
+                class="btn btn-raw"
+                title="View JSON"
+                >JSON</a
+              >
+              <button
+                class="btn btn-copy"
+                onclick="
+                  copyRaw(
+                    'https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows/wf-runners-hosted-images.json',
+                  )
+                "
+                title="Copy raw URL"
+              >
+                Copy URL
+              </button>
+              <button
+                class="btn btn-import"
+                onclick="
+                  n8nImport(
+                    'https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows/wf-runners-hosted-images.json',
+                  )
+                "
+                title="Import to local n8n"
+              >
+                Import ▶
+              </button>
+            </div>
+          </div>
+          <div class="card" data-file="wf-runners-hosted-list.json">
+            <div class="card-op">List For Org</div>
+            <div class="card-actions">
+              <a
+                href="https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows/wf-runners-hosted-list.json"
+                target="_blank"
+                class="btn btn-raw"
+                title="View JSON"
+                >JSON</a
+              >
+              <button
+                class="btn btn-copy"
+                onclick="
+                  copyRaw(
+                    'https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows/wf-runners-hosted-list.json',
+                  )
+                "
+                title="Copy raw URL"
+              >
+                Copy URL
+              </button>
+              <button
+                class="btn btn-import"
+                onclick="
+                  n8nImport(
+                    'https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows/wf-runners-hosted-list.json',
+                  )
+                "
+                title="Import to local n8n"
+              >
+                Import ▶
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-header" style="background: #f59e0b">
+          <span class="panel-icon">🖥</span>
+          <span class="panel-title">SELF HOSTED RUNNERS</span>
+          <span class="panel-count">3 workflows</span>
+        </div>
+        <div class="panel-body">
+          <div class="card" data-file="wf-runners-self-list-org.json">
+            <div class="card-op">List Org</div>
+            <div class="card-actions">
+              <a
+                href="https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows/wf-runners-self-list-org.json"
+                target="_blank"
+                class="btn btn-raw"
+                title="View JSON"
+                >JSON</a
+              >
+              <button
+                class="btn btn-copy"
+                onclick="
+                  copyRaw(
+                    'https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows/wf-runners-self-list-org.json',
+                  )
+                "
+                title="Copy raw URL"
+              >
+                Copy URL
+              </button>
+              <button
+                class="btn btn-import"
+                onclick="
+                  n8nImport(
+                    'https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows/wf-runners-self-list-org.json',
+                  )
+                "
+                title="Import to local n8n"
+              >
+                Import ▶
+              </button>
+            </div>
+          </div>
+          <div class="card" data-file="wf-runners-self-list-repo.json">
+            <div class="card-op">List Repo</div>
+            <div class="card-actions">
+              <a
+                href="https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows/wf-runners-self-list-repo.json"
+                target="_blank"
+                class="btn btn-raw"
+                title="View JSON"
+                >JSON</a
+              >
+              <button
+                class="btn btn-copy"
+                onclick="
+                  copyRaw(
+                    'https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows/wf-runners-self-list-repo.json',
+                  )
+                "
+                title="Copy raw URL"
+              >
+                Copy URL
+              </button>
+              <button
+                class="btn btn-import"
+                onclick="
+                  n8nImport(
+                    'https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows/wf-runners-self-list-repo.json',
+                  )
+                "
+                title="Import to local n8n"
+              >
+                Import ▶
+              </button>
+            </div>
+          </div>
+          <div class="card" data-file="wf-runners-self-reg-token.json">
+            <div class="card-op">Reg Token Repo</div>
+            <div class="card-actions">
+              <a
+                href="https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows/wf-runners-self-reg-token.json"
+                target="_blank"
+                class="btn btn-raw"
+                title="View JSON"
+                >JSON</a
+              >
+              <button
+                class="btn btn-copy"
+                onclick="
+                  copyRaw(
+                    'https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows/wf-runners-self-reg-token.json',
+                  )
+                "
+                title="Copy raw URL"
+              >
+                Copy URL
+              </button>
+              <button
+                class="btn btn-import"
+                onclick="
+                  n8nImport(
+                    'https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows/wf-runners-self-reg-token.json',
+                  )
+                "
+                title="Import to local n8n"
+              >
+                Import ▶
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-header" style="background: #ef4444">
+          <span class="panel-icon">🔑</span>
+          <span class="panel-title">SECRETS</span>
+          <span class="panel-count">3 workflows</span>
+        </div>
+        <div class="panel-body">
+          <div class="card" data-file="wf-secrets-org-list.json">
+            <div class="card-op">Org List</div>
+            <div class="card-actions">
+              <a
+                href="https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows/wf-secrets-org-list.json"
+                target="_blank"
+                class="btn btn-raw"
+                title="View JSON"
+                >JSON</a
+              >
+              <button
+                class="btn btn-copy"
+                onclick="
+                  copyRaw(
+                    'https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows/wf-secrets-org-list.json',
+                  )
+                "
+                title="Copy raw URL"
+              >
+                Copy URL
+              </button>
+              <button
+                class="btn btn-import"
+                onclick="
+                  n8nImport(
+                    'https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows/wf-secrets-org-list.json',
+                  )
+                "
+                title="Import to local n8n"
+              >
+                Import ▶
+              </button>
+            </div>
+          </div>
+          <div class="card" data-file="wf-secrets-repo-list.json">
+            <div class="card-op">Repo List</div>
+            <div class="card-actions">
+              <a
+                href="https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows/wf-secrets-repo-list.json"
+                target="_blank"
+                class="btn btn-raw"
+                title="View JSON"
+                >JSON</a
+              >
+              <button
+                class="btn btn-copy"
+                onclick="
+                  copyRaw(
+                    'https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows/wf-secrets-repo-list.json',
+                  )
+                "
+                title="Copy raw URL"
+              >
+                Copy URL
+              </button>
+              <button
+                class="btn btn-import"
+                onclick="
+                  n8nImport(
+                    'https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows/wf-secrets-repo-list.json',
+                  )
+                "
+                title="Import to local n8n"
+              >
+                Import ▶
+              </button>
+            </div>
+          </div>
+          <div class="card" data-file="wf-secrets-repo-pubkey.json">
+            <div class="card-op">Repo Get Pubkey</div>
+            <div class="card-actions">
+              <a
+                href="https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows/wf-secrets-repo-pubkey.json"
+                target="_blank"
+                class="btn btn-raw"
+                title="View JSON"
+                >JSON</a
+              >
+              <button
+                class="btn btn-copy"
+                onclick="
+                  copyRaw(
+                    'https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows/wf-secrets-repo-pubkey.json',
+                  )
+                "
+                title="Copy raw URL"
+              >
+                Copy URL
+              </button>
+              <button
+                class="btn btn-import"
+                onclick="
+                  n8nImport(
+                    'https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows/wf-secrets-repo-pubkey.json',
+                  )
+                "
+                title="Import to local n8n"
+              >
+                Import ▶
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-header" style="background: #6366f1">
+          <span class="panel-icon">▶</span>
+          <span class="panel-title">WORKFLOW RUNS</span>
+          <span class="panel-count">4 workflows</span>
+        </div>
+        <div class="panel-body">
+          <div class="card" data-file="wf-workflow-runs-cancel.json">
+            <div class="card-op">Cancel</div>
+            <div class="card-actions">
+              <a
+                href="https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows/wf-workflow-runs-cancel.json"
+                target="_blank"
+                class="btn btn-raw"
+                title="View JSON"
+                >JSON</a
+              >
+              <button
+                class="btn btn-copy"
+                onclick="
+                  copyRaw(
+                    'https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows/wf-workflow-runs-cancel.json',
+                  )
+                "
+                title="Copy raw URL"
+              >
+                Copy URL
+              </button>
+              <button
+                class="btn btn-import"
+                onclick="
+                  n8nImport(
+                    'https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows/wf-workflow-runs-cancel.json',
+                  )
+                "
+                title="Import to local n8n"
+              >
+                Import ▶
+              </button>
+            </div>
+          </div>
+          <div class="card" data-file="wf-workflow-runs-list.json">
+            <div class="card-op">List For Repo</div>
+            <div class="card-actions">
+              <a
+                href="https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows/wf-workflow-runs-list.json"
+                target="_blank"
+                class="btn btn-raw"
+                title="View JSON"
+                >JSON</a
+              >
+              <button
+                class="btn btn-copy"
+                onclick="
+                  copyRaw(
+                    'https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows/wf-workflow-runs-list.json',
+                  )
+                "
+                title="Copy raw URL"
+              >
+                Copy URL
+              </button>
+              <button
+                class="btn btn-import"
+                onclick="
+                  n8nImport(
+                    'https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows/wf-workflow-runs-list.json',
+                  )
+                "
+                title="Import to local n8n"
+              >
+                Import ▶
+              </button>
+            </div>
+          </div>
+          <div class="card" data-file="wf-workflow-runs-rerun.json">
+            <div class="card-op">Re Run</div>
+            <div class="card-actions">
+              <a
+                href="https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows/wf-workflow-runs-rerun.json"
+                target="_blank"
+                class="btn btn-raw"
+                title="View JSON"
+                >JSON</a
+              >
+              <button
+                class="btn btn-copy"
+                onclick="
+                  copyRaw(
+                    'https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows/wf-workflow-runs-rerun.json',
+                  )
+                "
+                title="Copy raw URL"
+              >
+                Copy URL
+              </button>
+              <button
+                class="btn btn-import"
+                onclick="
+                  n8nImport(
+                    'https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows/wf-workflow-runs-rerun.json',
+                  )
+                "
+                title="Import to local n8n"
+              >
+                Import ▶
+              </button>
+            </div>
+          </div>
+          <div class="card" data-file="wf-workflow-runs-trigger.json">
+            <div class="card-op">Trigger Dispatch</div>
+            <div class="card-actions">
+              <a
+                href="https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows/wf-workflow-runs-trigger.json"
+                target="_blank"
+                class="btn btn-raw"
+                title="View JSON"
+                >JSON</a
+              >
+              <button
+                class="btn btn-copy"
+                onclick="
+                  copyRaw(
+                    'https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows/wf-workflow-runs-trigger.json',
+                  )
+                "
+                title="Copy raw URL"
+              >
+                Copy URL
+              </button>
+              <button
+                class="btn btn-import"
+                onclick="
+                  n8nImport(
+                    'https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows/wf-workflow-runs-trigger.json',
+                  )
+                "
+                title="Import to local n8n"
+              >
+                Import ▶
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+    </div><!-- /tab-workflows -->
 
-    <div class="panel">
-      <div class="panel-header" style="background:#64748b">
-        <span class="panel-icon">🔐</span>
-        <span class="panel-title">AUTHENTICATION</span>
-        <span class="panel-count">2 workflows</span>
-      </div>
-      <div class="panel-body">
-        <div class="card" data-file="wf-auth-rate-limit.json">
-          <div class="card-op">Get Rate Limit</div>
-          <div class="card-actions">
-            <a href="https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows/wf-auth-rate-limit.json" target="_blank" class="btn btn-raw" title="View JSON">JSON</a>
-            <button class="btn btn-copy" onclick="copyRaw('https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows/wf-auth-rate-limit.json')" title="Copy raw URL">Copy URL</button>
-            <button class="btn btn-import" onclick="n8nImport('https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows/wf-auth-rate-limit.json')" title="Import to local n8n">Import ▶</button>
-          </div>
+    <!-- GitHub Mount Tab -->
+    <div id="tab-github" class="tab-panel">
+      <div id="mountPanel">
+        <div class="mount-url-box">
+          <span class="mount-tag">MOUNTPOINT</span>
+          <code id="mountUrl">https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows-index.json</code>
+          <button class="btn btn-copy" onclick="copyRaw('https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows-index.json')">Copy URL</button>
+          <a href="https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows-index.json" target="_blank" class="btn btn-raw">JSON ↗</a>
         </div>
-        <div class="card" data-file="wf-auth-user.json">
-          <div class="card-op">Get Authenticated User</div>
-          <div class="card-actions">
-            <a href="https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows/wf-auth-user.json" target="_blank" class="btn btn-raw" title="View JSON">JSON</a>
-            <button class="btn btn-copy" onclick="copyRaw('https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows/wf-auth-user.json')" title="Copy raw URL">Copy URL</button>
-            <button class="btn btn-import" onclick="n8nImport('https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows/wf-auth-user.json')" title="Import to local n8n">Import ▶</button>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="panel">
-      <div class="panel-header" style="background:#8b5cf6">
-        <span class="panel-icon">💻</span>
-        <span class="panel-title">CODESPACES</span>
-        <span class="panel-count">4 workflows</span>
-      </div>
-      <div class="panel-body">
-        <div class="card" data-file="wf-codespaces-list.json">
-          <div class="card-op">List</div>
-          <div class="card-actions">
-            <a href="https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows/wf-codespaces-list.json" target="_blank" class="btn btn-raw" title="View JSON">JSON</a>
-            <button class="btn btn-copy" onclick="copyRaw('https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows/wf-codespaces-list.json')" title="Copy raw URL">Copy URL</button>
-            <button class="btn btn-import" onclick="n8nImport('https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows/wf-codespaces-list.json')" title="Import to local n8n">Import ▶</button>
-          </div>
-        </div>
-        <div class="card" data-file="wf-codespaces-secrets-list.json">
-          <div class="card-op">List Secrets</div>
-          <div class="card-actions">
-            <a href="https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows/wf-codespaces-secrets-list.json" target="_blank" class="btn btn-raw" title="View JSON">JSON</a>
-            <button class="btn btn-copy" onclick="copyRaw('https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows/wf-codespaces-secrets-list.json')" title="Copy raw URL">Copy URL</button>
-            <button class="btn btn-import" onclick="n8nImport('https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows/wf-codespaces-secrets-list.json')" title="Import to local n8n">Import ▶</button>
-          </div>
-        </div>
-        <div class="card" data-file="wf-codespaces-start.json">
-          <div class="card-op">Start</div>
-          <div class="card-actions">
-            <a href="https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows/wf-codespaces-start.json" target="_blank" class="btn btn-raw" title="View JSON">JSON</a>
-            <button class="btn btn-copy" onclick="copyRaw('https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows/wf-codespaces-start.json')" title="Copy raw URL">Copy URL</button>
-            <button class="btn btn-import" onclick="n8nImport('https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows/wf-codespaces-start.json')" title="Import to local n8n">Import ▶</button>
-          </div>
-        </div>
-        <div class="card" data-file="wf-codespaces-stop.json">
-          <div class="card-op">Stop</div>
-          <div class="card-actions">
-            <a href="https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows/wf-codespaces-stop.json" target="_blank" class="btn btn-raw" title="View JSON">JSON</a>
-            <button class="btn btn-copy" onclick="copyRaw('https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows/wf-codespaces-stop.json')" title="Copy raw URL">Copy URL</button>
-            <button class="btn btn-import" onclick="n8nImport('https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows/wf-codespaces-stop.json')" title="Import to local n8n">Import ▶</button>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="panel">
-      <div class="panel-header" style="background:#06b6d4">
-        <span class="panel-icon">🗄</span>
-        <span class="panel-title">GIT DATABASE</span>
-        <span class="panel-count">3 workflows</span>
-      </div>
-      <div class="panel-body">
-        <div class="card" data-file="wf-git-blob-create.json">
-          <div class="card-op">Create Blob</div>
-          <div class="card-actions">
-            <a href="https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows/wf-git-blob-create.json" target="_blank" class="btn btn-raw" title="View JSON">JSON</a>
-            <button class="btn btn-copy" onclick="copyRaw('https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows/wf-git-blob-create.json')" title="Copy raw URL">Copy URL</button>
-            <button class="btn btn-import" onclick="n8nImport('https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows/wf-git-blob-create.json')" title="Import to local n8n">Import ▶</button>
-          </div>
-        </div>
-        <div class="card" data-file="wf-git-commit-create.json">
-          <div class="card-op">Create Commit</div>
-          <div class="card-actions">
-            <a href="https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows/wf-git-commit-create.json" target="_blank" class="btn btn-raw" title="View JSON">JSON</a>
-            <button class="btn btn-copy" onclick="copyRaw('https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows/wf-git-commit-create.json')" title="Copy raw URL">Copy URL</button>
-            <button class="btn btn-import" onclick="n8nImport('https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows/wf-git-commit-create.json')" title="Import to local n8n">Import ▶</button>
-          </div>
-        </div>
-        <div class="card" data-file="wf-git-refs-list.json">
-          <div class="card-op">List Refs</div>
-          <div class="card-actions">
-            <a href="https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows/wf-git-refs-list.json" target="_blank" class="btn btn-raw" title="View JSON">JSON</a>
-            <button class="btn btn-copy" onclick="copyRaw('https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows/wf-git-refs-list.json')" title="Copy raw URL">Copy URL</button>
-            <button class="btn btn-import" onclick="n8nImport('https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows/wf-git-refs-list.json')" title="Import to local n8n">Import ▶</button>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="panel">
-      <div class="panel-header" style="background:#ec4899">
-        <span class="panel-icon">🔌</span>
-        <span class="panel-title">INSTALLATIONS</span>
-        <span class="panel-count">1 workflows</span>
-      </div>
-      <div class="panel-body">
-        <div class="card" data-file="wf-installations-list.json">
-          <div class="card-op">List</div>
-          <div class="card-actions">
-            <a href="https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows/wf-installations-list.json" target="_blank" class="btn btn-raw" title="View JSON">JSON</a>
-            <button class="btn btn-copy" onclick="copyRaw('https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows/wf-installations-list.json')" title="Copy raw URL">Copy URL</button>
-            <button class="btn btn-import" onclick="n8nImport('https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows/wf-installations-list.json')" title="Import to local n8n">Import ▶</button>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="panel">
-      <div class="panel-header" style="background:#84cc16">
-        <span class="panel-icon">🏢</span>
-        <span class="panel-title">ORGS</span>
-        <span class="panel-count">3 workflows</span>
-      </div>
-      <div class="panel-body">
-        <div class="card" data-file="wf-orgs-audit-log.json">
-          <div class="card-op">Get Audit Log</div>
-          <div class="card-actions">
-            <a href="https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows/wf-orgs-audit-log.json" target="_blank" class="btn btn-raw" title="View JSON">JSON</a>
-            <button class="btn btn-copy" onclick="copyRaw('https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows/wf-orgs-audit-log.json')" title="Copy raw URL">Copy URL</button>
-            <button class="btn btn-import" onclick="n8nImport('https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows/wf-orgs-audit-log.json')" title="Import to local n8n">Import ▶</button>
-          </div>
-        </div>
-        <div class="card" data-file="wf-orgs-members-list.json">
-          <div class="card-op">List Members</div>
-          <div class="card-actions">
-            <a href="https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows/wf-orgs-members-list.json" target="_blank" class="btn btn-raw" title="View JSON">JSON</a>
-            <button class="btn btn-copy" onclick="copyRaw('https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows/wf-orgs-members-list.json')" title="Copy raw URL">Copy URL</button>
-            <button class="btn btn-import" onclick="n8nImport('https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows/wf-orgs-members-list.json')" title="Import to local n8n">Import ▶</button>
-          </div>
-        </div>
-        <div class="card" data-file="wf-orgs-repos-list.json">
-          <div class="card-op">List Repos</div>
-          <div class="card-actions">
-            <a href="https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows/wf-orgs-repos-list.json" target="_blank" class="btn btn-raw" title="View JSON">JSON</a>
-            <button class="btn btn-copy" onclick="copyRaw('https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows/wf-orgs-repos-list.json')" title="Copy raw URL">Copy URL</button>
-            <button class="btn btn-import" onclick="n8nImport('https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows/wf-orgs-repos-list.json')" title="Import to local n8n">Import ▶</button>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="panel">
-      <div class="panel-header" style="background:#3b82f6">
-        <span class="panel-icon">👥</span>
-        <span class="panel-title">RUNNER GROUPS</span>
-        <span class="panel-count">2 workflows</span>
-      </div>
-      <div class="panel-body">
-        <div class="card" data-file="wf-runner-groups-create.json">
-          <div class="card-op">Create For Org</div>
-          <div class="card-actions">
-            <a href="https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows/wf-runner-groups-create.json" target="_blank" class="btn btn-raw" title="View JSON">JSON</a>
-            <button class="btn btn-copy" onclick="copyRaw('https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows/wf-runner-groups-create.json')" title="Copy raw URL">Copy URL</button>
-            <button class="btn btn-import" onclick="n8nImport('https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows/wf-runner-groups-create.json')" title="Import to local n8n">Import ▶</button>
-          </div>
-        </div>
-        <div class="card" data-file="wf-runner-groups-list.json">
-          <div class="card-op">List For Org</div>
-          <div class="card-actions">
-            <a href="https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows/wf-runner-groups-list.json" target="_blank" class="btn btn-raw" title="View JSON">JSON</a>
-            <button class="btn btn-copy" onclick="copyRaw('https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows/wf-runner-groups-list.json')" title="Copy raw URL">Copy URL</button>
-            <button class="btn btn-import" onclick="n8nImport('https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows/wf-runner-groups-list.json')" title="Import to local n8n">Import ▶</button>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="panel">
-      <div class="panel-header" style="background:#10b981">
-        <span class="panel-icon">☁️</span>
-        <span class="panel-title">HOSTED RUNNERS</span>
-        <span class="panel-count">2 workflows</span>
-      </div>
-      <div class="panel-body">
-        <div class="card" data-file="wf-runners-hosted-images.json">
-          <div class="card-op">List Images</div>
-          <div class="card-actions">
-            <a href="https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows/wf-runners-hosted-images.json" target="_blank" class="btn btn-raw" title="View JSON">JSON</a>
-            <button class="btn btn-copy" onclick="copyRaw('https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows/wf-runners-hosted-images.json')" title="Copy raw URL">Copy URL</button>
-            <button class="btn btn-import" onclick="n8nImport('https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows/wf-runners-hosted-images.json')" title="Import to local n8n">Import ▶</button>
-          </div>
-        </div>
-        <div class="card" data-file="wf-runners-hosted-list.json">
-          <div class="card-op">List For Org</div>
-          <div class="card-actions">
-            <a href="https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows/wf-runners-hosted-list.json" target="_blank" class="btn btn-raw" title="View JSON">JSON</a>
-            <button class="btn btn-copy" onclick="copyRaw('https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows/wf-runners-hosted-list.json')" title="Copy raw URL">Copy URL</button>
-            <button class="btn btn-import" onclick="n8nImport('https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows/wf-runners-hosted-list.json')" title="Import to local n8n">Import ▶</button>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="panel">
-      <div class="panel-header" style="background:#f59e0b">
-        <span class="panel-icon">🖥</span>
-        <span class="panel-title">SELF HOSTED RUNNERS</span>
-        <span class="panel-count">3 workflows</span>
-      </div>
-      <div class="panel-body">
-        <div class="card" data-file="wf-runners-self-list-org.json">
-          <div class="card-op">List Org</div>
-          <div class="card-actions">
-            <a href="https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows/wf-runners-self-list-org.json" target="_blank" class="btn btn-raw" title="View JSON">JSON</a>
-            <button class="btn btn-copy" onclick="copyRaw('https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows/wf-runners-self-list-org.json')" title="Copy raw URL">Copy URL</button>
-            <button class="btn btn-import" onclick="n8nImport('https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows/wf-runners-self-list-org.json')" title="Import to local n8n">Import ▶</button>
-          </div>
-        </div>
-        <div class="card" data-file="wf-runners-self-list-repo.json">
-          <div class="card-op">List Repo</div>
-          <div class="card-actions">
-            <a href="https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows/wf-runners-self-list-repo.json" target="_blank" class="btn btn-raw" title="View JSON">JSON</a>
-            <button class="btn btn-copy" onclick="copyRaw('https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows/wf-runners-self-list-repo.json')" title="Copy raw URL">Copy URL</button>
-            <button class="btn btn-import" onclick="n8nImport('https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows/wf-runners-self-list-repo.json')" title="Import to local n8n">Import ▶</button>
-          </div>
-        </div>
-        <div class="card" data-file="wf-runners-self-reg-token.json">
-          <div class="card-op">Reg Token Repo</div>
-          <div class="card-actions">
-            <a href="https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows/wf-runners-self-reg-token.json" target="_blank" class="btn btn-raw" title="View JSON">JSON</a>
-            <button class="btn btn-copy" onclick="copyRaw('https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows/wf-runners-self-reg-token.json')" title="Copy raw URL">Copy URL</button>
-            <button class="btn btn-import" onclick="n8nImport('https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows/wf-runners-self-reg-token.json')" title="Import to local n8n">Import ▶</button>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="panel">
-      <div class="panel-header" style="background:#ef4444">
-        <span class="panel-icon">🔑</span>
-        <span class="panel-title">SECRETS</span>
-        <span class="panel-count">3 workflows</span>
-      </div>
-      <div class="panel-body">
-        <div class="card" data-file="wf-secrets-org-list.json">
-          <div class="card-op">Org List</div>
-          <div class="card-actions">
-            <a href="https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows/wf-secrets-org-list.json" target="_blank" class="btn btn-raw" title="View JSON">JSON</a>
-            <button class="btn btn-copy" onclick="copyRaw('https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows/wf-secrets-org-list.json')" title="Copy raw URL">Copy URL</button>
-            <button class="btn btn-import" onclick="n8nImport('https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows/wf-secrets-org-list.json')" title="Import to local n8n">Import ▶</button>
-          </div>
-        </div>
-        <div class="card" data-file="wf-secrets-repo-list.json">
-          <div class="card-op">Repo List</div>
-          <div class="card-actions">
-            <a href="https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows/wf-secrets-repo-list.json" target="_blank" class="btn btn-raw" title="View JSON">JSON</a>
-            <button class="btn btn-copy" onclick="copyRaw('https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows/wf-secrets-repo-list.json')" title="Copy raw URL">Copy URL</button>
-            <button class="btn btn-import" onclick="n8nImport('https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows/wf-secrets-repo-list.json')" title="Import to local n8n">Import ▶</button>
-          </div>
-        </div>
-        <div class="card" data-file="wf-secrets-repo-pubkey.json">
-          <div class="card-op">Repo Get Pubkey</div>
-          <div class="card-actions">
-            <a href="https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows/wf-secrets-repo-pubkey.json" target="_blank" class="btn btn-raw" title="View JSON">JSON</a>
-            <button class="btn btn-copy" onclick="copyRaw('https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows/wf-secrets-repo-pubkey.json')" title="Copy raw URL">Copy URL</button>
-            <button class="btn btn-import" onclick="n8nImport('https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows/wf-secrets-repo-pubkey.json')" title="Import to local n8n">Import ▶</button>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="panel">
-      <div class="panel-header" style="background:#6366f1">
-        <span class="panel-icon">▶</span>
-        <span class="panel-title">WORKFLOW RUNS</span>
-        <span class="panel-count">4 workflows</span>
-      </div>
-      <div class="panel-body">
-        <div class="card" data-file="wf-workflow-runs-cancel.json">
-          <div class="card-op">Cancel</div>
-          <div class="card-actions">
-            <a href="https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows/wf-workflow-runs-cancel.json" target="_blank" class="btn btn-raw" title="View JSON">JSON</a>
-            <button class="btn btn-copy" onclick="copyRaw('https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows/wf-workflow-runs-cancel.json')" title="Copy raw URL">Copy URL</button>
-            <button class="btn btn-import" onclick="n8nImport('https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows/wf-workflow-runs-cancel.json')" title="Import to local n8n">Import ▶</button>
-          </div>
-        </div>
-        <div class="card" data-file="wf-workflow-runs-list.json">
-          <div class="card-op">List For Repo</div>
-          <div class="card-actions">
-            <a href="https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows/wf-workflow-runs-list.json" target="_blank" class="btn btn-raw" title="View JSON">JSON</a>
-            <button class="btn btn-copy" onclick="copyRaw('https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows/wf-workflow-runs-list.json')" title="Copy raw URL">Copy URL</button>
-            <button class="btn btn-import" onclick="n8nImport('https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows/wf-workflow-runs-list.json')" title="Import to local n8n">Import ▶</button>
-          </div>
-        </div>
-        <div class="card" data-file="wf-workflow-runs-rerun.json">
-          <div class="card-op">Re Run</div>
-          <div class="card-actions">
-            <a href="https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows/wf-workflow-runs-rerun.json" target="_blank" class="btn btn-raw" title="View JSON">JSON</a>
-            <button class="btn btn-copy" onclick="copyRaw('https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows/wf-workflow-runs-rerun.json')" title="Copy raw URL">Copy URL</button>
-            <button class="btn btn-import" onclick="n8nImport('https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows/wf-workflow-runs-rerun.json')" title="Import to local n8n">Import ▶</button>
-          </div>
-        </div>
-        <div class="card" data-file="wf-workflow-runs-trigger.json">
-          <div class="card-op">Trigger Dispatch</div>
-          <div class="card-actions">
-            <a href="https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows/wf-workflow-runs-trigger.json" target="_blank" class="btn btn-raw" title="View JSON">JSON</a>
-            <button class="btn btn-copy" onclick="copyRaw('https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows/wf-workflow-runs-trigger.json')" title="Copy raw URL">Copy URL</button>
-            <button class="btn btn-import" onclick="n8nImport('https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows/wf-workflow-runs-trigger.json')" title="Import to local n8n">Import ▶</button>
-          </div>
-        </div>
-      </div>
-    </div>
-</main>
 
-<!-- Setup Modal -->
-<div class="modal" id="setupModal">
-  <div class="modal-box">
-    <h3>⚙ n8n Setup — R3 GitHub Workflows</h3>
-    <p style="color:#94a3b8;font-size:.85rem;margin-bottom:10px">Startet n8n lokal und importiert alle Workflows:</p>
-    <pre># 1. n8n starten (Docker)
+        <div class="import-all-bar">
+          <button class="btn btn-import" style="padding:8px 18px;font-size:.82rem" onclick="importAllWorkflows()">⬆ Alle 27 Workflows in n8n importieren</button>
+          <a href="https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/n8n-github-universal.json"
+             class="btn btn-raw" style="padding:8px 14px;font-size:.82rem" target="_blank">Universal Workflow JSON ↗</a>
+          <button class="btn btn-copy" style="padding:8px 14px;font-size:.82rem"
+            onclick="copyRaw('https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/n8n-github-universal.json')">Copy Universal URL</button>
+          <span style="color:#64748b;font-size:.78rem">Mountpoint-URL für Agents, n8n-Webhooks, Automationen</span>
+        </div>
+
+        <div class="mount-grid" id="mountGrid">
+          <!-- filled by loadMount() -->
+        </div>
+      </div>
+    </div><!-- /tab-github -->
+    <div class="modal" id="setupModal">
+      <div class="modal-box">
+        <h3>⚙ n8n Setup — R3 GitHub Workflows</h3>
+        <p style="color: #94a3b8; font-size: 0.85rem; margin-bottom: 10px">
+          Startet n8n lokal und importiert alle Workflows:
+        </p>
+        <pre>
+# 1. n8n starten (Docker)
 docker run -d --name n8n \
   -p 5678:5678 \
   -e N8N_BASIC_AUTH_ACTIVE=false \
@@ -396,76 +1464,168 @@ docker run -d --name n8n \
   n8nio/n8n
 
 # 2. Warten bis bereit, dann Workflows importieren
-sleep 5 && open http://localhost:5678</pre>
-    <pre># PowerShell (Windows R3-DASHBOARD)
-iwr 'https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/install/Install-R3-n8n.ps1' -UseB | iex</pre>
-    <pre># Bash (Linux/Mac/Codespace)
-curl -fsSL 'https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/install/install-r3-n8n.sh' | bash</pre>
-    <button class="close-btn" onclick="closeSetup()">Schließen</button>
-  </div>
-</div>
+sleep 5 && open http://localhost:5678</pre
+        >
+        <pre>
+# PowerShell (Windows R3-DASHBOARD)
+iwr 'https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/install/Install-R3-n8n.ps1' -UseB | iex</pre
+        >
+        <pre>
+# Bash (Linux/Mac/Codespace)
+curl -fsSL 'https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/install/install-r3-n8n.sh' | bash</pre
+        >
+        <button class="close-btn" onclick="closeSetup()">Schließen</button>
+      </div>
+    </div>
 
-<!-- Copy success toast -->
-<div id="toast" style="display:none;position:fixed;bottom:24px;right:24px;background:#059669;color:#fff;padding:10px 20px;border-radius:8px;font-weight:600;font-size:.85rem;z-index:200">
-  ✓ URL kopiert
-</div>
+    <!-- Copy success toast -->
+    <div
+      id="toast"
+      style="
+        display: none;
+        position: fixed;
+        bottom: 24px;
+        right: 24px;
+        background: #059669;
+        color: #fff;
+        padding: 10px 20px;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 0.85rem;
+        z-index: 200;
+      "
+    >
+      ✓ URL kopiert
+    </div>
 
-<footer>
-  R3-DASHBOARD · GitHub API n8n Dashboard · 
-  <a href="https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/config/github-api-endpoints.json" style="color:#6366f1">Endpoint Reference</a>
-</footer>
+    <footer>
+      R3-DASHBOARD · GitHub API n8n Dashboard ·
+      <a
+        href="https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/config/github-api-endpoints.json"
+        style="color: #6366f1"
+        >Endpoint Reference</a
+      >
+    </footer>
 
-<script>
-function n8nImport(rawUrl) {
-  const n8nBase = 'http://localhost:5678';
-  // Try to open n8n import UI
-  const importUrl = n8nBase + '/workflow/new';
-  window.open(importUrl, '_blank');
-  // Copy URL for manual paste
-  copyRaw(rawUrl);
-  alert('n8n geöffnet.\nFüge die kopierte URL unter "Import from URL" ein:\n' + rawUrl);
-}
+    <script>
+      function n8nImport(rawUrl) {
+        const n8nBase = "http://localhost:5678";
+        // Try to open n8n import UI
+        const importUrl = n8nBase + "/workflow/new";
+        window.open(importUrl, "_blank");
+        // Copy URL for manual paste
+        copyRaw(rawUrl);
+        alert(
+          'n8n geöffnet.\nFüge die kopierte URL unter "Import from URL" ein:\n' +
+            rawUrl,
+        );
+      }
 
-function copyRaw(url) {
-  navigator.clipboard.writeText(url).then(() => showToast());
-}
+      function copyRaw(url) {
+        navigator.clipboard.writeText(url).then(() => showToast());
+      }
 
-function showToast() {
-  const t = document.getElementById('toast');
-  t.style.display = 'block';
-  setTimeout(() => t.style.display = 'none', 2200);
-}
+      function showToast() {
+        const t = document.getElementById("toast");
+        t.style.display = "block";
+        setTimeout(() => (t.style.display = "none"), 2200);
+      }
 
-function filterCards() {
-  const q = document.getElementById('search').value.toLowerCase();
-  document.querySelectorAll('.card').forEach(c => {
-    const text = c.querySelector('.card-op').textContent.toLowerCase() + c.dataset.file;
-    c.classList.toggle('hidden', q && !text.includes(q));
-  });
-  document.querySelectorAll('.panel').forEach(p => {
-    const visible = [...p.querySelectorAll('.card')].some(c => !c.classList.contains('hidden'));
-    p.classList.toggle('hidden', q && !visible);
-  });
-}
+      function filterCards() {
+        const q = document.getElementById("search").value.toLowerCase();
+        document.querySelectorAll(".card").forEach((c) => {
+          const text =
+            c.querySelector(".card-op").textContent.toLowerCase() +
+            c.dataset.file;
+          c.classList.toggle("hidden", q && !text.includes(q));
+        });
+        document.querySelectorAll(".panel").forEach((p) => {
+          const visible = [...p.querySelectorAll(".card")].some(
+            (c) => !c.classList.contains("hidden"),
+          );
+          p.classList.toggle("hidden", q && !visible);
+        });
+      }
 
-function showSetup() { document.getElementById('setupModal').classList.add('open'); }
-function closeSetup() { document.getElementById('setupModal').classList.remove('open'); }
+      function showSetup() {
+        document.getElementById("setupModal").classList.add("open");
+      }
+      function closeSetup() {
+        document.getElementById("setupModal").classList.remove("open");
+      }
 
-// Check n8n status
-async function checkN8n() {
-  const el = document.getElementById('n8nStatus');
-  const t = document.getElementById('lastCheck');
-  t.textContent = new Date().toLocaleTimeString('de-DE');
-  try {
-    const r = await fetch('http://localhost:5678/healthz', {mode:'no-cors',signal:AbortSignal.timeout(3000)});
-    el.textContent = '✓ online'; el.className = 'ok';
-  } catch {
-    el.textContent = '✗ offline (localhost:5678)'; el.className = 'err';
-  }
-}
-checkN8n();
-setInterval(checkN8n, 30000);
-document.getElementById('setupModal').addEventListener('click', e => { if(e.target===e.currentTarget) closeSetup(); });
-</script>
-</body>
+      // Check n8n status
+      async function checkN8n() {
+        const el = document.getElementById("n8nStatus");
+        const t = document.getElementById("lastCheck");
+        t.textContent = new Date().toLocaleTimeString("de-DE");
+        try {
+          const r = await fetch("http://localhost:5678/healthz", {
+            mode: "no-cors",
+            signal: AbortSignal.timeout(3000),
+          });
+          el.textContent = "✓ online";
+          el.className = "ok";
+        } catch {
+          el.textContent = "✗ offline (localhost:5678)";
+          el.className = "err";
+        }
+      }
+      checkN8n();
+      setInterval(checkN8n, 30000);
+      document.getElementById("setupModal").addEventListener("click", (e) => {
+        if (e.target === e.currentTarget) closeSetup();
+      });
+
+      // ── Tab switching ──────────────────────────────────────────────
+      function switchTab(id) {
+        document.querySelectorAll('.tab').forEach((t,i) => t.classList.toggle('active', ['workflows','github'][i]===id));
+        document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+        document.getElementById('tab-'+id).classList.add('active');
+        if (id === 'github' && !document.getElementById('mountGrid').children.length) loadMount();
+      }
+
+      // ── Load workflows-index.json and render GitHub mount panel ───
+      const BASE_RAW = 'https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows';
+      const INDEX_URL = 'https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows-index.json';
+
+      async function loadMount() {
+        const grid = document.getElementById('mountGrid');
+        grid.innerHTML = '<p style="color:#94a3b8;padding:20px">Lade Index vom Mountpoint...</p>';
+        try {
+          const data = await (await fetch(INDEX_URL + '?_=' + Date.now())).json();
+          grid.innerHTML = '';
+          data.categories.forEach(cat => {
+            const div = document.createElement('div');
+            div.className = 'mount-cat';
+            div.innerHTML = `<div class="mount-cat-hdr" style="background:${cat.color}20;border-bottom:2px solid ${cat.color}">
+              <span>${cat.icon}</span><span>${cat.label}</span>
+              <span style="margin-left:auto;font-size:.7rem;color:${cat.color};font-weight:400">${cat.workflows.length} wf</span>
+            </div>` + cat.workflows.map(wf => {
+              const url = `${BASE_RAW}/${wf.slug}.json`;
+              return `<div class="mount-wf">
+                <span>${wf.label}</span>
+                <a href="${url}" target="_blank" class="btn btn-raw">JSON</a>
+                <button class="btn btn-copy" onclick="copyRaw('${url}')">URL</button>
+                <button class="btn btn-import" onclick="n8nImport('${url}')">Import</button>
+              </div>`;
+            }).join('');
+            grid.appendChild(div);
+          });
+        } catch(e) {
+          grid.innerHTML = `<p style="color:#f87171;padding:20px">Fehler beim Laden des Index: ${e.message}</p>`;
+        }
+      }
+
+      // Import all workflows sequentially (open n8n once, copy each URL)
+      async function importAllWorkflows() {
+        const data = await (await fetch(INDEX_URL)).json();
+        const urls = data.categories.flatMap(c => c.workflows.map(w => `${BASE_RAW}/${w.slug}.json`));
+        const list = urls.join('\n');
+        navigator.clipboard.writeText(list);
+        window.open('http://localhost:5678/workflow/new', '_blank');
+        alert(`${urls.length} Workflow-URLs in die Zwischenablage kopiert.\n\nIn n8n: Workflow > Import from URL (je URL).\n\nAlle URLs:\n${list.slice(0,400)}...`);
+      }
+    </script>
+  </body>
 </html>

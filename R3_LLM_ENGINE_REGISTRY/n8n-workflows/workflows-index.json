@@ -1,0 +1,226 @@
+{
+  "_meta": {
+    "name": "R³ VIB.E — GitHub API n8n Workflow Registry",
+    "version": "1.0.0",
+    "mountpoint": "https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows-index.json",
+    "base_raw": "https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/workflows",
+    "n8n_ui": "http://localhost:5678",
+    "n8n_healthz": "http://localhost:5678/healthz",
+    "universal_workflow": "https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/n8n-workflows/n8n-github-universal.json",
+    "total": 27,
+    "categories": 11
+  },
+  "categories": [
+    {
+      "id": "workflow-runs",
+      "label": "Workflow Runs",
+      "icon": "⚙️",
+      "color": "#6366f1",
+      "workflows": [
+        {
+          "slug": "wf-workflow-runs-list",
+          "label": "List Runs",
+          "op": "list_for_repo"
+        },
+        {
+          "slug": "wf-workflow-runs-trigger",
+          "label": "Trigger Run",
+          "op": "create_workflow_dispatch"
+        },
+        {
+          "slug": "wf-workflow-runs-cancel",
+          "label": "Cancel Run",
+          "op": "cancel"
+        },
+        { "slug": "wf-workflow-runs-rerun", "label": "Re-run", "op": "rerun" }
+      ]
+    },
+    {
+      "id": "secrets",
+      "label": "Secrets",
+      "icon": "🔑",
+      "color": "#f59e0b",
+      "workflows": [
+        {
+          "slug": "wf-secrets-repo-list",
+          "label": "Repo Secrets List",
+          "op": "list_repo_secrets"
+        },
+        {
+          "slug": "wf-secrets-repo-pubkey",
+          "label": "Repo Public Key",
+          "op": "get_repo_public_key"
+        },
+        {
+          "slug": "wf-secrets-org-list",
+          "label": "Org Secrets List",
+          "op": "list_org_secrets"
+        }
+      ]
+    },
+    {
+      "id": "runners-self",
+      "label": "Self-hosted Runners",
+      "icon": "🖥️",
+      "color": "#10b981",
+      "workflows": [
+        {
+          "slug": "wf-runners-self-list-repo",
+          "label": "List (Repo)",
+          "op": "list_self_hosted_runners_for_repo"
+        },
+        {
+          "slug": "wf-runners-self-list-org",
+          "label": "List (Org)",
+          "op": "list_self_hosted_runners_for_org"
+        },
+        {
+          "slug": "wf-runners-self-reg-token",
+          "label": "Reg Token (Repo)",
+          "op": "create_registration_token_for_repo"
+        }
+      ]
+    },
+    {
+      "id": "runners-hosted",
+      "label": "GitHub-hosted Runners",
+      "icon": "☁️",
+      "color": "#3b82f6",
+      "workflows": [
+        {
+          "slug": "wf-runners-hosted-list",
+          "label": "List Runners",
+          "op": "list_github_hosted_runners_for_org"
+        },
+        {
+          "slug": "wf-runners-hosted-images",
+          "label": "List Images",
+          "op": "list_runner_images"
+        }
+      ]
+    },
+    {
+      "id": "runner-groups",
+      "label": "Runner Groups",
+      "icon": "📦",
+      "color": "#8b5cf6",
+      "workflows": [
+        {
+          "slug": "wf-runner-groups-list",
+          "label": "List Groups",
+          "op": "list_runner_groups_for_org"
+        },
+        {
+          "slug": "wf-runner-groups-create",
+          "label": "Create Group",
+          "op": "create_runner_group"
+        }
+      ]
+    },
+    {
+      "id": "codespaces",
+      "label": "Codespaces",
+      "icon": "💻",
+      "color": "#a855f7",
+      "workflows": [
+        {
+          "slug": "wf-codespaces-list",
+          "label": "List",
+          "op": "list_for_authenticated_user"
+        },
+        {
+          "slug": "wf-codespaces-start",
+          "label": "Start",
+          "op": "start_for_authenticated_user"
+        },
+        {
+          "slug": "wf-codespaces-stop",
+          "label": "Stop",
+          "op": "stop_for_authenticated_user"
+        },
+        {
+          "slug": "wf-codespaces-secrets-list",
+          "label": "List Secrets",
+          "op": "list_secrets_for_authenticated_user"
+        }
+      ]
+    },
+    {
+      "id": "git",
+      "label": "Git",
+      "icon": "🌿",
+      "color": "#f97316",
+      "workflows": [
+        {
+          "slug": "wf-git-refs-list",
+          "label": "List Refs",
+          "op": "list_matching_refs"
+        },
+        {
+          "slug": "wf-git-blob-create",
+          "label": "Create Blob",
+          "op": "create_blob"
+        },
+        {
+          "slug": "wf-git-commit-create",
+          "label": "Create Commit",
+          "op": "create_commit"
+        }
+      ]
+    },
+    {
+      "id": "orgs",
+      "label": "Organizations",
+      "icon": "🏢",
+      "color": "#ec4899",
+      "workflows": [
+        {
+          "slug": "wf-orgs-members-list",
+          "label": "List Members",
+          "op": "list_members"
+        },
+        {
+          "slug": "wf-orgs-repos-list",
+          "label": "List Repos",
+          "op": "list_org_repositories"
+        },
+        {
+          "slug": "wf-orgs-audit-log",
+          "label": "Audit Log",
+          "op": "get_audit_log"
+        }
+      ]
+    },
+    {
+      "id": "auth",
+      "label": "Authentication",
+      "icon": "🔐",
+      "color": "#64748b",
+      "workflows": [
+        {
+          "slug": "wf-auth-rate-limit",
+          "label": "Rate Limit",
+          "op": "get_rate_limit"
+        },
+        {
+          "slug": "wf-auth-user",
+          "label": "Authenticated User",
+          "op": "get_authenticated"
+        }
+      ]
+    },
+    {
+      "id": "installations",
+      "label": "Installations",
+      "icon": "🔌",
+      "color": "#0ea5e9",
+      "workflows": [
+        {
+          "slug": "wf-installations-list",
+          "label": "List Installations",
+          "op": "list_installations_for_authenticated_app"
+        }
+      ]
+    }
+  ]
+}
