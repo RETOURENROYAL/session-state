@@ -1,0 +1,189 @@
+{
+  "name": "GitHub \u2014 Workflow Runs: Cancel",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "trig",
+      "name": "Manual Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        240,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a1",
+              "name": "GITHUB_TOKEN",
+              "value": "={{ $env.GITHUB_TOKEN }}",
+              "type": "string"
+            },
+            {
+              "id": "a2",
+              "name": "BASE_URL",
+              "value": "https://api.github.com",
+              "type": "string"
+            },
+            {
+              "id": "a3",
+              "name": "OWNER",
+              "value": "RETOURENROYAL",
+              "type": "string"
+            },
+            {
+              "id": "a4",
+              "name": "REPO",
+              "value": "session-state",
+              "type": "string"
+            },
+            {
+              "id": "a5",
+              "name": "ORG",
+              "value": "RETOURENROYAL",
+              "type": "string"
+            },
+            {
+              "id": "a6",
+              "name": "RESOURCE",
+              "value": "workflow_runs",
+              "type": "string"
+            },
+            {
+              "id": "a7",
+              "name": "OPERATION",
+              "value": "cancel",
+              "type": "string"
+            },
+            {
+              "id": "a8",
+              "name": "EXTRA_PARAMS",
+              "value": "{\"run_id\":0}",
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "id": "cfg",
+      "name": "Config",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        460,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.BASE_URL + '/repos/' + $json.OWNER + '/' + $json.REPO + '/actions/runs?per_page=10' }}",
+        "authentication": "none",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "={{ 'Bearer ' + $json.GITHUB_TOKEN }}"
+            },
+            {
+              "name": "Accept",
+              "value": "application/vnd.github+json"
+            },
+            {
+              "name": "X-GitHub-Api-Version",
+              "value": "2022-11-28"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          },
+          "timeout": 30000
+        }
+      },
+      "id": "http",
+      "name": "GitHub API Call",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        680,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "r1",
+              "name": "result",
+              "value": "={{ $json }}",
+              "type": "object"
+            },
+            {
+              "id": "r2",
+              "name": "workflow",
+              "value": "GitHub \u2014 Workflow Runs: Cancel",
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "id": "out",
+      "name": "Output",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        900,
+        300
+      ]
+    }
+  ],
+  "connections": {
+    "Manual Trigger": {
+      "main": [
+        [
+          {
+            "node": "Config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Config": {
+      "main": [
+        [
+          {
+            "node": "GitHub API Call",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GitHub API Call": {
+      "main": [
+        [
+          {
+            "node": "Output",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "_meta": {
+    "resource": "workflow_runs",
+    "operation": "cancel"
+  }
+}
