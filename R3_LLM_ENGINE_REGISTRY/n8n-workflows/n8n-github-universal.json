@@ -1,0 +1,296 @@
+{
+  "name": "GitHub API — Universal R3 Node",
+  "_meta": {
+    "_note": "Import into n8n via Workflows → Import. Set GITHUB_TOKEN env var.",
+    "_resources": "authentication|oauth|installations|git_database|orgs|secrets|workflow_runs|hosted_runners|self_hosted_runners|runner_groups|codespaces",
+    "_endpoint_reference": "https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/config/github-api-endpoints.json",
+    "_quick_use": {
+      "list_workflow_runs": {
+        "RESOURCE": "workflow_runs",
+        "OPERATION": "list_for_repo"
+      },
+      "trigger_workflow": {
+        "RESOURCE": "workflow_runs",
+        "OPERATION": "trigger_dispatch",
+        "EXTRA_PARAMS": {
+          "workflow_id": "deploy.yml",
+          "ref": "main"
+        }
+      },
+      "list_org_members": {
+        "RESOURCE": "orgs",
+        "OPERATION": "list_members"
+      },
+      "create_repo_secret": {
+        "RESOURCE": "secrets",
+        "OPERATION": "repo_upsert",
+        "EXTRA_PARAMS": {
+          "secret_name": "KEY",
+          "encrypted_value": "ENC",
+          "key_id": "KID"
+        }
+      },
+      "start_codespace": {
+        "RESOURCE": "codespaces",
+        "OPERATION": "start",
+        "EXTRA_PARAMS": {
+          "codespace_name": "myspace"
+        }
+      },
+      "list_self_hosted": {
+        "RESOURCE": "self_hosted_runners",
+        "OPERATION": "list_org"
+      },
+      "create_runner_group": {
+        "RESOURCE": "runner_groups",
+        "OPERATION": "create_for_org",
+        "EXTRA_PARAMS": {
+          "name": "R3-Runners"
+        }
+      },
+      "create_git_blob": {
+        "RESOURCE": "git_database",
+        "OPERATION": "create_blob",
+        "EXTRA_PARAMS": {
+          "content": "aGVsbG8="
+        }
+      },
+      "get_rate_limit": {
+        "RESOURCE": "authentication",
+        "OPERATION": "get_rate_limit"
+      }
+    }
+  },
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "trigger",
+      "name": "Manual Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        240,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a1",
+              "name": "GITHUB_TOKEN",
+              "value": "={{ $env.GITHUB_TOKEN || $env.GITHUB_PERSONAL_ACCESS_TOKEN }}",
+              "type": "string"
+            },
+            {
+              "id": "a2",
+              "name": "BASE_URL",
+              "value": "https://api.github.com",
+              "type": "string"
+            },
+            {
+              "id": "a3",
+              "name": "OWNER",
+              "value": "RETOURENROYAL",
+              "type": "string"
+            },
+            {
+              "id": "a4",
+              "name": "REPO",
+              "value": "session-state",
+              "type": "string"
+            },
+            {
+              "id": "a5",
+              "name": "ORG",
+              "value": "RETOURENROYAL",
+              "type": "string"
+            },
+            {
+              "id": "a6",
+              "name": "RESOURCE",
+              "value": "workflow_runs",
+              "type": "string"
+            },
+            {
+              "id": "a7",
+              "name": "OPERATION",
+              "value": "list_for_repo",
+              "type": "string"
+            },
+            {
+              "id": "a8",
+              "name": "EXTRA_PARAMS",
+              "value": "{}",
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "id": "config",
+      "name": "Config",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        460,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// GitHub Universal Router — RESOURCE + OPERATION -> URL + METHOD + BODY\nconst item = $input.first().json;\nconst BASE  = item.BASE_URL  || 'https://api.github.com';\nconst OWNER = item.OWNER || '';\nconst REPO  = item.REPO  || '';\nconst ORG   = item.ORG   || '';\nconst TOKEN = item.GITHUB_TOKEN || '';\nconst RES   = item.RESOURCE  || '';\nconst OP    = item.OPERATION || '';\nconst EXTRA = (() => { try { return JSON.parse(item.EXTRA_PARAMS||'{}'); } catch{return {};} })();\n\nfunction u(path) {\n  return BASE + path\n    .replace('{owner}',OWNER).replace('{repo}',REPO).replace('{org}',ORG)\n    .replace(/\\{([^}]+)\\}/g,(_,k) => EXTRA[k]!==undefined ? EXTRA[k] : ':'+k);\n}\n\nconst R = {\n  authentication: {\n    get_authenticated_user:{method:'GET',url:u('/user')},\n    get_rate_limit:        {method:'GET',url:u('/rate_limit')},\n    list_installations:    {method:'GET',url:u('/user/installations')}\n  },\n  oauth: {\n    check_token: {method:'POST',  url:u('/applications/{client_id}/token'),body:{access_token:EXTRA.token}},\n    reset_token: {method:'PATCH', url:u('/applications/{client_id}/token'),body:{access_token:EXTRA.token}},\n    delete_token:{method:'DELETE',url:u('/applications/{client_id}/token'),body:{access_token:EXTRA.token}},\n    list_grants: {method:'GET',   url:u('/applications/grants')},\n    delete_grant:{method:'DELETE',url:u('/applications/grants/{grant_id}')}\n  },\n  installations: {\n    list:                   {method:'GET',   url:u('/app/installations')},\n    get:                    {method:'GET',   url:u('/app/installations/{installation_id}')},\n    create_access_token:    {method:'POST',  url:u('/app/installations/{installation_id}/access_tokens')},\n    delete:                 {method:'DELETE',url:u('/app/installations/{installation_id}')},\n    list_repos:             {method:'GET',   url:u('/installation/repositories')},\n    list_user_installations:{method:'GET',   url:u('/user/installations')}\n  },\n  git_database: {\n    get_blob:     {method:'GET', url:u('/repos/{owner}/{repo}/git/blobs/{file_sha}')},\n    create_blob:  {method:'POST',url:u('/repos/{owner}/{repo}/git/blobs'),body:{content:EXTRA.content||'',encoding:'base64'}},\n    get_tree:     {method:'GET', url:u('/repos/{owner}/{repo}/git/trees/{tree_sha}')+'?recursive=1'},\n    create_tree:  {method:'POST',url:u('/repos/{owner}/{repo}/git/trees'),body:{base_tree:EXTRA.base_tree||'',tree:EXTRA.tree||[]}},\n    get_commit:   {method:'GET', url:u('/repos/{owner}/{repo}/git/commits/{commit_sha}')},\n    create_commit:{method:'POST',url:u('/repos/{owner}/{repo}/git/commits'),body:{message:EXTRA.message||'',tree:EXTRA.tree_sha||'',parents:EXTRA.parents||[]}},\n    list_refs:    {method:'GET', url:u('/repos/{owner}/{repo}/git/refs')},\n    get_ref:      {method:'GET', url:u('/repos/{owner}/{repo}/git/ref/{ref}')},\n    create_ref:   {method:'POST',url:u('/repos/{owner}/{repo}/git/refs'),body:{ref:EXTRA.ref||'',sha:EXTRA.sha||''}},\n    update_ref:   {method:'PATCH',url:u('/repos/{owner}/{repo}/git/refs/{ref}'),body:{sha:EXTRA.sha||'',force:false}},\n    delete_ref:   {method:'DELETE',url:u('/repos/{owner}/{repo}/git/refs/{ref}')},\n    create_tag:   {method:'POST',url:u('/repos/{owner}/{repo}/git/tags'),body:{tag:EXTRA.tag||'',message:EXTRA.message||'',object:EXTRA.sha||'',type:'commit'}}\n  },\n  orgs: {\n    list_orgs:        {method:'GET',   url:u('/organizations')+'?per_page=30'},\n    get_org:          {method:'GET',   url:u('/orgs/{org}')},\n    update_org:       {method:'PATCH', url:u('/orgs/{org}'),body:EXTRA},\n    list_members:     {method:'GET',   url:u('/orgs/{org}/members')+'?per_page=30'},\n    remove_member:    {method:'DELETE',url:u('/orgs/{org}/members/{username}')},\n    list_repos:       {method:'GET',   url:u('/orgs/{org}/repos')+'?type=all&sort=updated&per_page=30'},\n    create_repo:      {method:'POST',  url:u('/orgs/{org}/repos'),body:{name:EXTRA.name||'new-repo',private:EXTRA.private!==false,auto_init:true}},\n    list_invitations: {method:'GET',   url:u('/orgs/{org}/invitations')},\n    create_invitation:{method:'POST',  url:u('/orgs/{org}/invitations'),body:{email:EXTRA.email||'',role:'direct_member'}},\n    cancel_invitation:{method:'DELETE',url:u('/orgs/{org}/invitations/{invitation_id}')},\n    list_webhooks:    {method:'GET',   url:u('/orgs/{org}/hooks')},\n    create_webhook:   {method:'POST',  url:u('/orgs/{org}/hooks'),body:{name:'web',config:{url:EXTRA.webhook_url||'',content_type:'json'},events:EXTRA.events||['push'],active:true}},\n    delete_webhook:   {method:'DELETE',url:u('/orgs/{org}/hooks/{hook_id}')},\n    list_teams:       {method:'GET',   url:u('/orgs/{org}/teams')},\n    create_team:      {method:'POST',  url:u('/orgs/{org}/teams'),body:{name:EXTRA.name||'',privacy:'closed'}},\n    get_audit_log:    {method:'GET',   url:u('/orgs/{org}/audit-log')+'?per_page=30'}\n  },\n  secrets: {\n    repo_list:      {method:'GET',   url:u('/repos/{owner}/{repo}/actions/secrets')},\n    repo_get_pubkey:{method:'GET',   url:u('/repos/{owner}/{repo}/actions/secrets/public-key')},\n    repo_get:       {method:'GET',   url:u('/repos/{owner}/{repo}/actions/secrets/{secret_name}')},\n    repo_upsert:    {method:'PUT',   url:u('/repos/{owner}/{repo}/actions/secrets/{secret_name}'),body:{encrypted_value:EXTRA.encrypted_value||'',key_id:EXTRA.key_id||''}},\n    repo_delete:    {method:'DELETE',url:u('/repos/{owner}/{repo}/actions/secrets/{secret_name}')},\n    org_list:       {method:'GET',   url:u('/orgs/{org}/actions/secrets')},\n    org_get_pubkey: {method:'GET',   url:u('/orgs/{org}/actions/secrets/public-key')},\n    org_upsert:     {method:'PUT',   url:u('/orgs/{org}/actions/secrets/{secret_name}'),body:{encrypted_value:EXTRA.encrypted_value||'',key_id:EXTRA.key_id||'',visibility:'all'}},\n    org_delete:     {method:'DELETE',url:u('/orgs/{org}/actions/secrets/{secret_name}')}\n  },\n  workflow_runs: {\n    list_for_repo:    {method:'GET',   url:u('/repos/{owner}/{repo}/actions/runs')+'?per_page=30'},\n    list_for_workflow:{method:'GET',   url:u('/repos/{owner}/{repo}/actions/workflows/{workflow_id}/runs')},\n    get:              {method:'GET',   url:u('/repos/{owner}/{repo}/actions/runs/{run_id}')},\n    delete:           {method:'DELETE',url:u('/repos/{owner}/{repo}/actions/runs/{run_id}')},\n    cancel:           {method:'POST',  url:u('/repos/{owner}/{repo}/actions/runs/{run_id}/cancel')},\n    re_run:           {method:'POST',  url:u('/repos/{owner}/{repo}/actions/runs/{run_id}/rerun')},\n    re_run_failed:    {method:'POST',  url:u('/repos/{owner}/{repo}/actions/runs/{run_id}/rerun-failed-jobs')},\n    list_jobs:        {method:'GET',   url:u('/repos/{owner}/{repo}/actions/runs/{run_id}/jobs')},\n    delete_logs:      {method:'DELETE',url:u('/repos/{owner}/{repo}/actions/runs/{run_id}/logs')},\n    get_timing:       {method:'GET',   url:u('/repos/{owner}/{repo}/actions/runs/{run_id}/timing')},\n    list_artifacts:   {method:'GET',   url:u('/repos/{owner}/{repo}/actions/runs/{run_id}/artifacts')},\n    approve:          {method:'POST',  url:u('/repos/{owner}/{repo}/actions/runs/{run_id}/approve')},\n    list_workflows:   {method:'GET',   url:u('/repos/{owner}/{repo}/actions/workflows')},\n    get_workflow:     {method:'GET',   url:u('/repos/{owner}/{repo}/actions/workflows/{workflow_id}')},\n    enable_workflow:  {method:'PUT',   url:u('/repos/{owner}/{repo}/actions/workflows/{workflow_id}/enable')},\n    disable_workflow: {method:'PUT',   url:u('/repos/{owner}/{repo}/actions/workflows/{workflow_id}/disable')},\n    trigger_dispatch: {method:'POST',  url:u('/repos/{owner}/{repo}/actions/workflows/{workflow_id}/dispatches'),body:{ref:EXTRA.ref||'main',inputs:EXTRA.inputs||{}}}\n  },\n  hosted_runners: {\n    list_for_org:    {method:'GET',   url:u('/orgs/{org}/actions/hosted-runners')},\n    create_for_org:  {method:'POST',  url:u('/orgs/{org}/actions/hosted-runners'),body:{name:EXTRA.name||'r3-runner',image:{id:'ubuntu-24.04',source:'github'},runner_group_id:EXTRA.runner_group_id||1,size:EXTRA.size||'4-core',maximum_runners:EXTRA.maximum_runners||10}},\n    get_for_org:     {method:'GET',   url:u('/orgs/{org}/actions/hosted-runners/{hosted_runner_id}')},\n    update_for_org:  {method:'PATCH', url:u('/orgs/{org}/actions/hosted-runners/{hosted_runner_id}'),body:EXTRA},\n    delete_for_org:  {method:'DELETE',url:u('/orgs/{org}/actions/hosted-runners/{hosted_runner_id}')},\n    list_images:     {method:'GET',   url:u('/orgs/{org}/actions/hosted-runners/images')},\n    list_platforms:  {method:'GET',   url:u('/orgs/{org}/actions/hosted-runners/platforms')},\n    list_limits:     {method:'GET',   url:u('/orgs/{org}/actions/hosted-runners/limits')},\n    list_machine_sizes:{method:'GET', url:u('/orgs/{org}/actions/hosted-runners/machine-sizes')}\n  },\n  self_hosted_runners: {\n    list_repo:         {method:'GET',   url:u('/repos/{owner}/{repo}/actions/runners')},\n    create_jit_repo:   {method:'POST',  url:u('/repos/{owner}/{repo}/actions/runners/generate-jitconfig'),body:{name:EXTRA.name||'r3-self',runner_group_id:EXTRA.runner_group_id||1,labels:EXTRA.labels||['self-hosted']}},\n    reg_token_repo:    {method:'POST',  url:u('/repos/{owner}/{repo}/actions/runners/registration-token')},\n    remove_token_repo: {method:'POST',  url:u('/repos/{owner}/{repo}/actions/runners/remove-token')},\n    get_repo:          {method:'GET',   url:u('/repos/{owner}/{repo}/actions/runners/{runner_id}')},\n    delete_repo:       {method:'DELETE',url:u('/repos/{owner}/{repo}/actions/runners/{runner_id}')},\n    list_labels_repo:  {method:'GET',   url:u('/repos/{owner}/{repo}/actions/runners/{runner_id}/labels')},\n    add_labels_repo:   {method:'POST',  url:u('/repos/{owner}/{repo}/actions/runners/{runner_id}/labels'),body:{labels:EXTRA.labels||[]}},\n    list_org:          {method:'GET',   url:u('/orgs/{org}/actions/runners')},\n    create_jit_org:    {method:'POST',  url:u('/orgs/{org}/actions/runners/generate-jitconfig'),body:{name:EXTRA.name||'r3-self',runner_group_id:EXTRA.runner_group_id||1,labels:EXTRA.labels||['self-hosted']}},\n    reg_token_org:     {method:'POST',  url:u('/orgs/{org}/actions/runners/registration-token')},\n    get_org:           {method:'GET',   url:u('/orgs/{org}/actions/runners/{runner_id}')},\n    delete_org:        {method:'DELETE',url:u('/orgs/{org}/actions/runners/{runner_id}')},\n    list_applications: {method:'GET',   url:u('/orgs/{org}/actions/runners/downloads')}\n  },\n  runner_groups: {\n    list_for_org:             {method:'GET',   url:u('/orgs/{org}/actions/runner-groups')},\n    create_for_org:           {method:'POST',  url:u('/orgs/{org}/actions/runner-groups'),body:{name:EXTRA.name||'default',visibility:'all',allows_public_repositories:false}},\n    get_for_org:              {method:'GET',   url:u('/orgs/{org}/actions/runner-groups/{runner_group_id}')},\n    update_for_org:           {method:'PATCH', url:u('/orgs/{org}/actions/runner-groups/{runner_group_id}'),body:EXTRA},\n    delete_for_org:           {method:'DELETE',url:u('/orgs/{org}/actions/runner-groups/{runner_group_id}')},\n    list_repos_for_group:     {method:'GET',   url:u('/orgs/{org}/actions/runner-groups/{runner_group_id}/repositories')},\n    set_repos_for_group:      {method:'PUT',   url:u('/orgs/{org}/actions/runner-groups/{runner_group_id}/repositories'),body:{selected_repository_ids:EXTRA.repo_ids||[]}},\n    add_repo_to_group:        {method:'PUT',   url:u('/orgs/{org}/actions/runner-groups/{runner_group_id}/repositories/{repository_id}')},\n    remove_repo_from_group:   {method:'DELETE',url:u('/orgs/{org}/actions/runner-groups/{runner_group_id}/repositories/{repository_id}')},\n    list_runners_for_group:   {method:'GET',   url:u('/orgs/{org}/actions/runner-groups/{runner_group_id}/runners')},\n    add_runner_to_group:      {method:'PUT',   url:u('/orgs/{org}/actions/runner-groups/{runner_group_id}/runners/{runner_id}')},\n    remove_runner_from_group: {method:'DELETE',url:u('/orgs/{org}/actions/runner-groups/{runner_group_id}/runners/{runner_id}')}\n  },\n  codespaces: {\n    list:             {method:'GET',   url:u('/user/codespaces')},\n    create:           {method:'POST',  url:u('/user/codespaces'),body:{repository_id:EXTRA.repository_id||0,ref:EXTRA.ref||'main',location:EXTRA.location||'EuropeWest',machine:EXTRA.machine||'basicLinux32gb',display_name:EXTRA.display_name||''}},\n    list_for_repo:    {method:'GET',   url:u('/repos/{owner}/{repo}/codespaces')},\n    create_for_repo:  {method:'POST',  url:u('/repos/{owner}/{repo}/codespaces'),body:{ref:EXTRA.ref||'main',machine:EXTRA.machine||'basicLinux32gb'}},\n    get:              {method:'GET',   url:u('/user/codespaces/{codespace_name}')},\n    update:           {method:'PATCH', url:u('/user/codespaces/{codespace_name}'),body:EXTRA},\n    delete:           {method:'DELETE',url:u('/user/codespaces/{codespace_name}')},\n    start:            {method:'POST',  url:u('/user/codespaces/{codespace_name}/start')},\n    stop:             {method:'POST',  url:u('/user/codespaces/{codespace_name}/stop')},\n    export:           {method:'POST',  url:u('/user/codespaces/{codespace_name}/exports')},\n    list_machines:    {method:'GET',   url:u('/user/codespaces/{codespace_name}/machines')},\n    list_secrets:     {method:'GET',   url:u('/user/codespaces/secrets')},\n    get_pubkey:       {method:'GET',   url:u('/user/codespaces/secrets/public-key')},\n    upsert_secret:    {method:'PUT',   url:u('/user/codespaces/secrets/{secret_name}'),body:{encrypted_value:EXTRA.encrypted_value||'',key_id:EXTRA.key_id||''}},\n    delete_secret:    {method:'DELETE',url:u('/user/codespaces/secrets/{secret_name}')},\n    org_list_secrets: {method:'GET',   url:u('/orgs/{org}/codespaces/secrets')},\n    org_upsert_secret:{method:'PUT',   url:u('/orgs/{org}/codespaces/secrets/{secret_name}'),body:{encrypted_value:EXTRA.encrypted_value||'',key_id:EXTRA.key_id||'',visibility:'all'}}\n  }\n};\n\nif (!R[RES]) return [{json:{error:`Unknown resource: \"${RES}\". Valid: ${Object.keys(R).join(', ')}`}}];\nif (!R[RES][OP]) return [{json:{error:`Unknown op: \"${OP}\" for \"${RES}\". Valid: ${Object.keys(R[RES]).join(', ')}`}}];\nconst route = R[RES][OP];\nreturn [{json:{\n  method:route.method, url:route.url, body:route.body||null,\n  headers:{Authorization:`Bearer ${TOKEN}`,Accept:'application/vnd.github+json','X-GitHub-Api-Version':'2022-11-28','Content-Type':'application/json'},\n  resource:RES, operation:OP\n}}];"
+      },
+      "id": "router",
+      "name": "Route Builder",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        680,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "method": "={{ $json.method }}",
+        "url": "={{ $json.url }}",
+        "authentication": "none",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "={{ $json.headers.Authorization }}"
+            },
+            {
+              "name": "Accept",
+              "value": "application/vnd.github+json"
+            },
+            {
+              "name": "X-GitHub-Api-Version",
+              "value": "2022-11-28"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $json.body ? JSON.stringify($json.body) : '{}' }}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          },
+          "timeout": 30000
+        }
+      },
+      "id": "http",
+      "name": "GitHub API",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        900,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "r1",
+              "name": "result",
+              "value": "={{ $json }}",
+              "type": "object"
+            },
+            {
+              "id": "r2",
+              "name": "resource",
+              "value": "={{ $('Config').item.json.RESOURCE }}",
+              "type": "string"
+            },
+            {
+              "id": "r3",
+              "name": "operation",
+              "value": "={{ $('Config').item.json.OPERATION }}",
+              "type": "string"
+            },
+            {
+              "id": "r4",
+              "name": "url",
+              "value": "={{ $('Route Builder').item.json.url }}",
+              "type": "string"
+            },
+            {
+              "id": "r5",
+              "name": "method",
+              "value": "={{ $('Route Builder').item.json.method }}",
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "id": "output",
+      "name": "Output",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1120,
+        300
+      ]
+    }
+  ],
+  "connections": {
+    "Manual Trigger": {
+      "main": [
+        [
+          {
+            "node": "Config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Config": {
+      "main": [
+        [
+          {
+            "node": "Route Builder",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Route Builder": {
+      "main": [
+        [
+          {
+            "node": "GitHub API",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GitHub API": {
+      "main": [
+        [
+          {
+            "node": "Output",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}

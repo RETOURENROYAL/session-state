@@ -1,0 +1,279 @@
+{
+  "_title": "GitHub REST API — Universal R3 Endpoint Map",
+  "_base_url": "https://api.github.com",
+  "_auth": {
+    "methods": ["Bearer TOKEN (PAT/OAuth)", "Basic login:token", "GitHub App JWT", "Installation token"],
+    "header": "Authorization: Bearer {GITHUB_TOKEN}",
+    "fine_grained_pat_note": "Fine-grained PATs require explicit permission grants per resource"
+  },
+
+  "authentication": {
+    "_doc": "https://docs.github.com/de/rest/authentication/authenticating-to-the-rest-api",
+    "endpoints": {
+      "get_authenticated_user":      { "method": "GET",  "path": "/user",                          "auth": "any",     "description": "Aktuell authentifizierten User abrufen" },
+      "get_rate_limit":              { "method": "GET",  "path": "/rate_limit",                    "auth": "any",     "description": "Rate-Limit-Status prüfen" },
+      "create_token_check":          { "method": "POST", "path": "/applications/{client_id}/token","auth": "basic",   "description": "OAuth-Token prüfen/erneuern" },
+      "list_installations":          { "method": "GET",  "path": "/user/installations",            "auth": "user",    "description": "Alle App-Installationen des Users" }
+    },
+    "fine_grained_pat_permissions": {
+      "_doc": "https://docs.github.com/de/rest/authentication/permissions-required-for-fine-grained-personal-access-tokens",
+      "resource_scopes": [
+        "actions","administration","checks","code_scanning_alerts","codespaces",
+        "codespaces_lifecycle_admin","codespaces_metadata","codespaces_secrets",
+        "commit_statuses","contents","dependabot_alerts","dependabot_secrets",
+        "deployments","discussions","emails","environments","followers",
+        "git_signing_ssh_public_keys","gpg_keys","interaction_limits","issues",
+        "members","merge_queues","metadata","organization_administration",
+        "organization_announcement_banners","organization_codespaces",
+        "organization_codespaces_settings","organization_events",
+        "organization_hooks","organization_personal_access_token_requests",
+        "organization_personal_access_tokens","organization_plan",
+        "organization_projects","organization_secrets","organization_self_hosted_runners",
+        "organization_user_blocking","packages","pages","profile","pull_requests",
+        "repository_hooks","repository_projects","repository_rules",
+        "secret_scanning_alerts","secrets","security_events","starring","statuses",
+        "team_discussions","vulnerability_alerts","webhooks","workflows","runners"
+      ]
+    }
+  },
+
+  "oauth_applications": {
+    "_doc": "https://docs.github.com/de/rest/apps/oauth-applications",
+    "endpoints": {
+      "check_token":                 { "method": "POST",   "path": "/applications/{client_id}/token",              "auth": "basic_app", "body": { "access_token": "{token}" } },
+      "reset_token":                 { "method": "PATCH",  "path": "/applications/{client_id}/token",              "auth": "basic_app", "body": { "access_token": "{token}" } },
+      "delete_token":                { "method": "DELETE", "path": "/applications/{client_id}/token",              "auth": "basic_app", "body": { "access_token": "{token}" } },
+      "delete_app_authorization":    { "method": "DELETE", "path": "/applications/{client_id}/grant",              "auth": "basic_app", "body": { "access_token": "{token}" } },
+      "list_grants":                 { "method": "GET",    "path": "/applications/grants",                         "auth": "user" },
+      "get_grant":                   { "method": "GET",    "path": "/applications/grants/{grant_id}",              "auth": "user" },
+      "delete_grant":                { "method": "DELETE", "path": "/applications/grants/{grant_id}",              "auth": "user" },
+      "create_scoped_token":         { "method": "POST",   "path": "/applications/{client_id}/token/scoped",       "auth": "basic_app", "description": "Scoped Token für spezifische Repositories" }
+    }
+  },
+
+  "app_installations": {
+    "_doc": "https://docs.github.com/de/rest/apps/installations",
+    "endpoints": {
+      "list_repos_for_installation": { "method": "GET",  "path": "/installation/repositories",                   "auth": "installation_token" },
+      "get_installation":            { "method": "GET",  "path": "/app/installations/{installation_id}",         "auth": "jwt" },
+      "list_installations":          { "method": "GET",  "path": "/app/installations",                           "auth": "jwt" },
+      "delete_installation":         { "method": "DELETE","path": "/app/installations/{installation_id}",        "auth": "jwt" },
+      "create_access_token":         { "method": "POST", "path": "/app/installations/{installation_id}/access_tokens","auth": "jwt", "description": "Installation-Access-Token erstellen" },
+      "list_user_installations":     { "method": "GET",  "path": "/user/installations",                          "auth": "user" },
+      "list_repos_accessible":       { "method": "GET",  "path": "/user/installations/{installation_id}/repositories","auth": "user" },
+      "add_repo_to_installation":    { "method": "PUT",  "path": "/user/installations/{installation_id}/repositories/{repository_id}","auth": "user" },
+      "remove_repo_from_installation":{"method":"DELETE","path": "/user/installations/{installation_id}/repositories/{repository_id}","auth": "user" }
+    }
+  },
+
+  "git_database": {
+    "_doc": "https://docs.github.com/de/rest/guides/using-the-rest-api-to-interact-with-your-git-database",
+    "endpoints": {
+      "blobs": {
+        "get":    { "method": "GET",  "path": "/repos/{owner}/{repo}/git/blobs/{file_sha}" },
+        "create": { "method": "POST", "path": "/repos/{owner}/{repo}/git/blobs",           "body": { "content": "{base64_content}", "encoding": "base64" } }
+      },
+      "trees": {
+        "get":    { "method": "GET",  "path": "/repos/{owner}/{repo}/git/trees/{tree_sha}", "params": { "recursive": "1" } },
+        "create": { "method": "POST", "path": "/repos/{owner}/{repo}/git/trees",
+                    "body": { "base_tree": "{sha}", "tree": [{ "path": "file.txt","mode": "100644","type": "blob","sha": "{blob_sha}" }] } }
+      },
+      "commits": {
+        "get":    { "method": "GET",  "path": "/repos/{owner}/{repo}/git/commits/{commit_sha}" },
+        "create": { "method": "POST", "path": "/repos/{owner}/{repo}/git/commits",
+                    "body": { "message": "{msg}", "tree": "{tree_sha}", "parents": ["{parent_sha}"] } }
+      },
+      "refs": {
+        "list":   { "method": "GET",    "path": "/repos/{owner}/{repo}/git/refs" },
+        "get":    { "method": "GET",    "path": "/repos/{owner}/{repo}/git/ref/{ref}" },
+        "create": { "method": "POST",   "path": "/repos/{owner}/{repo}/git/refs",  "body": { "ref": "refs/heads/{branch}", "sha": "{sha}" } },
+        "update": { "method": "PATCH",  "path": "/repos/{owner}/{repo}/git/refs/{ref}", "body": { "sha": "{sha}", "force": false } },
+        "delete": { "method": "DELETE", "path": "/repos/{owner}/{repo}/git/refs/{ref}" }
+      },
+      "tags": {
+        "get":    { "method": "GET",  "path": "/repos/{owner}/{repo}/git/tags/{tag_sha}" },
+        "create": { "method": "POST", "path": "/repos/{owner}/{repo}/git/tags",
+                    "body": { "tag": "{name}", "message": "{msg}", "object": "{sha}", "type": "commit" } }
+      }
+    }
+  },
+
+  "organizations": {
+    "_doc": "https://docs.github.com/de/rest/orgs/orgs",
+    "endpoints": {
+      "list_orgs":                   { "method": "GET",   "path": "/organizations",                              "params": { "since": 0, "per_page": 30 } },
+      "get_org":                     { "method": "GET",   "path": "/orgs/{org}" },
+      "update_org":                  { "method": "PATCH", "path": "/orgs/{org}",                                 "body": { "description": "…", "email": "…", "blog": "…" } },
+      "delete_org":                  { "method": "DELETE","path": "/orgs/{org}" },
+      "list_members":                { "method": "GET",   "path": "/orgs/{org}/members",                         "params": { "role": "all", "per_page": 30 } },
+      "get_member":                  { "method": "GET",   "path": "/orgs/{org}/members/{username}" },
+      "remove_member":               { "method": "DELETE","path": "/orgs/{org}/members/{username}" },
+      "list_outside_collaborators":  { "method": "GET",   "path": "/orgs/{org}/outside_collaborators" },
+      "list_public_members":         { "method": "GET",   "path": "/orgs/{org}/public_members" },
+      "check_public_member":         { "method": "GET",   "path": "/orgs/{org}/public_members/{username}" },
+      "publicize_membership":        { "method": "PUT",   "path": "/orgs/{org}/public_members/{username}" },
+      "conceal_membership":          { "method": "DELETE","path": "/orgs/{org}/public_members/{username}" },
+      "list_repos":                  { "method": "GET",   "path": "/orgs/{org}/repos",                           "params": { "type": "all", "sort": "updated", "per_page": 30 } },
+      "create_repo":                 { "method": "POST",  "path": "/orgs/{org}/repos",                           "body": { "name": "{repo}", "private": true, "auto_init": true } },
+      "list_invitations":            { "method": "GET",   "path": "/orgs/{org}/invitations" },
+      "create_invitation":           { "method": "POST",  "path": "/orgs/{org}/invitations",                     "body": { "email": "…", "role": "direct_member" } },
+      "cancel_invitation":           { "method": "DELETE","path": "/orgs/{org}/invitations/{invitation_id}" },
+      "get_org_membership":          { "method": "GET",   "path": "/orgs/{org}/memberships/{username}" },
+      "set_org_membership":          { "method": "PUT",   "path": "/orgs/{org}/memberships/{username}",           "body": { "role": "member" } },
+      "remove_org_membership":       { "method": "DELETE","path": "/orgs/{org}/memberships/{username}" },
+      "list_webhooks":               { "method": "GET",   "path": "/orgs/{org}/hooks" },
+      "create_webhook":              { "method": "POST",  "path": "/orgs/{org}/hooks",                           "body": { "name": "web","config": { "url": "…", "content_type": "json" },"events": ["push"], "active": true } },
+      "get_webhook":                 { "method": "GET",   "path": "/orgs/{org}/hooks/{hook_id}" },
+      "update_webhook":              { "method": "PATCH", "path": "/orgs/{org}/hooks/{hook_id}" },
+      "delete_webhook":              { "method": "DELETE","path": "/orgs/{org}/hooks/{hook_id}" },
+      "ping_webhook":                { "method": "POST",  "path": "/orgs/{org}/hooks/{hook_id}/pings" },
+      "list_teams":                  { "method": "GET",   "path": "/orgs/{org}/teams" },
+      "create_team":                 { "method": "POST",  "path": "/orgs/{org}/teams",                           "body": { "name": "…", "privacy": "closed" } },
+      "get_audit_log":               { "method": "GET",   "path": "/orgs/{org}/audit-log",                       "params": { "phrase": "…", "per_page": 30 } }
+    }
+  },
+
+  "actions_secrets": {
+    "_doc": "https://docs.github.com/de/rest/actions/secrets",
+    "endpoints": {
+      "repo": {
+        "list":              { "method": "GET",    "path": "/repos/{owner}/{repo}/actions/secrets" },
+        "get_public_key":    { "method": "GET",    "path": "/repos/{owner}/{repo}/actions/secrets/public-key" },
+        "get":               { "method": "GET",    "path": "/repos/{owner}/{repo}/actions/secrets/{secret_name}" },
+        "create_or_update":  { "method": "PUT",    "path": "/repos/{owner}/{repo}/actions/secrets/{secret_name}", "body": { "encrypted_value": "{libsodium_encrypted}", "key_id": "{key_id}" } },
+        "delete":            { "method": "DELETE", "path": "/repos/{owner}/{repo}/actions/secrets/{secret_name}" },
+        "list_env_secrets":  { "method": "GET",    "path": "/repos/{owner}/{repo}/environments/{env_name}/secrets" },
+        "get_env_public_key":{ "method": "GET",    "path": "/repos/{owner}/{repo}/environments/{env_name}/secrets/public-key" },
+        "create_env_secret": { "method": "PUT",    "path": "/repos/{owner}/{repo}/environments/{env_name}/secrets/{secret_name}" }
+      },
+      "org": {
+        "list":              { "method": "GET",    "path": "/orgs/{org}/actions/secrets" },
+        "get_public_key":    { "method": "GET",    "path": "/orgs/{org}/actions/secrets/public-key" },
+        "get":               { "method": "GET",    "path": "/orgs/{org}/actions/secrets/{secret_name}" },
+        "create_or_update":  { "method": "PUT",    "path": "/orgs/{org}/actions/secrets/{secret_name}", "body": { "encrypted_value": "…", "key_id": "…", "visibility": "all" } },
+        "delete":            { "method": "DELETE", "path": "/orgs/{org}/actions/secrets/{secret_name}" },
+        "list_repos":        { "method": "GET",    "path": "/orgs/{org}/actions/secrets/{secret_name}/repositories" },
+        "add_repo":          { "method": "PUT",    "path": "/orgs/{org}/actions/secrets/{secret_name}/repositories/{repository_id}" },
+        "remove_repo":       { "method": "DELETE", "path": "/orgs/{org}/actions/secrets/{secret_name}/repositories/{repository_id}" }
+      }
+    }
+  },
+
+  "workflow_runs": {
+    "_doc": "https://docs.github.com/de/rest/actions/workflow-runs",
+    "endpoints": {
+      "list_for_repo":       { "method": "GET",    "path": "/repos/{owner}/{repo}/actions/runs",                 "params": { "status": "completed", "per_page": 30, "branch": "{branch}" } },
+      "list_for_workflow":   { "method": "GET",    "path": "/repos/{owner}/{repo}/actions/workflows/{workflow_id}/runs" },
+      "get":                 { "method": "GET",    "path": "/repos/{owner}/{repo}/actions/runs/{run_id}" },
+      "delete":              { "method": "DELETE", "path": "/repos/{owner}/{repo}/actions/runs/{run_id}" },
+      "cancel":              { "method": "POST",   "path": "/repos/{owner}/{repo}/actions/runs/{run_id}/cancel" },
+      "re_run":              { "method": "POST",   "path": "/repos/{owner}/{repo}/actions/runs/{run_id}/rerun" },
+      "re_run_failed_jobs":  { "method": "POST",   "path": "/repos/{owner}/{repo}/actions/runs/{run_id}/rerun-failed-jobs" },
+      "list_jobs":           { "method": "GET",    "path": "/repos/{owner}/{repo}/actions/runs/{run_id}/jobs",   "params": { "filter": "latest" } },
+      "download_logs":       { "method": "GET",    "path": "/repos/{owner}/{repo}/actions/runs/{run_id}/logs" },
+      "delete_logs":         { "method": "DELETE", "path": "/repos/{owner}/{repo}/actions/runs/{run_id}/logs" },
+      "get_usage":           { "method": "GET",    "path": "/repos/{owner}/{repo}/actions/runs/{run_id}/timing" },
+      "list_artifacts":      { "method": "GET",    "path": "/repos/{owner}/{repo}/actions/runs/{run_id}/artifacts" },
+      "approve":             { "method": "POST",   "path": "/repos/{owner}/{repo}/actions/runs/{run_id}/approve" },
+      "get_review_history":  { "method": "GET",    "path": "/repos/{owner}/{repo}/actions/runs/{run_id}/approvals" },
+      "list_workflows":      { "method": "GET",    "path": "/repos/{owner}/{repo}/actions/workflows" },
+      "get_workflow":        { "method": "GET",    "path": "/repos/{owner}/{repo}/actions/workflows/{workflow_id}" },
+      "enable_workflow":     { "method": "PUT",    "path": "/repos/{owner}/{repo}/actions/workflows/{workflow_id}/enable" },
+      "disable_workflow":    { "method": "PUT",    "path": "/repos/{owner}/{repo}/actions/workflows/{workflow_id}/disable" },
+      "trigger_dispatch":    { "method": "POST",   "path": "/repos/{owner}/{repo}/actions/workflows/{workflow_id}/dispatches", "body": { "ref": "main", "inputs": {} } }
+    }
+  },
+
+  "hosted_runners": {
+    "_doc": "https://docs.github.com/de/rest/actions/hosted-runners",
+    "endpoints": {
+      "list_for_org":          { "method": "GET",  "path": "/orgs/{org}/actions/hosted-runners",                    "params": { "per_page": 30 } },
+      "create_for_org":        { "method": "POST", "path": "/orgs/{org}/actions/hosted-runners",
+                                  "body": { "name": "{runner_name}", "image": { "id": "ubuntu-24.04", "source": "github" },
+                                            "runner_group_id": 1, "size": "4-core", "maximum_runners": 10 } },
+      "get_for_org":           { "method": "GET",    "path": "/orgs/{org}/actions/hosted-runners/{hosted_runner_id}" },
+      "update_for_org":        { "method": "PATCH",  "path": "/orgs/{org}/actions/hosted-runners/{hosted_runner_id}", "body": { "name": "…", "maximum_runners": 5 } },
+      "delete_for_org":        { "method": "DELETE", "path": "/orgs/{org}/actions/hosted-runners/{hosted_runner_id}" },
+      "list_images_for_org":   { "method": "GET",  "path": "/orgs/{org}/actions/hosted-runners/images" },
+      "list_platforms_for_org":{ "method": "GET",  "path": "/orgs/{org}/actions/hosted-runners/platforms" },
+      "list_limits_for_org":   { "method": "GET",  "path": "/orgs/{org}/actions/hosted-runners/limits" },
+      "list_machine_sizes":    { "method": "GET",  "path": "/orgs/{org}/actions/hosted-runners/machine-sizes" }
+    }
+  },
+
+  "self_hosted_runners": {
+    "_doc": "https://docs.github.com/de/rest/actions/self-hosted-runners",
+    "endpoints": {
+      "repo": {
+        "list":              { "method": "GET",    "path": "/repos/{owner}/{repo}/actions/runners",                  "params": { "per_page": 30 } },
+        "create_jit_config": { "method": "POST",   "path": "/repos/{owner}/{repo}/actions/runners/generate-jitconfig","body": { "name": "…", "runner_group_id": 1, "labels": ["self-hosted","linux"] } },
+        "create_reg_token":  { "method": "POST",   "path": "/repos/{owner}/{repo}/actions/runners/registration-token" },
+        "create_rem_token":  { "method": "POST",   "path": "/repos/{owner}/{repo}/actions/runners/remove-token" },
+        "get":               { "method": "GET",    "path": "/repos/{owner}/{repo}/actions/runners/{runner_id}" },
+        "delete":            { "method": "DELETE", "path": "/repos/{owner}/{repo}/actions/runners/{runner_id}" },
+        "list_labels":       { "method": "GET",    "path": "/repos/{owner}/{repo}/actions/runners/{runner_id}/labels" },
+        "add_labels":        { "method": "POST",   "path": "/repos/{owner}/{repo}/actions/runners/{runner_id}/labels",  "body": { "labels": ["{label}"] } },
+        "set_labels":        { "method": "PUT",    "path": "/repos/{owner}/{repo}/actions/runners/{runner_id}/labels",  "body": { "labels": ["{label}"] } },
+        "remove_all_labels": { "method": "DELETE", "path": "/repos/{owner}/{repo}/actions/runners/{runner_id}/labels" },
+        "remove_label":      { "method": "DELETE", "path": "/repos/{owner}/{repo}/actions/runners/{runner_id}/labels/{name}" }
+      },
+      "org": {
+        "list":              { "method": "GET",    "path": "/orgs/{org}/actions/runners" },
+        "create_jit_config": { "method": "POST",   "path": "/orgs/{org}/actions/runners/generate-jitconfig" },
+        "create_reg_token":  { "method": "POST",   "path": "/orgs/{org}/actions/runners/registration-token" },
+        "create_rem_token":  { "method": "POST",   "path": "/orgs/{org}/actions/runners/remove-token" },
+        "get":               { "method": "GET",    "path": "/orgs/{org}/actions/runners/{runner_id}" },
+        "delete":            { "method": "DELETE", "path": "/orgs/{org}/actions/runners/{runner_id}" },
+        "list_applications": { "method": "GET",    "path": "/orgs/{org}/actions/runners/downloads" }
+      }
+    }
+  },
+
+  "runner_groups": {
+    "_doc": "https://docs.github.com/de/rest/actions/self-hosted-runner-groups",
+    "endpoints": {
+      "list_for_org":              { "method": "GET",    "path": "/orgs/{org}/actions/runner-groups" },
+      "create_for_org":            { "method": "POST",   "path": "/orgs/{org}/actions/runner-groups",              "body": { "name": "…", "visibility": "all", "allows_public_repositories": false } },
+      "get_for_org":               { "method": "GET",    "path": "/orgs/{org}/actions/runner-groups/{runner_group_id}" },
+      "update_for_org":            { "method": "PATCH",  "path": "/orgs/{org}/actions/runner-groups/{runner_group_id}", "body": { "name": "…" } },
+      "delete_for_org":            { "method": "DELETE", "path": "/orgs/{org}/actions/runner-groups/{runner_group_id}" },
+      "list_repos_for_group":      { "method": "GET",    "path": "/orgs/{org}/actions/runner-groups/{runner_group_id}/repositories" },
+      "set_repos_for_group":       { "method": "PUT",    "path": "/orgs/{org}/actions/runner-groups/{runner_group_id}/repositories", "body": { "selected_repository_ids": ["{id}"] } },
+      "add_repo_to_group":         { "method": "PUT",    "path": "/orgs/{org}/actions/runner-groups/{runner_group_id}/repositories/{repository_id}" },
+      "remove_repo_from_group":    { "method": "DELETE", "path": "/orgs/{org}/actions/runner-groups/{runner_group_id}/repositories/{repository_id}" },
+      "list_runners_for_group":    { "method": "GET",    "path": "/orgs/{org}/actions/runner-groups/{runner_group_id}/runners" },
+      "set_runners_for_group":     { "method": "PUT",    "path": "/orgs/{org}/actions/runner-groups/{runner_group_id}/runners", "body": { "runners": ["{runner_id}"] } },
+      "add_runner_to_group":       { "method": "PUT",    "path": "/orgs/{org}/actions/runner-groups/{runner_group_id}/runners/{runner_id}" },
+      "remove_runner_from_group":  { "method": "DELETE", "path": "/orgs/{org}/actions/runner-groups/{runner_group_id}/runners/{runner_id}" }
+    }
+  },
+
+  "codespaces": {
+    "_doc": "https://docs.github.com/de/rest/codespaces/codespaces",
+    "endpoints": {
+      "list_for_authenticated":    { "method": "GET",    "path": "/user/codespaces",                               "params": { "per_page": 30 } },
+      "create_for_authenticated":  { "method": "POST",   "path": "/user/codespaces",
+                                      "body": { "repository_id": "{id}", "ref": "main", "location": "EuropeWest",
+                                                "machine": "basicLinux32gb", "display_name": "…" } },
+      "list_for_repo":             { "method": "GET",    "path": "/repos/{owner}/{repo}/codespaces" },
+      "create_for_repo":           { "method": "POST",   "path": "/repos/{owner}/{repo}/codespaces",               "body": { "ref": "main", "machine": "basicLinux32gb" } },
+      "get":                       { "method": "GET",    "path": "/user/codespaces/{codespace_name}" },
+      "update":                    { "method": "PATCH",  "path": "/user/codespaces/{codespace_name}",              "body": { "machine": "…", "display_name": "…" } },
+      "delete":                    { "method": "DELETE", "path": "/user/codespaces/{codespace_name}" },
+      "start":                     { "method": "POST",   "path": "/user/codespaces/{codespace_name}/start" },
+      "stop":                      { "method": "POST",   "path": "/user/codespaces/{codespace_name}/stop" },
+      "export":                    { "method": "POST",   "path": "/user/codespaces/{codespace_name}/exports" },
+      "get_export_details":        { "method": "GET",    "path": "/user/codespaces/{codespace_name}/exports/{export_id}" },
+      "list_machines":             { "method": "GET",    "path": "/user/codespaces/{codespace_name}/machines" },
+      "list_machines_for_new":     { "method": "GET",    "path": "/repos/{owner}/{repo}/codespaces/machines" },
+      "list_secrets":              { "method": "GET",    "path": "/user/codespaces/secrets" },
+      "get_public_key":            { "method": "GET",    "path": "/user/codespaces/secrets/public-key" },
+      "create_or_update_secret":   { "method": "PUT",    "path": "/user/codespaces/secrets/{secret_name}",         "body": { "encrypted_value": "…", "key_id": "…" } },
+      "delete_secret":             { "method": "DELETE", "path": "/user/codespaces/secrets/{secret_name}" },
+      "list_repos_for_secret":     { "method": "GET",    "path": "/user/codespaces/secrets/{secret_name}/repositories" },
+      "set_repos_for_secret":      { "method": "PUT",    "path": "/user/codespaces/secrets/{secret_name}/repositories", "body": { "selected_repository_ids": ["{id}"] } },
+      "org_list_secrets":          { "method": "GET",    "path": "/orgs/{org}/codespaces/secrets" },
+      "org_create_secret":         { "method": "PUT",    "path": "/orgs/{org}/codespaces/secrets/{secret_name}",   "body": { "encrypted_value": "…", "key_id": "…", "visibility": "all" } }
+    }
+  }
+}
