@@ -54,17 +54,7 @@ foreach ($wf in $Workflows) { Download "$RepoRaw/n8n-workflows/workflows/$wf.jso
 Write-Host "[4/4] Downloading endpoint reference..."
 Download "$RepoRaw/config/github-api-endpoints.json" "$TargetDir\github-api-endpoints.json"
 
-# Find a free port starting at 5678
-function Get-FreePort([int]$start=5678) {
-    $used = (netstat -ano | Select-String "TCP.*:(\d+)\s" | ForEach-Object { $_.Matches.Groups[1].Value }) -as [int[]]
-    $p = $start
-    while ($used -contains $p) { $p++ }
-    return $p
-}
-$N8N_PORT = Get-FreePort 5678
-if ($N8N_PORT -ne 5678) {
-    Write-Host "  ⚠  Port 5678 belegt → verwende Port $N8N_PORT" -ForegroundColor Yellow
-}
+$N8N_PORT = 5678
 
 # Write docker-compose (no 'version' — obsolete in Compose v2)
 @"
@@ -74,10 +64,10 @@ services:
     container_name: r3-n8n
     restart: unless-stopped
     ports:
-      - "${N8N_PORT}:5678"
+      - "5678:5678"
     environment:
       - N8N_BASIC_AUTH_ACTIVE=false
-      - WEBHOOK_URL=http://localhost:${N8N_PORT}
+      - WEBHOOK_URL=http://localhost:5678
       - GENERIC_TIMEZONE=Europe/Berlin
       - N8N_DEFAULT_LOCALE=de
       - N8N_LOG_LEVEL=warn
@@ -100,17 +90,27 @@ if (-not $env:GITHUB_TOKEN) {
 $start = Read-Host "  ▶ n8n jetzt starten? (Docker required) [y/N]"
 if ($start -match '^[yY]') {
     Set-Location $TargetDir
-    # Remove existing container to avoid name conflict
+
+    # Kill ALL containers currently bound to port 5678 (whatever their name)
+    Write-Host "  Räume Port 5678 auf..." -ForegroundColor Gray
+    $onPort = docker ps -q --filter "publish=5678" 2>$null
+    if ($onPort) {
+        docker rm -f $onPort 2>$null | Out-Null
+        Write-Host "  Alter Container entfernt." -ForegroundColor Gray
+    }
+    # Also remove by name in case it's stopped (not shown by ps without -a)
     docker rm -f r3-n8n 2>$null | Out-Null
+
     docker compose up -d
     if ($LASTEXITCODE -eq 0) {
         Start-Sleep 6
-        Write-Host "  ✓ n8n laeuft auf http://localhost:$N8N_PORT" -ForegroundColor Green
-        Start-Process "http://localhost:$N8N_PORT"
+        Write-Host "  ✓ n8n laeuft auf http://localhost:5678" -ForegroundColor Green
+        Start-Process "http://localhost:5678"
         Start-Process "$DashDir\index.html"
     } else {
         Write-Host "  ✗ docker compose up fehlgeschlagen" -ForegroundColor Red
-        Write-Host "  Manuell: cd $TargetDir; docker compose up -d" -ForegroundColor Gray
+        Write-Host "  Diagnose: docker ps -a --filter publish=5678" -ForegroundColor Gray
+        Write-Host "  Manuell:  cd $TargetDir; docker compose up -d" -ForegroundColor Gray
     }
 } else {
     Write-Host ""
@@ -126,5 +126,5 @@ Write-Host "  ══════════════════════
 Write-Host "  ✓ Installation abgeschlossen" -ForegroundColor Green
 Write-Host "  📁 Dateien:  $TargetDir" -ForegroundColor White
 Write-Host "  🌐 Dashboard: $DashDir\index.html" -ForegroundColor White
-Write-Host "  🔗 n8n:      http://localhost:$N8N_PORT" -ForegroundColor White
+Write-Host "  🔗 n8n:      http://localhost:5678" -ForegroundColor White
 Write-Host "  ═══════════════════════════════════════════════════" -ForegroundColor DarkCyan
