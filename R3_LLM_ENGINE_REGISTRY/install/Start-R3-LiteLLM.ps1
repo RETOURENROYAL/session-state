@@ -80,6 +80,25 @@ function Resolve-Config {
     }
 }
 
+function Get-PortOwner {
+    param([int]$P)
+    # Check running Docker containers first
+    $dockerOwner = docker ps --format "{{.Names}}\t{{.Ports}}" 2>$null |
+                   Where-Object { $_ -match ":${P}->" } |
+                   Select-Object -First 1
+    if ($dockerOwner) {
+        return @{ type = "docker"; name = ($dockerOwner -split "`t")[0] }
+    }
+    # Fallback: check any process via netstat
+    $nsLine = (netstat -ano 2>$null) -match "0\.0\.0\.0:$P\s|127\.0\.0\.1:$P\s|::$P\s" |
+              Select-Object -First 1
+    if ($nsLine) {
+        $pid = ($nsLine.Trim() -split '\s+') | Select-Object -Last 1
+        return @{ type = "process"; pid = $pid }
+    }
+    return $null
+}
+
 function Start-LiteLLM {
     $status = Get-ContainerStatus
     if ($status -match "^Up") {
@@ -92,6 +111,32 @@ function Start-LiteLLM {
     if ($status) {
         Write-Host "  ⟳ Entferne gestoppten Container..." -ForegroundColor DarkGray
         docker rm $ContainerName 2>$null | Out-Null
+    }
+
+    # Pre-check: is port $Port already in use? (check before docker run — more reliable)
+    $owner = Get-PortOwner -P $Port
+    if ($owner) {
+        if ($owner.type -eq "docker") {
+            if ($owner.name -eq $ContainerName) {
+                Write-Host "  ⟳ Unser Container belegt Port $Port bereits — health-check..." -ForegroundColor DarkGray
+                Test-Health
+                return
+            }
+            Write-Host "  ℹ Port $Port belegt von Docker-Container: $($owner.name)" -ForegroundColor Yellow
+            Write-Host "  ⟳ Stoppe '$($owner.name)'..." -ForegroundColor DarkGray
+            docker stop $owner.name 2>$null | Out-Null
+            docker rm   $owner.name 2>$null | Out-Null
+            Start-Sleep -Seconds 2
+        } else {
+            $pid = $owner.pid
+            Write-Host "  ✗ Port $Port belegt von Prozess PID $pid (kein Docker-Container)." -ForegroundColor Red
+            try {
+                $pName = (Get-Process -Id ([int]$pid) -ErrorAction SilentlyContinue).ProcessName
+                if ($pName) { Write-Host "  Prozess: $pName (PID $pid)" -ForegroundColor Yellow }
+            } catch {}
+            Write-Host "  → Beenden mit: Stop-Process -Id $pid -Force" -ForegroundColor DarkGray
+            return
+        }
     }
 
     $configPath = Resolve-Config
@@ -115,44 +160,10 @@ function Start-LiteLLM {
 
     $result = docker @dockerArgs 2>&1
     if ($LASTEXITCODE -ne 0) {
-        $errMsg = "$result"
-        # Port already allocated — find which container owns :4000 and offer to kill it
-        if ($errMsg -match "port is already allocated|address already in use") {
-            Write-Host "  ✗ Port $Port ist bereits belegt." -ForegroundColor Red
-            $owner = docker ps --format "{{.Names}}\t{{.Ports}}" 2>$null |
-                     Where-Object { $_ -match ":${Port}->" } |
-                     Select-Object -First 1
-            if ($owner) {
-                $ownerName = ($owner -split "`t")[0]
-                Write-Host "  ℹ Belegt von Container: $ownerName" -ForegroundColor Yellow
-                if ($ownerName -eq $ContainerName) {
-                    Write-Host "  ⟳ Das ist unser eigener Container — health-check..." -ForegroundColor DarkGray
-                    Test-Health
-                    return
-                }
-                Write-Host "  ▶ Stoppe '$ownerName' und starte $ContainerName..." -ForegroundColor Yellow
-                docker stop $ownerName 2>$null | Out-Null
-                docker rm   $ownerName 2>$null | Out-Null
-                Start-Sleep -Seconds 2
-            } else {
-                # Port taken by non-Docker process (node, python, etc.)
-                Write-Host "  ℹ Port $Port belegt durch Prozess (kein Docker-Container)." -ForegroundColor Yellow
-                $proc = netstat -ano 2>$null | Select-String ":${Port}\s" | Select-Object -First 1
-                if ($proc) { Write-Host "  netstat: $proc" -ForegroundColor DarkGray }
-                Write-Host "  → Prozess manuell beenden, dann erneut ausführen." -ForegroundColor DarkGray
-                return
-            }
-            # Retry after clearing the port
-            $result = docker @dockerArgs 2>&1
-            if ($LASTEXITCODE -ne 0) {
-                Write-Host "  ✗ Zweiter Versuch fehlgeschlagen: $result" -ForegroundColor Red
-                return
-            }
-        } else {
-            Write-Host "  ✗ docker run fehlgeschlagen: $result" -ForegroundColor Red
-            Write-Host "  Manuell: docker run -d --name r3-litellm -p 4000:4000 --add-host host.docker.internal:host-gateway -v `"$configPath`":/app/config.yaml -e LITELLM_MASTER_KEY=r3-local $Image --config /app/config.yaml --port 4000" -ForegroundColor DarkGray
-            return
-        }
+        $errMsg = ($result | Out-String).Trim()
+        Write-Host "  ✗ docker run fehlgeschlagen: $errMsg" -ForegroundColor Red
+        Write-Host "  Manuell: docker run -d --name r3-litellm -p 4000:4000 --add-host host.docker.internal:host-gateway -v `"$configPath`":/app/config.yaml -e LITELLM_MASTER_KEY=r3-local $Image --config /app/config.yaml --port 4000" -ForegroundColor DarkGray
+        return
     }
 
     Write-Host "  ⏳ Warte auf LiteLLM (max 40s)..." -ForegroundColor DarkGray
