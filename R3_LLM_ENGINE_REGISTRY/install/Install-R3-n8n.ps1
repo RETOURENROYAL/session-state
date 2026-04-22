@@ -91,26 +91,29 @@ $start = Read-Host "  ▶ n8n jetzt starten? (Docker required) [y/N]"
 if ($start -match '^[yY]') {
     Set-Location $TargetDir
 
-    # Kill ALL containers currently bound to port 5678 (whatever their name)
-    Write-Host "  Räume Port 5678 auf..." -ForegroundColor Gray
-    $onPort = docker ps -q --filter "publish=5678" 2>$null
-    if ($onPort) {
-        docker rm -f $onPort 2>$null | Out-Null
-        Write-Host "  Alter Container entfernt." -ForegroundColor Gray
-    }
-    # Also remove by name in case it's stopped (not shown by ps without -a)
-    docker rm -f r3-n8n 2>$null | Out-Null
-
-    docker compose up -d
-    if ($LASTEXITCODE -eq 0) {
-        Start-Sleep 6
-        Write-Host "  ✓ n8n laeuft auf http://localhost:5678" -ForegroundColor Green
+    # Check if port 5678 is already in use (n8n already running)
+    $running = docker ps -q --filter "publish=5678" 2>$null
+    if ($running) {
+        $name = docker inspect --format '{{.Name}}' $running 2>$null
+        Write-Host "  ✓ n8n laeuft bereits ($name) auf http://localhost:5678" -ForegroundColor Green
+        Write-Host "    Bestehende Workflows und Daten bleiben unangetastet." -ForegroundColor Gray
         Start-Process "http://localhost:5678"
         Start-Process "$DashDir\index.html"
     } else {
-        Write-Host "  ✗ docker compose up fehlgeschlagen" -ForegroundColor Red
-        Write-Host "  Diagnose: docker ps -a --filter publish=5678" -ForegroundColor Gray
-        Write-Host "  Manuell:  cd $TargetDir; docker compose up -d" -ForegroundColor Gray
+        # Remove stopped r3-n8n container if it exists (won't affect running containers)
+        docker rm -f r3-n8n 2>$null | Out-Null
+
+        docker compose up -d
+        if ($LASTEXITCODE -eq 0) {
+            Start-Sleep 6
+            Write-Host "  ✓ n8n laeuft auf http://localhost:5678" -ForegroundColor Green
+            Start-Process "http://localhost:5678"
+            Start-Process "$DashDir\index.html"
+        } else {
+            Write-Host "  ✗ docker compose up fehlgeschlagen" -ForegroundColor Red
+            Write-Host "  Diagnose: docker ps -a --filter publish=5678" -ForegroundColor Gray
+            Write-Host "  Manuell:  cd $TargetDir; docker compose up -d" -ForegroundColor Gray
+        }
     }
 } else {
     Write-Host ""
