@@ -34,7 +34,8 @@ $Image         = "ghcr.io/berriai/litellm:main-latest"
 $LiteLLMUrl    = "http://localhost:$Port"
 
 # Config file — supports both remote (download) and local run
-$ScriptDir     = Split-Path $MyInvocation.MyCommand.Path -ErrorAction SilentlyContinue
+# Guard: $MyInvocation.MyCommand.Path is null when piped via iwr | iex
+$ScriptDir     = if ($MyInvocation.MyCommand.Path) { Split-Path $MyInvocation.MyCommand.Path } else { $null }
 $ConfigLocal   = if ($ScriptDir) { "$ScriptDir\..\config\litellm-config.yaml" } else { $null }
 $ConfigRaw     = "https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/config/litellm-config.yaml"
 
@@ -114,9 +115,44 @@ function Start-LiteLLM {
 
     $result = docker @dockerArgs 2>&1
     if ($LASTEXITCODE -ne 0) {
-        Write-Host "  ✗ docker run fehlgeschlagen: $result" -ForegroundColor Red
-        Write-Host "  Manuell: docker run -d --name r3-litellm -p 4000:4000 --add-host host.docker.internal:host-gateway -v `"$configPath`":/app/config.yaml -e LITELLM_MASTER_KEY=r3-local $Image --config /app/config.yaml --port 4000" -ForegroundColor DarkGray
-        return
+        $errMsg = "$result"
+        # Port already allocated — find which container owns :4000 and offer to kill it
+        if ($errMsg -match "port is already allocated|address already in use") {
+            Write-Host "  ✗ Port $Port ist bereits belegt." -ForegroundColor Red
+            $owner = docker ps --format "{{.Names}}\t{{.Ports}}" 2>$null |
+                     Where-Object { $_ -match ":${Port}->" } |
+                     Select-Object -First 1
+            if ($owner) {
+                $ownerName = ($owner -split "`t")[0]
+                Write-Host "  ℹ Belegt von Container: $ownerName" -ForegroundColor Yellow
+                if ($ownerName -eq $ContainerName) {
+                    Write-Host "  ⟳ Das ist unser eigener Container — health-check..." -ForegroundColor DarkGray
+                    Test-Health
+                    return
+                }
+                Write-Host "  ▶ Stoppe '$ownerName' und starte $ContainerName..." -ForegroundColor Yellow
+                docker stop $ownerName 2>$null | Out-Null
+                docker rm   $ownerName 2>$null | Out-Null
+                Start-Sleep -Seconds 2
+            } else {
+                # Port taken by non-Docker process (node, python, etc.)
+                Write-Host "  ℹ Port $Port belegt durch Prozess (kein Docker-Container)." -ForegroundColor Yellow
+                $proc = netstat -ano 2>$null | Select-String ":${Port}\s" | Select-Object -First 1
+                if ($proc) { Write-Host "  netstat: $proc" -ForegroundColor DarkGray }
+                Write-Host "  → Prozess manuell beenden, dann erneut ausführen." -ForegroundColor DarkGray
+                return
+            }
+            # Retry after clearing the port
+            $result = docker @dockerArgs 2>&1
+            if ($LASTEXITCODE -ne 0) {
+                Write-Host "  ✗ Zweiter Versuch fehlgeschlagen: $result" -ForegroundColor Red
+                return
+            }
+        } else {
+            Write-Host "  ✗ docker run fehlgeschlagen: $result" -ForegroundColor Red
+            Write-Host "  Manuell: docker run -d --name r3-litellm -p 4000:4000 --add-host host.docker.internal:host-gateway -v `"$configPath`":/app/config.yaml -e LITELLM_MASTER_KEY=r3-local $Image --config /app/config.yaml --port 4000" -ForegroundColor DarkGray
+            return
+        }
     }
 
     Write-Host "  ⏳ Warte auf LiteLLM (max 40s)..." -ForegroundColor DarkGray
