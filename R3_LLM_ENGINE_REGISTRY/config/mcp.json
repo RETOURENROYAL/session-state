@@ -1,4 +1,6 @@
 {
+  "_comment": "VS Code User MCP config — copy to: C:\\Users\\mail\\AppData\\Roaming\\Code\\User\\mcp.json",
+  "_note": "r3-matrix-control :8422 does NOT expose /mcp — connection will fail. Omit from VS Code settings.json.",
   "servers": {
     "r3-chatlegs-primary": {
       "type": "sse",
@@ -7,10 +9,6 @@
     "r3-chatlegs-shadow": {
       "type": "sse",
       "url": "http://localhost:8421/mcp"
-    },
-    "r3-matrix-control": {
-      "type": "sse",
-      "url": "http://localhost:8422/mcp"
     }
   }
 }

@@ -18,43 +18,78 @@
     }
   },
 
+  // ── Continue.dev Models — all via LiteLLM :4000 ─────────
+  // r3/* routes = Ollama RAZER/APPSEN (zero-cost, local)
+  // groq/cerebras = cloud free-tier fallbacks
   "continue.models": [
+    // ── Local Ollama Routes (RAZER) ──────────────────────────
     {
-      "title": "⚡ LiteLLM → Groq Llama 3.3 70B",
+      "title": "🔥 r3/code — deepseek-coder:6.7b",
       "provider": "openai",
-      "model": "groq/llama-3.3-70b",
+      "model": "r3/code",
       "apiBase": "http://localhost:4000/v1",
       "apiKey": "r3-local"
     },
     {
-      "title": "⚡ LiteLLM → Cerebras 70B",
+      "title": "🔥 r3/reasoning — deepseek-r1",
       "provider": "openai",
-      "model": "cerebras/llama-3.3-70b",
+      "model": "r3/reasoning",
       "apiBase": "http://localhost:4000/v1",
       "apiKey": "r3-local"
     },
     {
-      "title": "⚡ LiteLLM → OpenRouter Auto",
+      "title": "⚡ r3/fast — gemma2:2b",
       "provider": "openai",
-      "model": "openrouter/auto",
+      "model": "r3/fast",
       "apiBase": "http://localhost:4000/v1",
       "apiKey": "r3-local"
     },
     {
-      "title": "🟢 Ollama RAZER — gemma2:2b",
-      "provider": "ollama",
-      "model": "gemma2:2b",
-      "apiBase": "http://host.docker.internal:11434"
+      "title": "💬 r3/chat — mistral:latest",
+      "provider": "openai",
+      "model": "r3/chat",
+      "apiBase": "http://localhost:4000/v1",
+      "apiKey": "r3-local"
     },
     {
-      "title": "💰 GPT-4o",
+      "title": "💬 r3/chat-heavy — qwen2.5:14b",
+      "provider": "openai",
+      "model": "r3/chat-heavy",
+      "apiBase": "http://localhost:4000/v1",
+      "apiKey": "r3-local"
+    },
+    {
+      "title": "📐 r3/large — mixtral 46.7B",
+      "provider": "openai",
+      "model": "r3/large",
+      "apiBase": "http://localhost:4000/v1",
+      "apiKey": "r3-local"
+    },
+    // ── Cloud Free-Tier Fallbacks ────────────────────────────
+    {
+      "title": "☁️ r3/code-fallback → Groq 70B",
+      "provider": "openai",
+      "model": "r3/code-fallback",
+      "apiBase": "http://localhost:4000/v1",
+      "apiKey": "r3-local"
+    },
+    {
+      "title": "☁️ r3/large-alt → OpenRouter Auto",
+      "provider": "openai",
+      "model": "r3/large-alt",
+      "apiBase": "http://localhost:4000/v1",
+      "apiKey": "r3-local"
+    },
+    // ── Paid APIs (explicit request only) ───────────────────
+    {
+      "title": "💰 GPT-4o (via r3/gateway)",
       "provider": "openai",
       "model": "gpt-4o",
       "apiBase": "http://localhost:4000/v1",
       "apiKey": "r3-local"
     },
     {
-      "title": "💰 Claude 3.5 Sonnet",
+      "title": "💰 Claude 3.5 Sonnet (via r3/gateway)",
       "provider": "openai",
       "model": "claude-3-5-sonnet",
       "apiBase": "http://localhost:4000/v1",
@@ -62,9 +97,9 @@
     }
   ],
   "continue.tabAutocompleteModel": {
-    "title": "Autocomplete — Groq 8B",
+    "title": "Autocomplete — r3/autocomplete (phi3:mini)",
     "provider": "openai",
-    "model": "groq/llama-3.1-8b",
+    "model": "r3/autocomplete",
     "apiBase": "http://localhost:4000/v1",
     "apiKey": "r3-local"
   },

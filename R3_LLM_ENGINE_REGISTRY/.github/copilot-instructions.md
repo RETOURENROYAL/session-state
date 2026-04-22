@@ -102,10 +102,25 @@ Large Context     → r3/large → r3/large-alt → openrouter/auto
 Offline (kein Net)→ r3/reasoning → r3/chat → r3/fast (alles lokal RAZER)
 ```
 
-### Registrierung in LiteLLM (einmalig ausführen)
+### LiteLLM Gateway — Start / Status / Stop
 
 ```powershell
-iwr https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/install/Register-R3-Ollama.ps1 | iex
+# Start (oder Idempotent-Check):
+& ([scriptblock]::Create((iwr "https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/install/Start-R3-LiteLLM.ps1?r=$(Get-Random)").Content))
+
+# Status prüfen:
+& ([scriptblock]::Create((iwr "https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/install/Start-R3-LiteLLM.ps1?r=$(Get-Random)").Content)) -Action status
+
+# Stop:
+& ([scriptblock]::Create((iwr "https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/install/Start-R3-LiteLLM.ps1?r=$(Get-Random)").Content)) -Action stop
+```
+
+> **Hinweis:** `iex $s -Action status` funktioniert NICHT (iex nimmt keine Parameter). Immer `& ([scriptblock]::Create($s)) -Action <verb>` verwenden.
+
+### Ollama-Registry in LiteLLM registrieren (einmalig)
+
+```powershell
+& ([scriptblock]::Create((iwr "https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/install/Register-R3-Ollama.ps1?r=$(Get-Random)").Content))
 ```
 
 Oder lokal: `C:\Users\mail\R3-DASHBOARD\R3_LLM_ENGINE_REGISTRY\install\Register-R3-Ollama.ps1`

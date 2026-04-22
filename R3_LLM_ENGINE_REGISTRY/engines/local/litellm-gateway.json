@@ -4,23 +4,88 @@
   "provider": "litellm",
   "api_base": "http://localhost:4000",
   "api_key": "r3-local",
-  "models": [
-    "groq/llama-3.3-70b",
-    "groq/llama-3.1-8b",
-    "cerebras/llama-3.3-70b",
-    "sambanova/llama-3.3-70b",
-    "openrouter/auto",
-    "ollama/gemma2:2b",
-    "ollama/llama3.2",
-    "gpt-4o",
-    "claude-3-5-sonnet",
-    "gemini-2.0-flash"
-  ],
-  "default_model": "groq/llama-3.3-70b",
-  "cost": "free-tier-available",
+  "routes": {
+    "r3/code": {
+      "model": "deepseek-coder:6.7b",
+      "node": "RAZER",
+      "task": "code/debug"
+    },
+    "r3/code-alt": {
+      "model": "qwen2.5-coder:latest",
+      "node": "RAZER",
+      "task": "code/alt"
+    },
+    "r3/code-fallback": {
+      "model": "groq/llama-3.3-70b",
+      "node": "cloud",
+      "task": "code/fallback"
+    },
+    "r3/reasoning": {
+      "model": "deepseek-r1:latest",
+      "node": "RAZER",
+      "task": "reasoning"
+    },
+    "r3/reasoning-alt": {
+      "model": "qwen3:latest",
+      "node": "RAZER",
+      "task": "reasoning/alt"
+    },
+    "r3/fast": { "model": "gemma2:2b", "node": "RAZER", "task": "fast/quick" },
+    "r3/fast-alt": {
+      "model": "groq/llama-3.1-8b",
+      "node": "cloud",
+      "task": "fast/fallback"
+    },
+    "r3/chat": {
+      "model": "mistral:latest",
+      "node": "RAZER",
+      "task": "general-chat"
+    },
+    "r3/chat-heavy": {
+      "model": "qwen2.5:14b",
+      "node": "RAZER",
+      "task": "14b-heavy"
+    },
+    "r3/large": {
+      "model": "mixtral:latest",
+      "node": "RAZER",
+      "task": "large-context-46.7b"
+    },
+    "r3/large-alt": {
+      "model": "openrouter/auto",
+      "node": "cloud",
+      "task": "large/fallback"
+    },
+    "r3/autocomplete": {
+      "model": "phi3:mini",
+      "node": "RAZER",
+      "task": "autocomplete"
+    },
+    "r3/embed": {
+      "model": "nomic-embed-text:latest",
+      "node": "APPSEN",
+      "task": "embeddings/RAG"
+    },
+    "r3/appsen-chat": {
+      "model": "llama3.2:latest",
+      "node": "APPSEN",
+      "task": "appsen-fallback"
+    }
+  },
+  "route_count": 14,
+  "default_model": "r3/fast",
+  "embedding_endpoint": "POST http://localhost:4000/v1/embeddings",
+  "embedding_model": "r3/embed",
+  "cost": "zero-cost-local",
   "requires_key": true,
   "key_env": "LITELLM_MASTER_KEY",
-  "start_cmd": "litellm --config /workspaces/session-state/litellm-config.yaml --port 4000",
-  "reachable_from": "codespace",
-  "status": "running"
+  "start_cmd": "& ([scriptblock]::Create((iwr 'https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/install/Start-R3-LiteLLM.ps1?r=$(Get-Random)').Content))",
+  "status_cmd": "& ([scriptblock]::Create((iwr 'https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/install/Start-R3-LiteLLM.ps1?r=$(Get-Random)').Content)) -Action status",
+  "reachable_from": ["windows-host", "docker-container"],
+  "ollama_nodes": {
+    "RAZER": "http://host.docker.internal:11434",
+    "APPSEN": "http://192.168.1.226:11434"
+  },
+  "status": "running",
+  "last_verified": "2026-04-22"
 }
