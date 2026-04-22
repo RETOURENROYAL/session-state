@@ -55,10 +55,15 @@ function Get-ContainerStatus {
 
 function Test-Health([switch]$Silent) {
     try {
-        $null = Invoke-WebRequest "$LiteLLMUrl/health" -TimeoutSec 3 -UseBasicParsing -EA Stop
+        $resp = Invoke-WebRequest "$LiteLLMUrl/health" -TimeoutSec 3 -UseBasicParsing -EA Stop
         if (-not $Silent) { Write-Host "  ✓ LiteLLM $LiteLLMUrl/v1 — online" -ForegroundColor Green }
         return $true
     } catch {
+        # 401 = LiteLLM is running but requires auth — treat as online
+        if ($_.Exception.Response -and [int]$_.Exception.Response.StatusCode -eq 401) {
+            if (-not $Silent) { Write-Host "  ✓ LiteLLM $LiteLLMUrl/v1 — online (auth required)" -ForegroundColor Green }
+            return $true
+        }
         if (-not $Silent) { Write-Host "  ✗ LiteLLM $LiteLLMUrl — offline" -ForegroundColor Red }
         return $false
     }
