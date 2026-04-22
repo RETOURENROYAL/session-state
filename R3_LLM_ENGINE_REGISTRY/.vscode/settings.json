@@ -84,5 +84,11 @@
     "debug.overrideProxyUrl": "http://localhost:4000/v1"
   },
   "github.copilot.chat.localeOverride": "de",
-  "chat.agent.enabled": true
+  "chat.agent.enabled": true,
+
+  // ── R3 Platform Context ──────────────────────────────────
+  // copilot-instructions.md gives Copilot Chat full R3 platform context.
+  // Loaded automatically from .github/copilot-instructions.md in workspace root.
+  "github.copilot.chat.codeGeneration.useInstructionFiles": true,
+  "github.copilot.chat.testGeneration.useInstructionFiles": true
 }
