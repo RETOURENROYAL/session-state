@@ -69,11 +69,18 @@ services:
       - WEBHOOK_URL=http://localhost:5678
       - GENERIC_TIMEZONE=Europe/Berlin
       - N8N_DEFAULT_LOCALE=de
-      - GITHUB_TOKEN=`${GITHUB_TOKEN}
-      - GITHUB_PERSONAL_ACCESS_TOKEN=`${GITHUB_TOKEN}
+      - N8N_LOG_LEVEL=warn
+      - GITHUB_TOKEN=`${GITHUB_TOKEN:-}
+      - GITHUB_PERSONAL_ACCESS_TOKEN=`${GITHUB_TOKEN:-}
     volumes:
       - n8n_data:/home/node/.n8n
       - ./workflows:/workflows:ro
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:5678/healthz || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
 volumes:
   n8n_data:
 "@ | Set-Content "$TargetDir\docker-compose.yml"
@@ -90,10 +97,21 @@ if (-not $env:GITHUB_TOKEN) {
 $start = Read-Host "  ▶ n8n jetzt starten? (Docker required) [y/N]"
 if ($start -match '^[yY]') {
     Set-Location $TargetDir
+    # Remove existing container to avoid name conflict
+    $existing = docker ps -aq --filter "name=r3-n8n" 2>$null
+    if ($existing) {
+        Write-Host "  Entferne alten r3-n8n Container..." -ForegroundColor Gray
+        docker rm -f r3-n8n 2>$null | Out-Null
+    }
     docker compose up -d
-    Start-Sleep 5
-    Write-Host "  ✓ n8n läuft auf http://localhost:5678" -ForegroundColor Green
-    Start-Process "$DashDir\index.html"
+    if ($LASTEXITCODE -eq 0) {
+        Start-Sleep 5
+        Write-Host "  ✓ n8n laeuft auf http://localhost:5678" -ForegroundColor Green
+        Start-Process "$DashDir\index.html"
+    } else {
+        Write-Host "  ✗ docker compose up fehlgeschlagen (siehe Fehler oben)" -ForegroundColor Red
+        Write-Host "  Manuell: cd $TargetDir; docker compose up -d" -ForegroundColor Gray
+    }
 } else {
     Write-Host ""
     Write-Host "  Manuelle Schritte:" -ForegroundColor Cyan

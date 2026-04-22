@@ -1,5 +1,3 @@
-version: "3.8"
-
 services:
   n8n:
     image: n8nio/n8n:latest
@@ -9,18 +7,13 @@ services:
       - "5678:5678"
     environment:
       - N8N_BASIC_AUTH_ACTIVE=false
-      - N8N_HOST=localhost
-      - N8N_PORT=5678
-      - N8N_PROTOCOL=http
       - WEBHOOK_URL=http://localhost:5678
       - GENERIC_TIMEZONE=Europe/Berlin
       - N8N_DEFAULT_LOCALE=de
       - EXECUTIONS_PROCESS=main
-      - N8N_METRICS=false
       - N8N_LOG_LEVEL=warn
-      # Pass-through GitHub token to all workflows
-      - GITHUB_TOKEN=${GITHUB_TOKEN}
-      - GITHUB_PERSONAL_ACCESS_TOKEN=${GITHUB_TOKEN}
+      - GITHUB_TOKEN=${GITHUB_TOKEN:-}
+      - GITHUB_PERSONAL_ACCESS_TOKEN=${GITHUB_TOKEN:-}
     volumes:
       - n8n_data:/home/node/.n8n
       - ./workflows:/workflows:ro
