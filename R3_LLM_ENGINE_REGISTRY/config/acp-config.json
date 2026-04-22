@@ -66,7 +66,14 @@
       "status": "live",
       "auth": {
         "type": "env_var",
-        "vars": [{ "name": "R3_API_KEY", "label": "R3 API Key", "secret": true, "optional": true }]
+        "vars": [
+          {
+            "name": "R3_API_KEY",
+            "label": "R3 API Key",
+            "secret": true,
+            "optional": true
+          }
+        ]
       },
       "capabilities": {
         "fs": { "readTextFile": true, "writeTextFile": true },
@@ -141,8 +148,14 @@
     "_comment": "Inject MCP servers into sessions via ACP channel — no separate process needed.",
     "session_new_tools_block": {
       "mcpServers": {
-        "r3-project-tools": { "transport": "acp", "id": "r3-project-tools-550e8400" },
-        "r3-workspace-tools": { "transport": "acp", "id": "r3-workspace-tools-a1b2c3d4" }
+        "r3-project-tools": {
+          "transport": "acp",
+          "id": "r3-project-tools-550e8400"
+        },
+        "r3-workspace-tools": {
+          "transport": "acp",
+          "id": "r3-workspace-tools-a1b2c3d4"
+        }
       }
     },
     "mcp_connect_flow": {
@@ -156,7 +169,9 @@
     "_doc": "https://agentclientprotocol.com/protocol/initialization.md",
     "full_handshake": {
       "step1_initialize": {
-        "jsonrpc": "2.0", "id": 1, "method": "initialize",
+        "jsonrpc": "2.0",
+        "id": 1,
+        "method": "initialize",
         "params": {
           "protocolVersion": 1,
           "clientInfo": { "name": "r3-copilot-cli", "version": "1.0" },
@@ -173,17 +188,28 @@
       },
       "step2_authenticate_if_required": {
         "_note": "Only if agentCapabilities.auth present in initialize response",
-        "jsonrpc": "2.0", "id": 2, "method": "authenticate",
-        "params": { "method": "env_var", "vars": { "R3_API_KEY": "${R3_API_KEY}" } }
+        "jsonrpc": "2.0",
+        "id": 2,
+        "method": "authenticate",
+        "params": {
+          "method": "env_var",
+          "vars": { "R3_API_KEY": "${R3_API_KEY}" }
+        }
       },
       "step3_providers_list": {
         "_note": "Only if agentCapabilities.providers present",
-        "jsonrpc": "2.0", "id": 3, "method": "providers/list", "params": {}
+        "jsonrpc": "2.0",
+        "id": 3,
+        "method": "providers/list",
+        "params": {}
       },
       "step4_providers_set": {
-        "jsonrpc": "2.0", "id": 4, "method": "providers/set",
+        "jsonrpc": "2.0",
+        "id": 4,
+        "method": "providers/set",
         "params": {
-          "id": "main", "apiType": "openai",
+          "id": "main",
+          "apiType": "openai",
           "baseUrl": "http://localhost:4000/v1",
           "headers": { "Authorization": "Bearer r3-local" }
         }
@@ -195,7 +221,9 @@
     "_doc": "https://agentclientprotocol.com/protocol/session-setup.md",
 
     "session_new": {
-      "jsonrpc": "2.0", "id": 10, "method": "session/new",
+      "jsonrpc": "2.0",
+      "id": 10,
+      "method": "session/new",
       "params": {
         "cwd": "C:\\Users\\mail\\R3-DASHBOARD",
         "workspaceRoots": [
@@ -205,7 +233,10 @@
         ],
         "tools": {
           "mcpServers": {
-            "r3-matrix-control": { "transport": "acp", "id": "r3-matrix-550e8400" }
+            "r3-matrix-control": {
+              "transport": "acp",
+              "id": "r3-matrix-550e8400"
+            }
           }
         }
       }
@@ -213,13 +244,17 @@
 
     "session_list": {
       "_doc": "https://agentclientprotocol.com/protocol/session-list.md",
-      "jsonrpc": "2.0", "id": 11, "method": "session/list",
+      "jsonrpc": "2.0",
+      "id": 11,
+      "method": "session/list",
       "params": { "cwd": "C:\\Users\\mail\\R3-DASHBOARD" },
       "_note": "Requires sessionCapabilities.list. Filter by cwd to scope to R3 workspace."
     },
 
     "session_load": {
-      "jsonrpc": "2.0", "id": 12, "method": "session/load",
+      "jsonrpc": "2.0",
+      "id": 12,
+      "method": "session/load",
       "params": { "sessionId": "<sessionId from session/list>" },
       "_note": "Requires sessionCapabilities.load. Replays full conversation history."
     },
@@ -227,7 +262,9 @@
     "session_set_mode": {
       "_doc": "https://agentclientprotocol.com/protocol/session-modes.md",
       "_note": "Deprecated in favour of session_config_options. Still supported.",
-      "jsonrpc": "2.0", "id": 13, "method": "session/set_mode",
+      "jsonrpc": "2.0",
+      "id": 13,
+      "method": "session/set_mode",
       "params": { "sessionId": "<id>", "mode": "code" },
       "_available_modes": ["ask", "code", "auto"]
     },
@@ -237,36 +274,78 @@
       "_note": "Preferred over session/set_mode. Returned in session/new response as configOptions[].",
       "r3_options": [
         {
-          "id": "model", "name": "Model", "category": "model", "type": "select",
+          "id": "model",
+          "name": "Model",
+          "category": "model",
+          "type": "select",
           "currentValue": "groq/llama-3.3-70b",
           "options": [
-            { "value": "groq/llama-3.3-70b",      "name": "Groq Llama 3.3 70B (free, fast)" },
-            { "value": "cerebras/llama-3.3-70b",   "name": "Cerebras 70B (free, ultra-fast)" },
-            { "value": "sambanova/llama-3.3-70b",  "name": "SambaNova 70B (free)" },
-            { "value": "chutes/deepseek-r1",        "name": "DeepSeek R1 via Chutes (free)" },
-            { "value": "openrouter/auto",           "name": "OpenRouter Auto" },
-            { "value": "ollama/gemma2:2b",          "name": "Ollama Gemma2 (local RAZER)" },
-            { "value": "gpt-4o",                    "name": "GPT-4o (paid)" },
-            { "value": "claude-3-5-sonnet",         "name": "Claude 3.5 Sonnet (paid)" },
-            { "value": "gemini/gemini-2.0-flash",   "name": "Gemini 2.0 Flash (paid)" }
+            {
+              "value": "groq/llama-3.3-70b",
+              "name": "Groq Llama 3.3 70B (free, fast)"
+            },
+            {
+              "value": "cerebras/llama-3.3-70b",
+              "name": "Cerebras 70B (free, ultra-fast)"
+            },
+            {
+              "value": "sambanova/llama-3.3-70b",
+              "name": "SambaNova 70B (free)"
+            },
+            {
+              "value": "chutes/deepseek-r1",
+              "name": "DeepSeek R1 via Chutes (free)"
+            },
+            { "value": "openrouter/auto", "name": "OpenRouter Auto" },
+            {
+              "value": "ollama/gemma2:2b",
+              "name": "Ollama Gemma2 (local RAZER)"
+            },
+            { "value": "gpt-4o", "name": "GPT-4o (paid)" },
+            {
+              "value": "claude-3-5-sonnet",
+              "name": "Claude 3.5 Sonnet (paid)"
+            },
+            {
+              "value": "gemini/gemini-2.0-flash",
+              "name": "Gemini 2.0 Flash (paid)"
+            }
           ]
         },
         {
-          "id": "mode", "name": "Session Mode", "category": "mode", "type": "select",
+          "id": "mode",
+          "name": "Session Mode",
+          "category": "mode",
+          "type": "select",
           "currentValue": "ask",
           "options": [
-            { "value": "ask",  "name": "Ask",  "description": "Request permission before any change" },
-            { "value": "code", "name": "Code", "description": "Full tool access, write code directly" },
-            { "value": "auto", "name": "Auto", "description": "Decide automatically based on task" }
+            {
+              "value": "ask",
+              "name": "Ask",
+              "description": "Request permission before any change"
+            },
+            {
+              "value": "code",
+              "name": "Code",
+              "description": "Full tool access, write code directly"
+            },
+            {
+              "value": "auto",
+              "name": "Auto",
+              "description": "Decide automatically based on task"
+            }
           ]
         },
         {
-          "id": "thought_level", "name": "Reasoning Level", "category": "thought_level", "type": "select",
+          "id": "thought_level",
+          "name": "Reasoning Level",
+          "category": "thought_level",
+          "type": "select",
           "currentValue": "medium",
           "options": [
-            { "value": "low",    "name": "Fast — minimal reasoning" },
+            { "value": "low", "name": "Fast — minimal reasoning" },
             { "value": "medium", "name": "Balanced" },
-            { "value": "high",   "name": "Deep — full chain-of-thought" }
+            { "value": "high", "name": "Deep — full chain-of-thought" }
           ]
         }
       ]
@@ -277,7 +356,9 @@
     "_doc": "https://agentclientprotocol.com/protocol/prompt-turn.md",
 
     "session_prompt": {
-      "jsonrpc": "2.0", "id": 20, "method": "session/prompt",
+      "jsonrpc": "2.0",
+      "id": 20,
+      "method": "session/prompt",
       "params": {
         "sessionId": "<id>",
         "message": { "role": "user", "content": "Hello from R3-DASHBOARD!" }
@@ -286,7 +367,8 @@
 
     "session_cancel": {
       "_note": "Notification — no response expected",
-      "jsonrpc": "2.0", "method": "session/cancel",
+      "jsonrpc": "2.0",
+      "method": "session/cancel",
       "params": { "sessionId": "<id>" }
     },
 
@@ -309,11 +391,17 @@
       "_doc": "https://agentclientprotocol.com/protocol/file-system.md",
       "_note": "All paths MUST be absolute.",
       "fs_read": {
-        "jsonrpc": "2.0", "id": 30, "method": "fs/read_text_file",
-        "params": { "path": "C:\\Users\\mail\\R3-DASHBOARD\\engine-registry.json" }
+        "jsonrpc": "2.0",
+        "id": 30,
+        "method": "fs/read_text_file",
+        "params": {
+          "path": "C:\\Users\\mail\\R3-DASHBOARD\\engine-registry.json"
+        }
       },
       "fs_write": {
-        "jsonrpc": "2.0", "id": 31, "method": "fs/write_text_file",
+        "jsonrpc": "2.0",
+        "id": 31,
+        "method": "fs/write_text_file",
         "params": {
           "path": "C:\\Users\\mail\\R3-DASHBOARD\\R3_LLM_ENGINE_REGISTRY\\logs\\acp-test.log",
           "content": "ACP write test OK"
@@ -324,25 +412,56 @@
     "terminals": {
       "_doc": "https://agentclientprotocol.com/protocol/terminals.md",
       "terminal_create": {
-        "jsonrpc": "2.0", "id": 40, "method": "terminal/create",
+        "jsonrpc": "2.0",
+        "id": 40,
+        "method": "terminal/create",
         "params": {
-          "sessionId": "<id>", "command": "node", "args": ["server.js"],
+          "sessionId": "<id>",
+          "command": "node",
+          "args": ["server.js"],
           "cwd": "C:\\Users\\mail\\R3-DASHBOARD\\SOURCE\\chat-legs",
           "env": { "PORT": "8420", "NODE_ENV": "production" }
         }
       },
-      "terminal_output":       { "jsonrpc": "2.0", "id": 41, "method": "terminal/output",         "params": { "terminalId": "<id>" } },
-      "terminal_wait_for_exit":{ "jsonrpc": "2.0", "id": 42, "method": "terminal/wait_for_exit",  "params": { "terminalId": "<id>", "timeout": 30000 } },
-      "terminal_kill":         { "jsonrpc": "2.0", "id": 43, "method": "terminal/kill",           "params": { "terminalId": "<id>" } },
-      "terminal_release":      { "jsonrpc": "2.0", "id": 44, "method": "terminal/release",        "params": { "terminalId": "<id>" } }
+      "terminal_output": {
+        "jsonrpc": "2.0",
+        "id": 41,
+        "method": "terminal/output",
+        "params": { "terminalId": "<id>" }
+      },
+      "terminal_wait_for_exit": {
+        "jsonrpc": "2.0",
+        "id": 42,
+        "method": "terminal/wait_for_exit",
+        "params": { "terminalId": "<id>", "timeout": 30000 }
+      },
+      "terminal_kill": {
+        "jsonrpc": "2.0",
+        "id": 43,
+        "method": "terminal/kill",
+        "params": { "terminalId": "<id>" }
+      },
+      "terminal_release": {
+        "jsonrpc": "2.0",
+        "id": 44,
+        "method": "terminal/release",
+        "params": { "terminalId": "<id>" }
+      }
     },
 
     "permission_request": {
       "_doc": "https://agentclientprotocol.com/protocol/tool-calls.md",
-      "jsonrpc": "2.0", "id": 50, "method": "session/request_permission",
+      "jsonrpc": "2.0",
+      "id": 50,
+      "method": "session/request_permission",
       "params": {
         "sessionId": "<id>",
-        "toolCall": { "name": "fs/write_text_file", "params": { "path": "C:\\Users\\mail\\R3-DASHBOARD\\engine-registry.json" } },
+        "toolCall": {
+          "name": "fs/write_text_file",
+          "params": {
+            "path": "C:\\Users\\mail\\R3-DASHBOARD\\engine-registry.json"
+          }
+        },
         "message": "Agent wants to modify engine-registry.json"
       }
     }
@@ -356,50 +475,106 @@
       "result": {
         "providers": [
           {
-            "id": "main", "supported": ["openai", "anthropic"], "required": true,
-            "current": { "apiType": "openai", "baseUrl": "https://api.openai.com/v1" }
+            "id": "main",
+            "supported": ["openai", "anthropic"],
+            "required": true,
+            "current": {
+              "apiType": "openai",
+              "baseUrl": "https://api.openai.com/v1"
+            }
           }
         ]
       }
     },
 
     "providers_set_r3": {
-      "jsonrpc": "2.0", "id": 60, "method": "providers/set",
+      "jsonrpc": "2.0",
+      "id": 60,
+      "method": "providers/set",
       "params": {
-        "id": "main", "apiType": "openai",
+        "id": "main",
+        "apiType": "openai",
         "baseUrl": "http://localhost:4000/v1",
         "headers": { "Authorization": "Bearer r3-local" }
       }
     },
 
     "providers_disable": {
-      "jsonrpc": "2.0", "id": 61, "method": "providers/disable",
+      "jsonrpc": "2.0",
+      "id": 61,
+      "method": "providers/disable",
       "params": { "id": "secondary" },
       "_note": "Disable non-required providers at runtime without losing discoverability."
     },
 
-    "available_models_via_litellm": [
-      "groq/llama-3.3-70b", "cerebras/llama-3.3-70b", "sambanova/llama-3.3-70b",
-      "chutes/deepseek-r1", "openrouter/auto", "ollama/gemma2:2b",
-      "gpt-4o", "claude-3-5-sonnet", "gemini/gemini-2.0-flash", "mistral/mistral-large"
-    ]
+    "available_models_via_litellm": {
+      "_note": "r3/* routes = local Ollama (zero-cost). Others via external providers.",
+      "ollama_local": [
+        "r3/code",
+        "r3/code-alt",
+        "r3/code-fallback",
+        "r3/reasoning",
+        "r3/reasoning-alt",
+        "r3/fast",
+        "r3/fast-alt",
+        "r3/chat",
+        "r3/chat-heavy",
+        "r3/large",
+        "r3/large-alt",
+        "r3/autocomplete",
+        "r3/embed",
+        "r3/appsen-chat"
+      ],
+      "free_cloud": [
+        "groq/llama-3.3-70b",
+        "cerebras/llama-3.3-70b",
+        "sambanova/llama-3.3-70b",
+        "chutes/deepseek-r1",
+        "openrouter/auto"
+      ],
+      "paid_cloud": [
+        "gpt-4o",
+        "claude-3-5-sonnet",
+        "gemini/gemini-2.0-flash",
+        "mistral/mistral-large"
+      ]
+    }
   },
 
   "authentication": {
     "_doc": "https://agentclientprotocol.com/rfds/auth-methods.md",
     "supported_methods": [
       {
-        "id": "r3-local", "name": "R3 Local Key", "type": "env_var",
-        "vars": [{ "name": "R3_API_KEY", "label": "R3 API Key", "secret": true, "optional": true }],
+        "id": "r3-local",
+        "name": "R3 Local Key",
+        "type": "env_var",
+        "vars": [
+          {
+            "name": "R3_API_KEY",
+            "label": "R3 API Key",
+            "secret": true,
+            "optional": true
+          }
+        ],
         "_note": "Default key 'r3-local' — no auth needed for local-only use"
       },
       {
-        "id": "github-pat", "name": "GitHub PAT", "type": "env_var",
-        "vars": [{ "name": "GITHUB_PERSONAL_ACCESS_TOKEN", "label": "GitHub PAT", "secret": true }],
+        "id": "github-pat",
+        "name": "GitHub PAT",
+        "type": "env_var",
+        "vars": [
+          {
+            "name": "GITHUB_PERSONAL_ACCESS_TOKEN",
+            "label": "GitHub PAT",
+            "secret": true
+          }
+        ],
         "link": "https://github.com/settings/tokens"
       },
       {
-        "id": "copilot-cli", "name": "Copilot CLI Auth", "type": "agent",
+        "id": "copilot-cli",
+        "name": "Copilot CLI Auth",
+        "type": "agent",
         "description": "Run 'copilot auth login' — agent handles OAuth flow"
       }
     ]
@@ -409,11 +584,31 @@
     "_doc": "https://agentclientprotocol.com/protocol/slash-commands.md",
     "_note": "Agent advertises via session/update notification with commands update.",
     "r3_commands": [
-      { "name": "/ide",    "description": "Toggle VS Code connection + diff view", "agent": "github-copilot-cli" },
-      { "name": "/model",  "description": "Switch active LLM model",               "agent": "r3-chatlegs-primary" },
-      { "name": "/status", "description": "Show R3 server + engine status",        "agent": "r3-matrix-control" },
-      { "name": "/route",  "description": "Change LLM routing target",             "agent": "r3-matrix-control" },
-      { "name": "/proxy",  "description": "Manage proxy chain",                    "agent": "r3-matrix-control" }
+      {
+        "name": "/ide",
+        "description": "Toggle VS Code connection + diff view",
+        "agent": "github-copilot-cli"
+      },
+      {
+        "name": "/model",
+        "description": "Switch active LLM model",
+        "agent": "r3-chatlegs-primary"
+      },
+      {
+        "name": "/status",
+        "description": "Show R3 server + engine status",
+        "agent": "r3-matrix-control"
+      },
+      {
+        "name": "/route",
+        "description": "Change LLM routing target",
+        "agent": "r3-matrix-control"
+      },
+      {
+        "name": "/proxy",
+        "description": "Manage proxy chain",
+        "agent": "r3-matrix-control"
+      }
     ]
   },
 
@@ -421,23 +616,45 @@
     "_doc": "https://agentclientprotocol.com/rfds/additional-directories.md",
     "_comment": "Pass all roots so agents have full R3-DASHBOARD context from session start.",
     "roots": [
-      { "path": "C:\\Users\\mail\\R3-DASHBOARD",                            "label": "R3 Root" },
-      { "path": "C:\\Users\\mail\\R3-DASHBOARD\\SOURCE\\chat-legs",         "label": "ChatLegs" },
-      { "path": "C:\\Users\\mail\\R3-DASHBOARD\\MODULES",                   "label": "Modules" },
-      { "path": "C:\\Users\\mail\\R3-DASHBOARD\\MODULES\\agent-skills",     "label": "Agent Skills" },
-      { "path": "C:\\Users\\mail\\R3-DASHBOARD\\GH_MD",                     "label": "Knowledge Base" }
+      { "path": "C:\\Users\\mail\\R3-DASHBOARD", "label": "R3 Root" },
+      {
+        "path": "C:\\Users\\mail\\R3-DASHBOARD\\SOURCE\\chat-legs",
+        "label": "ChatLegs"
+      },
+      { "path": "C:\\Users\\mail\\R3-DASHBOARD\\MODULES", "label": "Modules" },
+      {
+        "path": "C:\\Users\\mail\\R3-DASHBOARD\\MODULES\\agent-skills",
+        "label": "Agent Skills"
+      },
+      {
+        "path": "C:\\Users\\mail\\R3-DASHBOARD\\GH_MD",
+        "label": "Knowledge Base"
+      }
     ]
   },
 
   "vscode_integration": {
     "_comment": "Live in .vscode/settings.json + %APPDATA%/Code/User/mcp.json",
     "mcp_servers": {
-      "r3-chatlegs-primary": { "type": "sse", "url": "http://localhost:8420/mcp" },
-      "r3-chatlegs-shadow":  { "type": "sse", "url": "http://localhost:8421/mcp" },
-      "r3-matrix-control":   { "_note": "CONFIRMED: :8422 has no /mcp endpoint. Remove from mcp.json.", "type": "sse", "url": "http://localhost:8422/mcp", "status": "404-not-found" }
+      "r3-chatlegs-primary": {
+        "type": "sse",
+        "url": "http://localhost:8420/mcp"
+      },
+      "r3-chatlegs-shadow": {
+        "type": "sse",
+        "url": "http://localhost:8421/mcp"
+      },
+      "r3-matrix-control": {
+        "_note": "CONFIRMED: :8422 has no /mcp endpoint. Remove from mcp.json.",
+        "type": "sse",
+        "url": "http://localhost:8422/mcp",
+        "status": "404-not-found"
+      }
     },
     "copilot_proxy": {
-      "github.copilot.advanced": { "debug.overrideProxyUrl": "http://localhost:4000/v1" }
+      "github.copilot.advanced": {
+        "debug.overrideProxyUrl": "http://localhost:4000/v1"
+      }
     },
     "copilot_cli_acp": {
       "step1": "copilot (start CLI)",
@@ -451,13 +668,13 @@
     "_comment": "Run in PowerShell — verified working commands only",
     "_note": "All /acp commands removed — R3 servers do not implement ACP JSON-RPC. Use /mcp (SSE) and /v1/ (OpenAI) instead.",
 
-    "STEP1_list_models":     "(Invoke-RestMethod 'http://localhost:4000/v1/models' -Headers @{Authorization='Bearer r3-local'}).data | Select id",
+    "STEP1_list_models": "(Invoke-RestMethod 'http://localhost:4000/v1/models' -Headers @{Authorization='Bearer r3-local'}).data | Select id",
     "STEP2_chat_auto_model": "$m=(Invoke-RestMethod 'http://localhost:4000/v1/models' -Headers @{Authorization='Bearer r3-local'}).data[0].id; Invoke-RestMethod -Method Post 'http://localhost:4000/v1/chat/completions' -Headers @{Authorization='Bearer r3-local';'Content-Type'='application/json'} -Body \"{`\"model`\":`\"$m`\",`\"messages`\":[{`\"role`\":`\"user`\",`\"content`\":`\"Ping`\"}],`\"max_tokens`\":5}\" | ConvertTo-Json",
-    "STEP3_mcp_8420":        "Invoke-WebRequest 'http://localhost:8420/mcp' -UseBasicParsing | Select StatusCode,StatusDescription",
-    "STEP4_mcp_8421":        "Invoke-WebRequest 'http://localhost:8421/mcp' -UseBasicParsing | Select StatusCode,StatusDescription",
-    "STEP5_8422_probe":      "@('/','/api','/status','/health','/engines') | ForEach-Object { try { $r=Invoke-WebRequest \"http://localhost:8422$_\" -TimeoutSec 3 -UseBasicParsing; Write-Host \"$_ => $($r.StatusCode)\" } catch { Write-Host \"$_ => ERR\" } }",
-    "full_test_suite":       "iwr 'https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/scripts/Test-R3-ACP-MultiConnect.ps1' -OutFile \"$env:TEMP\\r3test.ps1\"; & \"$env:TEMP\\r3test.ps1\"",
-    "install_mcp_config":    "iwr 'https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/scripts/Install-R3-VSCode-MCP.ps1' -OutFile \"$env:TEMP\\r3mcp.ps1\"; & \"$env:TEMP\\r3mcp.ps1\"",
-    "start_all_servers":     "iwr 'https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/scripts/Start-R3-AllServers.ps1' -OutFile \"$env:TEMP\\r3start.ps1\"; & \"$env:TEMP\\r3start.ps1\""
+    "STEP3_mcp_8420": "Invoke-WebRequest 'http://localhost:8420/mcp' -UseBasicParsing | Select StatusCode,StatusDescription",
+    "STEP4_mcp_8421": "Invoke-WebRequest 'http://localhost:8421/mcp' -UseBasicParsing | Select StatusCode,StatusDescription",
+    "STEP5_8422_probe": "@('/','/api','/status','/health','/engines') | ForEach-Object { try { $r=Invoke-WebRequest \"http://localhost:8422$_\" -TimeoutSec 3 -UseBasicParsing; Write-Host \"$_ => $($r.StatusCode)\" } catch { Write-Host \"$_ => ERR\" } }",
+    "full_test_suite": "iwr 'https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/scripts/Test-R3-ACP-MultiConnect.ps1' -OutFile \"$env:TEMP\\r3test.ps1\"; & \"$env:TEMP\\r3test.ps1\"",
+    "install_mcp_config": "iwr 'https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/scripts/Install-R3-VSCode-MCP.ps1' -OutFile \"$env:TEMP\\r3mcp.ps1\"; & \"$env:TEMP\\r3mcp.ps1\"",
+    "start_all_servers": "iwr 'https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/scripts/Start-R3-AllServers.ps1' -OutFile \"$env:TEMP\\r3start.ps1\"; & \"$env:TEMP\\r3start.ps1\""
   }
 }
