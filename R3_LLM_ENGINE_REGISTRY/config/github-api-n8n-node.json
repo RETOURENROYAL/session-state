@@ -1,0 +1,535 @@
+{
+  "_name": "R3-DASHBOARD — Universal GitHub REST API n8n Node",
+  "_description": "Complete GitHub REST API coverage for n8n workflows. Import as HTTP Request nodes or use with the built-in GitHub node. Covers: authentication, hosted/self-hosted runners, OAuth apps, fine-grained PATs, installations, git-database, orgs, codespaces, workflow-runs, secrets.",
+  "_base_url": "https://api.github.com",
+  "_auth_methods": {
+    "pat_header":          "Authorization: Bearer YOUR_GITHUB_PAT",
+    "pat_basic":           "Authorization: Basic base64(username:pat)",
+    "github_app_jwt":      "Authorization: Bearer YOUR_APP_JWT",
+    "oauth_token":         "Authorization: token YOUR_OAUTH_TOKEN",
+    "fine_grained_pat":    "Authorization: Bearer github_pat_..."
+  },
+  "_n8n_credential": {
+    "type": "httpHeaderAuth",
+    "name": "GitHub PAT",
+    "data": { "name": "Authorization", "value": "Bearer {{$credentials.githubPat}}" }
+  },
+  "_variables": {
+    "OWNER":   "RETOURENROYAL",
+    "REPO":    "session-state",
+    "ORG":     "YOUR_ORG",
+    "PAT":     "{{$credentials.githubPat}}",
+    "BASE":    "https://api.github.com"
+  },
+
+  "n8n_workflow": {
+    "name": "GitHub REST API — Universal R3 Node",
+    "nodes": [
+
+      {
+        "id": "trigger",
+        "name": "Manual Trigger",
+        "type": "n8n-nodes-base.manualTrigger",
+        "position": [240, 300]
+      },
+
+      {
+        "id": "auth-test",
+        "name": "AUTH — Verify Token",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [460, 100],
+        "_doc": "https://docs.github.com/de/rest/authentication/authenticating-to-the-rest-api",
+        "parameters": {
+          "method": "GET",
+          "url": "https://api.github.com/user",
+          "authentication": "genericCredentialType",
+          "genericAuthType": "httpHeaderAuth",
+          "sendHeaders": true,
+          "headerParameters": { "parameters": [
+            { "name": "Accept", "value": "application/vnd.github+json" },
+            { "name": "X-GitHub-Api-Version", "value": "2022-11-28" }
+          ]},
+          "options": { "response": { "response": { "neverError": true } } }
+        },
+        "_description": "GET /user — verify PAT works, returns authenticated user info"
+      },
+
+      {
+        "id": "auth-token-scopes",
+        "name": "AUTH — Check Token Scopes",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [460, 180],
+        "_doc": "https://docs.github.com/de/rest/authentication/authenticating-to-the-rest-api",
+        "parameters": {
+          "method": "GET",
+          "url": "https://api.github.com/rate_limit",
+          "authentication": "genericCredentialType",
+          "genericAuthType": "httpHeaderAuth",
+          "sendHeaders": true,
+          "headerParameters": { "parameters": [
+            { "name": "Accept", "value": "application/vnd.github+json" }
+          ]}
+        },
+        "_description": "GET /rate_limit — check remaining API quota per auth method"
+      },
+
+      {
+        "id": "pat-permissions",
+        "name": "AUTH — Fine-Grained PAT Permissions",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [460, 260],
+        "_doc": "https://docs.github.com/de/rest/authentication/permissions-required-for-fine-grained-personal-access-tokens",
+        "parameters": {
+          "method": "GET",
+          "url": "https://api.github.com/user/installations",
+          "authentication": "genericCredentialType",
+          "genericAuthType": "httpHeaderAuth",
+          "sendHeaders": true,
+          "headerParameters": { "parameters": [
+            { "name": "Accept", "value": "application/vnd.github+json" }
+          ]}
+        },
+        "_description": "Fine-grained PATs require explicit permissions per resource. Required scopes per area documented at link above.",
+        "_required_permissions": {
+          "actions":      ["Actions: Read/Write"],
+          "secrets":      ["Secrets: Read/Write"],
+          "codespaces":   ["Codespaces: Read/Write"],
+          "runners":      ["Administration: Read/Write"],
+          "org":          ["Members: Read/Write", "Administration: Read/Write"],
+          "git_database": ["Contents: Read/Write"],
+          "installations":["Administration: Read"]
+        }
+      },
+
+      {
+        "id": "oauth-list-apps",
+        "name": "OAUTH — List Authorized Apps",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [460, 340],
+        "_doc": "https://docs.github.com/de/rest/apps/oauth-applications",
+        "parameters": {
+          "method": "GET",
+          "url": "https://api.github.com/applications/{{$node.config.clientId}}/tokens/{{$node.config.accessToken}}",
+          "authentication": "genericCredentialType",
+          "genericAuthType": "httpHeaderAuth",
+          "_note": "Requires OAuth App client_id + client_secret as Basic Auth"
+        },
+        "_available_endpoints": {
+          "check_token":       "POST /applications/{client_id}/token",
+          "reset_token":       "PATCH /applications/{client_id}/token",
+          "delete_token":      "DELETE /applications/{client_id}/token",
+          "delete_grant":      "DELETE /applications/{client_id}/grant",
+          "list_grants":       "GET /applications/grants",
+          "get_grant":         "GET /applications/grants/{grant_id}",
+          "delete_grant_user": "DELETE /applications/grants/{grant_id}"
+        }
+      },
+
+      {
+        "id": "installations-list",
+        "name": "INSTALLATIONS — List App Installations",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [460, 420],
+        "_doc": "https://docs.github.com/de/rest/apps/installations",
+        "parameters": {
+          "method": "GET",
+          "url": "https://api.github.com/app/installations",
+          "authentication": "genericCredentialType",
+          "genericAuthType": "httpHeaderAuth",
+          "sendHeaders": true,
+          "headerParameters": { "parameters": [
+            { "name": "Accept", "value": "application/vnd.github+json" }
+          ]}
+        },
+        "_available_endpoints": {
+          "list_installations":        "GET /app/installations",
+          "get_installation":          "GET /app/installations/{installation_id}",
+          "delete_installation":       "DELETE /app/installations/{installation_id}",
+          "create_installation_token": "POST /app/installations/{installation_id}/access_tokens",
+          "suspend_installation":      "PUT /app/installations/{installation_id}/suspended",
+          "unsuspend_installation":    "DELETE /app/installations/{installation_id}/suspended",
+          "list_repos_for_install":    "GET /installation/repositories",
+          "list_user_installations":   "GET /user/installations",
+          "list_repos_user_install":   "GET /user/installations/{installation_id}/repositories",
+          "add_repo_to_install":       "PUT /user/installations/{installation_id}/repositories/{repository_id}",
+          "remove_repo_from_install":  "DELETE /user/installations/{installation_id}/repositories/{repository_id}"
+        }
+      },
+
+      {
+        "id": "git-db-get-ref",
+        "name": "GIT DB — Get Reference",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [460, 500],
+        "_doc": "https://docs.github.com/de/rest/guides/using-the-rest-api-to-interact-with-your-git-database",
+        "parameters": {
+          "method": "GET",
+          "url": "=https://api.github.com/repos/{{$node.config.owner}}/{{$node.config.repo}}/git/refs/heads/main",
+          "authentication": "genericCredentialType",
+          "genericAuthType": "httpHeaderAuth"
+        },
+        "_available_endpoints": {
+          "get_blob":           "GET  /repos/{owner}/{repo}/git/blobs/{file_sha}",
+          "create_blob":        "POST /repos/{owner}/{repo}/git/blobs",
+          "get_commit":         "GET  /repos/{owner}/{repo}/git/commits/{commit_sha}",
+          "create_commit":      "POST /repos/{owner}/{repo}/git/commits",
+          "list_refs":          "GET  /repos/{owner}/{repo}/git/refs",
+          "get_ref":            "GET  /repos/{owner}/{repo}/git/ref/{ref}",
+          "create_ref":         "POST /repos/{owner}/{repo}/git/refs",
+          "update_ref":         "PATCH /repos/{owner}/{repo}/git/refs/{ref}",
+          "delete_ref":         "DELETE /repos/{owner}/{repo}/git/refs/{ref}",
+          "create_tag_object":  "POST /repos/{owner}/{repo}/git/tags",
+          "get_tag":            "GET  /repos/{owner}/{repo}/git/tags/{tag_sha}",
+          "create_tree":        "POST /repos/{owner}/{repo}/git/trees",
+          "get_tree":           "GET  /repos/{owner}/{repo}/git/trees/{tree_sha}"
+        },
+        "_workflow_push_example": {
+          "step1": "GET /repos/{owner}/{repo}/git/ref/heads/main  → get base SHA",
+          "step2": "POST /repos/{owner}/{repo}/git/blobs           → create blob with new file content",
+          "step3": "POST /repos/{owner}/{repo}/git/trees           → create tree with blob",
+          "step4": "POST /repos/{owner}/{repo}/git/commits         → create commit with tree",
+          "step5": "PATCH /repos/{owner}/{repo}/git/refs/heads/main → update ref to new commit"
+        }
+      },
+
+      {
+        "id": "org-list",
+        "name": "ORG — List Memberships",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [460, 580],
+        "_doc": "https://docs.github.com/de/rest/orgs/orgs",
+        "parameters": {
+          "method": "GET",
+          "url": "https://api.github.com/user/orgs",
+          "authentication": "genericCredentialType",
+          "genericAuthType": "httpHeaderAuth"
+        },
+        "_available_endpoints": {
+          "list_orgs_for_user":          "GET /user/orgs",
+          "list_orgs_for_auth_user":     "GET /organizations",
+          "get_org":                     "GET /orgs/{org}",
+          "update_org":                  "PATCH /orgs/{org}",
+          "delete_org":                  "DELETE /orgs/{org}",
+          "list_members":                "GET /orgs/{org}/members",
+          "check_membership":            "GET /orgs/{org}/members/{username}",
+          "remove_member":               "DELETE /orgs/{org}/members/{username}",
+          "get_membership":              "GET /orgs/{org}/memberships/{username}",
+          "set_membership":              "PUT /orgs/{org}/memberships/{username}",
+          "remove_membership":           "DELETE /orgs/{org}/memberships/{username}",
+          "list_outside_collaborators":  "GET /orgs/{org}/outside_collaborators",
+          "convert_member_to_outside":   "PUT /orgs/{org}/outside_collaborators/{username}",
+          "remove_outside_collaborator": "DELETE /orgs/{org}/outside_collaborators/{username}",
+          "list_org_invitations":        "GET /orgs/{org}/invitations",
+          "create_org_invitation":       "POST /orgs/{org}/invitations",
+          "cancel_org_invitation":       "DELETE /orgs/{org}/invitations/{invitation_id}",
+          "list_org_repos":              "GET /orgs/{org}/repos",
+          "create_org_repo":             "POST /orgs/{org}/repos",
+          "list_org_webhooks":           "GET /orgs/{org}/hooks",
+          "create_org_webhook":          "POST /orgs/{org}/hooks",
+          "list_org_audit_log":          "GET /orgs/{org}/audit-log"
+        }
+      },
+
+      {
+        "id": "hosted-runners-list",
+        "name": "HOSTED RUNNERS — List",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [460, 660],
+        "_doc": "https://docs.github.com/de/rest/actions/hosted-runners",
+        "parameters": {
+          "method": "GET",
+          "url": "=https://api.github.com/orgs/{{$node.config.org}}/actions/hosted-runners",
+          "authentication": "genericCredentialType",
+          "genericAuthType": "httpHeaderAuth"
+        },
+        "_available_endpoints": {
+          "list_hosted_runners_for_org":        "GET /orgs/{org}/actions/hosted-runners",
+          "create_hosted_runner_for_org":       "POST /orgs/{org}/actions/hosted-runners",
+          "get_hosted_runner_for_org":          "GET /orgs/{org}/actions/hosted-runners/{hosted_runner_id}",
+          "update_hosted_runner_for_org":       "PATCH /orgs/{org}/actions/hosted-runners/{hosted_runner_id}",
+          "delete_hosted_runner_for_org":       "DELETE /orgs/{org}/actions/hosted-runners/{hosted_runner_id}",
+          "list_hosted_runner_images_for_org":  "GET /orgs/{org}/actions/hosted-runners/images",
+          "list_gh_hosted_runner_machines":     "GET /orgs/{org}/actions/hosted-runners/machine-sizes",
+          "list_hosted_runner_platforms":       "GET /orgs/{org}/actions/hosted-runners/platforms"
+        }
+      },
+
+      {
+        "id": "self-hosted-runner-groups-list",
+        "name": "RUNNER GROUPS — List for Org",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [460, 740],
+        "_doc": "https://docs.github.com/de/rest/actions/self-hosted-runner-groups",
+        "parameters": {
+          "method": "GET",
+          "url": "=https://api.github.com/orgs/{{$node.config.org}}/actions/runner-groups",
+          "authentication": "genericCredentialType",
+          "genericAuthType": "httpHeaderAuth"
+        },
+        "_available_endpoints": {
+          "list_runner_groups_for_org":                  "GET /orgs/{org}/actions/runner-groups",
+          "create_runner_group_for_org":                 "POST /orgs/{org}/actions/runner-groups",
+          "get_runner_group_for_org":                    "GET /orgs/{org}/actions/runner-groups/{runner_group_id}",
+          "update_runner_group_for_org":                 "PATCH /orgs/{org}/actions/runner-groups/{runner_group_id}",
+          "delete_runner_group_for_org":                 "DELETE /orgs/{org}/actions/runner-groups/{runner_group_id}",
+          "list_repos_for_runner_group_in_org":          "GET /orgs/{org}/actions/runner-groups/{runner_group_id}/repositories",
+          "set_repos_for_runner_group_in_org":           "PUT /orgs/{org}/actions/runner-groups/{runner_group_id}/repositories",
+          "add_repo_to_runner_group_in_org":             "PUT /orgs/{org}/actions/runner-groups/{runner_group_id}/repositories/{repository_id}",
+          "remove_repo_from_runner_group_in_org":        "DELETE /orgs/{org}/actions/runner-groups/{runner_group_id}/repositories/{repository_id}",
+          "list_runners_in_group_for_org":               "GET /orgs/{org}/actions/runner-groups/{runner_group_id}/runners",
+          "set_runners_in_group_for_org":                "PUT /orgs/{org}/actions/runner-groups/{runner_group_id}/runners",
+          "add_runner_to_group_for_org":                 "PUT /orgs/{org}/actions/runner-groups/{runner_group_id}/runners/{runner_id}",
+          "remove_runner_from_group_for_org":            "DELETE /orgs/{org}/actions/runner-groups/{runner_group_id}/runners/{runner_id}",
+          "list_runner_groups_for_repo":                 "GET /repos/{owner}/{repo}/actions/runner-groups",
+          "list_runner_groups_for_enterprise":           "GET /enterprises/{enterprise}/actions/runner-groups",
+          "create_runner_group_for_enterprise":          "POST /enterprises/{enterprise}/actions/runner-groups"
+        }
+      },
+
+      {
+        "id": "self-hosted-runners-list",
+        "name": "SELF-HOSTED RUNNERS — List for Repo",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [460, 820],
+        "_doc": "https://docs.github.com/de/rest/actions/self-hosted-runners",
+        "parameters": {
+          "method": "GET",
+          "url": "=https://api.github.com/repos/{{$node.config.owner}}/{{$node.config.repo}}/actions/runners",
+          "authentication": "genericCredentialType",
+          "genericAuthType": "httpHeaderAuth"
+        },
+        "_available_endpoints": {
+          "list_runners_for_repo":                  "GET /repos/{owner}/{repo}/actions/runners",
+          "list_runner_apps_for_repo":              "GET /repos/{owner}/{repo}/actions/runners/downloads",
+          "create_registration_token_for_repo":     "POST /repos/{owner}/{repo}/actions/runners/registration-token",
+          "create_remove_token_for_repo":           "POST /repos/{owner}/{repo}/actions/runners/remove-token",
+          "get_runner_for_repo":                    "GET /repos/{owner}/{repo}/actions/runners/{runner_id}",
+          "delete_runner_for_repo":                 "DELETE /repos/{owner}/{repo}/actions/runners/{runner_id}",
+          "list_labels_for_runner_repo":            "GET /repos/{owner}/{repo}/actions/runners/{runner_id}/labels",
+          "add_labels_to_runner_repo":              "POST /repos/{owner}/{repo}/actions/runners/{runner_id}/labels",
+          "set_labels_for_runner_repo":             "PUT /repos/{owner}/{repo}/actions/runners/{runner_id}/labels",
+          "remove_all_labels_from_runner_repo":     "DELETE /repos/{owner}/{repo}/actions/runners/{runner_id}/labels",
+          "remove_label_from_runner_repo":          "DELETE /repos/{owner}/{repo}/actions/runners/{runner_id}/labels/{name}",
+          "list_runners_for_org":                   "GET /orgs/{org}/actions/runners",
+          "list_runner_apps_for_org":               "GET /orgs/{org}/actions/runners/downloads",
+          "create_registration_token_for_org":      "POST /orgs/{org}/actions/runners/registration-token",
+          "create_remove_token_for_org":            "POST /orgs/{org}/actions/runners/remove-token",
+          "get_runner_for_org":                     "GET /orgs/{org}/actions/runners/{runner_id}",
+          "delete_runner_for_org":                  "DELETE /orgs/{org}/actions/runners/{runner_id}",
+          "list_labels_for_runner_org":             "GET /orgs/{org}/actions/runners/{runner_id}/labels",
+          "add_labels_to_runner_org":               "POST /orgs/{org}/actions/runners/{runner_id}/labels",
+          "set_labels_for_runner_org":              "PUT /orgs/{org}/actions/runners/{runner_id}/labels",
+          "remove_all_labels_from_runner_org":      "DELETE /orgs/{org}/actions/runners/{runner_id}/labels",
+          "list_runners_for_enterprise":            "GET /enterprises/{enterprise}/actions/runners",
+          "create_registration_token_for_enterprise": "POST /enterprises/{enterprise}/actions/runners/registration-token",
+          "create_remove_token_for_enterprise":     "POST /enterprises/{enterprise}/actions/runners/remove-token",
+          "get_runner_for_enterprise":              "GET /enterprises/{enterprise}/actions/runners/{runner_id}",
+          "delete_runner_for_enterprise":           "DELETE /enterprises/{enterprise}/actions/runners/{runner_id}"
+        }
+      },
+
+      {
+        "id": "codespaces-list",
+        "name": "CODESPACES — List for Auth User",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [460, 900],
+        "_doc": "https://docs.github.com/de/rest/codespaces/codespaces",
+        "parameters": {
+          "method": "GET",
+          "url": "https://api.github.com/user/codespaces",
+          "authentication": "genericCredentialType",
+          "genericAuthType": "httpHeaderAuth"
+        },
+        "_available_endpoints": {
+          "list_codespaces_for_auth_user":        "GET /user/codespaces",
+          "create_codespace_for_auth_user":       "POST /user/codespaces",
+          "create_codespace_from_pr":             "POST /repos/{owner}/{repo}/pulls/{pull_number}/codespaces",
+          "list_codespaces_in_repo":              "GET /repos/{owner}/{repo}/codespaces",
+          "create_codespace_in_repo":             "POST /repos/{owner}/{repo}/codespaces",
+          "list_devcontainer_configs":            "GET /repos/{owner}/{repo}/codespaces/devcontainers",
+          "list_codespace_machines_for_repo":     "GET /repos/{owner}/{repo}/codespaces/machines",
+          "get_codespace_for_auth_user":          "GET /user/codespaces/{codespace_name}",
+          "update_codespace":                     "PATCH /user/codespaces/{codespace_name}",
+          "delete_codespace":                     "DELETE /user/codespaces/{codespace_name}",
+          "start_codespace":                      "POST /user/codespaces/{codespace_name}/start",
+          "stop_codespace":                       "POST /user/codespaces/{codespace_name}/stop",
+          "list_codespace_machines":              "GET /user/codespaces/{codespace_name}/machines",
+          "export_codespace":                     "POST /user/codespaces/{codespace_name}/exports",
+          "get_export_details":                   "GET /user/codespaces/{codespace_name}/exports/{export_id}",
+          "list_codespace_secrets_for_user":      "GET /user/codespaces/secrets",
+          "get_pubkey_for_codespace_user_secret": "GET /user/codespaces/secrets/public-key",
+          "get_codespace_secret_for_user":        "GET /user/codespaces/secrets/{secret_name}",
+          "create_or_update_codespace_secret_for_user": "PUT /user/codespaces/secrets/{secret_name}",
+          "delete_codespace_secret_for_user":     "DELETE /user/codespaces/secrets/{secret_name}",
+          "list_repos_for_codespace_secret":      "GET /user/codespaces/secrets/{secret_name}/repositories",
+          "set_repos_for_codespace_secret":       "PUT /user/codespaces/secrets/{secret_name}/repositories",
+          "list_org_codespaces":                  "GET /orgs/{org}/codespaces",
+          "list_org_codespace_secrets":           "GET /orgs/{org}/codespaces/secrets",
+          "get_org_pubkey_for_secret":            "GET /orgs/{org}/codespaces/secrets/public-key",
+          "get_org_codespace_secret":             "GET /orgs/{org}/codespaces/secrets/{secret_name}",
+          "create_or_update_org_codespace_secret":"PUT /orgs/{org}/codespaces/secrets/{secret_name}",
+          "delete_org_codespace_secret":          "DELETE /orgs/{org}/codespaces/secrets/{secret_name}"
+        }
+      },
+
+      {
+        "id": "workflow-runs-list",
+        "name": "WORKFLOW RUNS — List for Repo",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [460, 980],
+        "_doc": "https://docs.github.com/de/rest/actions/workflow-runs",
+        "parameters": {
+          "method": "GET",
+          "url": "=https://api.github.com/repos/{{$node.config.owner}}/{{$node.config.repo}}/actions/runs",
+          "authentication": "genericCredentialType",
+          "genericAuthType": "httpHeaderAuth",
+          "sendQuery": true,
+          "queryParameters": { "parameters": [
+            { "name": "status", "value": "completed" },
+            { "name": "per_page", "value": "10" }
+          ]}
+        },
+        "_available_endpoints": {
+          "list_workflow_runs_for_repo":           "GET /repos/{owner}/{repo}/actions/runs",
+          "list_runs_for_workflow":                "GET /repos/{owner}/{repo}/actions/workflows/{workflow_id}/runs",
+          "get_workflow_run":                      "GET /repos/{owner}/{repo}/actions/runs/{run_id}",
+          "update_workflow_run":                   "PATCH /repos/{owner}/{repo}/actions/runs/{run_id}",
+          "delete_workflow_run":                   "DELETE /repos/{owner}/{repo}/actions/runs/{run_id}",
+          "get_review_history":                    "GET /repos/{owner}/{repo}/actions/runs/{run_id}/approvals",
+          "approve_workflow_run":                  "POST /repos/{owner}/{repo}/actions/runs/{run_id}/approve",
+          "list_workflow_run_artifacts":           "GET /repos/{owner}/{repo}/actions/runs/{run_id}/artifacts",
+          "get_run_attempt":                       "GET /repos/{owner}/{repo}/actions/runs/{run_id}/attempts/{attempt_number}",
+          "list_jobs_for_run_attempt":             "GET /repos/{owner}/{repo}/actions/runs/{run_id}/attempts/{attempt_number}/jobs",
+          "download_logs_for_run_attempt":         "GET /repos/{owner}/{repo}/actions/runs/{run_id}/attempts/{attempt_number}/logs",
+          "cancel_workflow_run":                   "POST /repos/{owner}/{repo}/actions/runs/{run_id}/cancel",
+          "review_pending_deployments":            "POST /repos/{owner}/{repo}/actions/runs/{run_id}/deployment_protection_rule",
+          "list_jobs_for_workflow_run":            "GET /repos/{owner}/{repo}/actions/runs/{run_id}/jobs",
+          "download_workflow_run_logs":            "GET /repos/{owner}/{repo}/actions/runs/{run_id}/logs",
+          "delete_workflow_run_logs":              "DELETE /repos/{owner}/{repo}/actions/runs/{run_id}/logs",
+          "get_pending_deployments":               "GET /repos/{owner}/{repo}/actions/runs/{run_id}/pending_deployments",
+          "re_run_workflow":                       "POST /repos/{owner}/{repo}/actions/runs/{run_id}/rerun",
+          "re_run_failed_jobs":                    "POST /repos/{owner}/{repo}/actions/runs/{run_id}/rerun-failed-jobs",
+          "get_workflow_run_usage":                "GET /repos/{owner}/{repo}/actions/runs/{run_id}/timing"
+        },
+        "_trigger_workflow": {
+          "dispatch_event": "POST /repos/{owner}/{repo}/actions/workflows/{workflow_id}/dispatches",
+          "body": { "ref": "main", "inputs": { "key": "value" } }
+        }
+      },
+
+      {
+        "id": "secrets-list-repo",
+        "name": "SECRETS — List for Repo",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [460, 1060],
+        "_doc": "https://docs.github.com/de/rest/actions/secrets",
+        "parameters": {
+          "method": "GET",
+          "url": "=https://api.github.com/repos/{{$node.config.owner}}/{{$node.config.repo}}/actions/secrets",
+          "authentication": "genericCredentialType",
+          "genericAuthType": "httpHeaderAuth"
+        },
+        "_note": "Secret VALUES are never returned — only names/metadata. Create/update requires encrypting with repo public key (libsodium).",
+        "_available_endpoints": {
+          "list_repo_secrets":                 "GET /repos/{owner}/{repo}/actions/secrets",
+          "get_repo_public_key":               "GET /repos/{owner}/{repo}/actions/secrets/public-key",
+          "get_repo_secret":                   "GET /repos/{owner}/{repo}/actions/secrets/{secret_name}",
+          "create_or_update_repo_secret":      "PUT /repos/{owner}/{repo}/actions/secrets/{secret_name}",
+          "delete_repo_secret":                "DELETE /repos/{owner}/{repo}/actions/secrets/{secret_name}",
+          "list_repo_variables":               "GET /repos/{owner}/{repo}/actions/variables",
+          "create_repo_variable":              "POST /repos/{owner}/{repo}/actions/variables",
+          "get_repo_variable":                 "GET /repos/{owner}/{repo}/actions/variables/{name}",
+          "update_repo_variable":              "PATCH /repos/{owner}/{repo}/actions/variables/{name}",
+          "delete_repo_variable":              "DELETE /repos/{owner}/{repo}/actions/variables/{name}",
+          "list_org_secrets":                  "GET /orgs/{org}/actions/secrets",
+          "get_org_public_key":                "GET /orgs/{org}/actions/secrets/public-key",
+          "get_org_secret":                    "GET /orgs/{org}/actions/secrets/{secret_name}",
+          "create_or_update_org_secret":       "PUT /orgs/{org}/actions/secrets/{secret_name}",
+          "delete_org_secret":                 "DELETE /orgs/{org}/actions/secrets/{secret_name}",
+          "list_repos_for_org_secret":         "GET /orgs/{org}/actions/secrets/{secret_name}/repositories",
+          "set_repos_for_org_secret":          "PUT /orgs/{org}/actions/secrets/{secret_name}/repositories",
+          "add_repo_to_org_secret":            "PUT /orgs/{org}/actions/secrets/{secret_name}/repositories/{repository_id}",
+          "remove_repo_from_org_secret":       "DELETE /orgs/{org}/actions/secrets/{secret_name}/repositories/{repository_id}",
+          "list_environment_secrets":          "GET /repos/{owner}/{repo}/environments/{environment_name}/secrets",
+          "get_env_public_key":                "GET /repos/{owner}/{repo}/environments/{environment_name}/secrets/public-key",
+          "get_env_secret":                    "GET /repos/{owner}/{repo}/environments/{environment_name}/secrets/{secret_name}",
+          "create_or_update_env_secret":       "PUT /repos/{owner}/{repo}/environments/{environment_name}/secrets/{secret_name}",
+          "delete_env_secret":                 "DELETE /repos/{owner}/{repo}/environments/{environment_name}/secrets/{secret_name}",
+          "list_env_variables":                "GET /repos/{owner}/{repo}/environments/{environment_name}/variables",
+          "create_env_variable":               "POST /repos/{owner}/{repo}/environments/{environment_name}/variables",
+          "get_env_variable":                  "GET /repos/{owner}/{repo}/environments/{environment_name}/variables/{name}",
+          "update_env_variable":               "PATCH /repos/{owner}/{repo}/environments/{environment_name}/variables/{name}",
+          "delete_env_variable":               "DELETE /repos/{owner}/{repo}/environments/{environment_name}/variables/{name}"
+        },
+        "_encrypt_secret_example": {
+          "step1": "GET /repos/{owner}/{repo}/actions/secrets/public-key → key_id + key (base64)",
+          "step2": "Use tweetnacl or libsodium: const encrypted = nacl.box.seal(secretBytes, publicKeyBytes)",
+          "step3": "PUT /repos/{owner}/{repo}/actions/secrets/{name} with { encrypted_value: base64(encrypted), key_id }"
+        }
+      }
+    ],
+
+    "connections": {
+      "Manual Trigger": { "main": [[{ "node": "AUTH — Verify Token", "type": "main", "index": 0 }]] }
+    }
+  },
+
+  "n8n_import_instructions": {
+    "method1_import_json": [
+      "1. Open n8n → Workflows → Import from JSON",
+      "2. Paste this file's n8n_workflow object",
+      "3. Set up credential: Settings → Credentials → Add → HTTP Header Auth",
+      "   Name: 'Authorization', Value: 'Bearer YOUR_GITHUB_PAT'",
+      "4. Assign credential to all HTTP Request nodes"
+    ],
+    "method2_http_request_node": [
+      "1. Add HTTP Request node",
+      "2. Authentication: Header Auth → select GitHub credential",
+      "3. Copy any endpoint from _available_endpoints above",
+      "4. Replace {owner}, {repo}, {org} with expressions or static values",
+      "5. Add headers: Accept: application/vnd.github+json, X-GitHub-Api-Version: 2022-11-28"
+    ],
+    "method3_built_in_github_node": [
+      "1. Add GitHub node (built-in)",
+      "2. Set Owner/Repo from environment",
+      "3. For missing operations, fall back to HTTP Request node with endpoints from this file"
+    ],
+    "required_headers": {
+      "Accept": "application/vnd.github+json",
+      "X-GitHub-Api-Version": "2022-11-28",
+      "Authorization": "Bearer YOUR_PAT_OR_APP_JWT"
+    }
+  },
+
+  "r3_integration_examples": {
+    "trigger_r3_deploy_workflow": {
+      "description": "Trigger a GitHub Actions workflow to deploy R3-DASHBOARD",
+      "method": "POST",
+      "url": "https://api.github.com/repos/RETOURENROYAL/session-state/actions/workflows/deploy.yml/dispatches",
+      "body": { "ref": "main", "inputs": { "target": "r3-dashboard", "env": "production" } }
+    },
+    "check_workflow_status": {
+      "description": "Poll latest workflow run status",
+      "method": "GET",
+      "url": "https://api.github.com/repos/RETOURENROYAL/session-state/actions/runs?per_page=1&branch=main"
+    },
+    "push_config_via_git_db": {
+      "description": "Push engine-registry.json update without git clone",
+      "steps": [
+        "GET /repos/RETOURENROYAL/session-state/git/ref/heads/main",
+        "POST /repos/RETOURENROYAL/session-state/git/blobs (new content)",
+        "POST /repos/RETOURENROYAL/session-state/git/trees (with blob)",
+        "POST /repos/RETOURENROYAL/session-state/git/commits",
+        "PATCH /repos/RETOURENROYAL/session-state/git/refs/heads/main"
+      ]
+    },
+    "rotate_r3_secret": {
+      "description": "Update R3_API_KEY secret in repo",
+      "steps": [
+        "GET /repos/RETOURENROYAL/session-state/actions/secrets/public-key → key_id + key",
+        "Encrypt new value with libsodium",
+        "PUT /repos/RETOURENROYAL/session-state/actions/secrets/R3_API_KEY"
+      ]
+    }
+  }
+}
