@@ -91,28 +91,35 @@ $start = Read-Host "  ▶ n8n jetzt starten? (Docker required) [y/N]"
 if ($start -match '^[yY]') {
     Set-Location $TargetDir
 
-    # Check if port 5678 is already in use (n8n already running)
-    $running = docker ps -q --filter "publish=5678" 2>$null
-    if ($running) {
-        $name = docker inspect --format '{{.Name}}' $running 2>$null
-        Write-Host "  ✓ n8n laeuft bereits ($name) auf http://localhost:5678" -ForegroundColor Green
-        Write-Host "    Bestehende Workflows und Daten bleiben unangetastet." -ForegroundColor Gray
+    # Check if n8n is already responding on :5678 (works regardless of Docker vs native)
+    $health = try { (Invoke-WebRequest "http://localhost:5678/healthz" -UseBasicParsing -TimeoutSec 3 -ErrorAction Stop).Content } catch { "" }
+    if ($health -match '"ok"') {
+        Write-Host "  ✓ n8n laeuft bereits auf http://localhost:5678" -ForegroundColor Green
+        Write-Host "    Workflows und Daten bleiben unangetastet." -ForegroundColor Gray
         Start-Process "http://localhost:5678"
         Start-Process "$DashDir\index.html"
     } else {
-        # Remove stopped r3-n8n container if it exists (won't affect running containers)
-        docker rm -f r3-n8n 2>$null | Out-Null
-
-        docker compose up -d
-        if ($LASTEXITCODE -eq 0) {
-            Start-Sleep 6
-            Write-Host "  ✓ n8n laeuft auf http://localhost:5678" -ForegroundColor Green
-            Start-Process "http://localhost:5678"
-            Start-Process "$DashDir\index.html"
+        # Port check before attempting start
+        $portBusy = netstat -ano | Select-String "TCP.*:5678\s"
+        if ($portBusy) {
+            $pid5678 = ($portBusy | Select-Object -First 1).ToString().Trim() -split '\s+' | Select-Object -Last 1
+            $proc = try { (Get-Process -Id $pid5678 -ErrorAction Stop).Name } catch { "unbekannt" }
+            Write-Host "  ✗ Port 5678 belegt durch PID $pid5678 ($proc) — n8n antwortet aber nicht." -ForegroundColor Red
+            Write-Host "    Beenden: Stop-Process -Id $pid5678 -Force" -ForegroundColor Yellow
+            Write-Host "    Dann:    docker compose up -d" -ForegroundColor Yellow
         } else {
-            Write-Host "  ✗ docker compose up fehlgeschlagen" -ForegroundColor Red
-            Write-Host "  Diagnose: docker ps -a --filter publish=5678" -ForegroundColor Gray
-            Write-Host "  Manuell:  cd $TargetDir; docker compose up -d" -ForegroundColor Gray
+            # Port free — remove stopped container and start
+            docker rm -f r3-n8n 2>$null | Out-Null
+            docker compose up -d
+            if ($LASTEXITCODE -eq 0) {
+                Start-Sleep 6
+                Write-Host "  ✓ n8n laeuft auf http://localhost:5678" -ForegroundColor Green
+                Start-Process "http://localhost:5678"
+                Start-Process "$DashDir\index.html"
+            } else {
+                Write-Host "  ✗ docker compose up fehlgeschlagen" -ForegroundColor Red
+                Write-Host "  Diagnose: netstat -ano | findstr :5678" -ForegroundColor Gray
+            }
         }
     }
 } else {
