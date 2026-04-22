@@ -3,734 +3,772 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>R³|VIB.E — Dashboard Central</title>
+<title>R³|VIB.E — Dashboard Central v3</title>
 <style>
-* { box-sizing: border-box; margin: 0; padding: 0; }
-:root {
-  --bg:        #07070d;
-  --panel:     #0c0c16;
-  --panel2:    #101020;
-  --border:    #1c1c32;
-  --border2:   #252540;
-  --accent1:   #ff6b35;
-  --accent2:   #00d4ff;
-  --green:     #00ff88;
-  --red:       #ff3366;
-  --yellow:    #ffd700;
-  --purple:    #a855f7;
-  --text:      #c0c0d8;
-  --text-dim:  #50507a;
-  --font:      'Courier New', monospace;
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#06060c;--panel:#0a0a14;--panel2:#0e0e1c;--panel3:#121224;
+  --b1:#181830;--b2:#20203a;--b3:#2a2a48;
+  --a1:#ff6b35;--a2:#00d4ff;--a3:#a855f7;
+  --g:#00ff88;--r:#ff3366;--y:#ffd700;--p:#a855f7;
+  --t:#b8b8d0;--td:#3a3a60;--ts:#7070a0;
+  --font:'Courier New',monospace;
 }
-html, body { height: 100%; overflow: hidden; }
-body {
-  background: var(--bg);
-  color: var(--text);
-  font-family: var(--font);
-  display: grid;
-  grid-template-rows: 48px 1fr 60px;
-  grid-template-columns: 210px 1fr 270px;
-  height: 100vh;
+html,body{height:100%;overflow:hidden}
+body{
+  background:var(--bg);color:var(--t);font-family:var(--font);
+  display:grid;
+  grid-template-rows:44px 1fr 56px;
+  grid-template-columns:220px 1fr 260px;
+  height:100vh;
 }
-
-/* ── HEADER ── */
-#header {
-  grid-column: 1 / -1;
-  background: linear-gradient(90deg, #0c0c16 0%, #131326 50%, #0c0c16 100%);
-  border-bottom: 2px solid var(--accent1);
-  display: flex; align-items: center; padding: 0 14px; gap: 12px;
+/* HEADER */
+#hdr{
+  grid-column:1/-1;
+  background:linear-gradient(90deg,#080810 0%,#101022 60%,#080810 100%);
+  border-bottom:2px solid var(--a1);
+  display:flex;align-items:center;padding:0 12px;gap:10px;
 }
-#logo {
-  font-size: 17px; font-weight: bold; color: var(--accent1);
-  letter-spacing: 3px; white-space: nowrap; flex-shrink: 0;
+#logo{font-size:15px;font-weight:bold;color:var(--a1);letter-spacing:3px;white-space:nowrap;flex-shrink:0}
+#logo span{color:var(--a2)}
+.ep-chip{
+  display:flex;align-items:center;gap:4px;padding:2px 8px;
+  border:1px solid var(--b2);border-radius:1px;font-size:10px;
+  cursor:pointer;white-space:nowrap;flex-shrink:0;transition:border-color .15s;
 }
-#logo span { color: var(--accent2); }
-#logo sup { font-size: 9px; vertical-align: super; }
-.status-row { display: flex; gap: 6px; flex: 1; overflow: hidden; min-width: 0; }
-.ep-pill {
-  display: flex; align-items: center; gap: 4px;
-  padding: 2px 8px; border: 1px solid var(--border2);
-  border-radius: 2px; font-size: 10px; cursor: pointer;
-  transition: border-color .15s; white-space: nowrap; flex-shrink: 0;
+.ep-chip.on {border-color:var(--g);color:var(--g)}
+.ep-chip.off{border-color:var(--r);color:var(--r)}
+.ep-chip.chk{border-color:var(--y);color:var(--y);animation:pulse 1s infinite}
+.dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.ep-chip.on  .dot{background:var(--g);box-shadow:0 0 4px var(--g)}
+.ep-chip.off .dot{background:var(--r)}
+.ep-chip.chk .dot{background:var(--y)}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+#active-ep{font-size:10px;color:var(--a2);margin-left:4px;flex-shrink:0}
+#clk{font-size:10px;color:var(--td);margin-left:auto;flex-shrink:0}
+/* LEFT NAV */
+#nav{
+  grid-row:2;grid-column:1;
+  background:var(--panel);border-right:1px solid var(--b1);
+  overflow-y:auto;padding:6px 4px;display:flex;flex-direction:column;gap:0;
 }
-.ep-pill.online  { border-color: var(--green); }
-.ep-pill.offline { border-color: var(--red); }
-.ep-pill.checking{ border-color: var(--yellow); }
-.ep-pill .dot { width: 6px; height: 6px; border-radius: 50%; }
-.ep-pill.online  .dot { background: var(--green); }
-.ep-pill.offline .dot { background: var(--red); }
-.ep-pill.checking .dot { background: var(--yellow); animation: blink .8s infinite; }
-@keyframes blink { 0%,100%{opacity:1} 50%{opacity:.25} }
-#clock { font-size: 11px; color: var(--text-dim); white-space: nowrap; flex-shrink: 0; }
-
-/* ── SIDEBAR LEFT ── */
-#sidebar-left {
-  grid-row: 2; grid-column: 1;
-  background: var(--panel); border-right: 1px solid var(--border);
-  overflow-y: auto; padding: 8px 6px;
-  display: flex; flex-direction: column; gap: 0;
+.nav-sec{font-size:8.5px;color:var(--a2);letter-spacing:2px;padding:8px 5px 4px;
+  border-bottom:1px solid var(--b1);margin-bottom:3px;user-select:none}
+.nav-item{
+  display:flex;align-items:flex-start;gap:5px;padding:5px 5px;
+  border-radius:1px;font-size:10px;cursor:pointer;
+  border:1px solid transparent;margin-bottom:1px;line-height:1.35;
+  transition:all .1s;
 }
-.sec-title {
-  font-size: 9px; color: var(--accent2); letter-spacing: 2.5px;
-  padding: 8px 4px 5px; border-bottom: 1px solid var(--border);
-  margin-bottom: 5px; user-select: none;
+.nav-item:hover{background:#10101e;border-color:var(--b3)}
+.nav-item.active{background:#0e0e20;border-color:var(--a1);color:var(--a1)}
+.nav-item .ni{color:var(--td);font-size:8.5px;flex-shrink:0;min-width:18px;margin-top:1px}
+.nav-item .nt{flex:1;color:inherit}
+.nav-item .nc{font-size:8px;color:var(--td);flex-shrink:0}
+.sep{height:1px;background:var(--b1);margin:5px 0}
+.goal-btn{
+  display:block;width:100%;padding:5px 6px;margin-bottom:2px;
+  border:1px solid var(--b2);background:var(--panel2);
+  color:var(--ts);font-family:var(--font);font-size:9.5px;
+  border-radius:1px;cursor:pointer;text-align:left;transition:all .12s;letter-spacing:.5px;
 }
-.ep-row {
-  display: flex; align-items: center; gap: 6px;
-  padding: 5px 5px; border-radius: 2px; font-size: 10px;
-  cursor: pointer; border: 1px solid transparent; margin-bottom: 2px;
-  transition: all .12s;
+.goal-btn:hover{border-color:var(--a2);color:var(--a2)}
+/* MAIN */
+#main{grid-row:2;grid-column:2;display:flex;flex-direction:column;overflow:hidden}
+#ctx-bar{
+  padding:4px 10px;background:var(--panel2);
+  border-bottom:1px solid var(--b1);
+  display:flex;align-items:center;gap:8px;font-size:9.5px;flex-shrink:0;
+  min-height:32px;
 }
-.ep-row:hover { background: #161628; border-color: var(--border2); }
-.ep-row.sel   { background: #161628; border-color: var(--accent1); color: var(--accent1); }
-.ep-row .sdot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
-.sdot.online  { background: var(--green); }
-.sdot.offline { background: var(--red); box-shadow: 0 0 3px var(--red); }
-.sdot.checking{ background: var(--yellow); animation: blink .8s infinite; }
-.sep { height: 1px; background: var(--border); margin: 8px 0; }
-.mode-btn {
-  display: block; width: 100%; padding: 7px 6px; margin-bottom: 4px;
-  border: 1px solid var(--border2); background: var(--panel2);
-  color: var(--text-dim); font-family: var(--font); font-size: 10px;
-  border-radius: 2px; cursor: pointer; letter-spacing: 1px;
-  transition: all .15s; text-align: left;
+#ctx-domain{color:var(--a1);font-weight:bold;flex-shrink:0}
+#ctx-desc{color:var(--ts);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#ctx-paths{font-size:8.5px;color:var(--td);flex-shrink:0;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#chat{flex:1;overflow-y:auto;padding:10px 12px;display:flex;flex-direction:column;gap:7px}
+.msg{max-width:92%;padding:7px 10px;border-radius:2px;font-size:11.5px;line-height:1.55;word-break:break-word}
+.msg .lbl{font-size:8.5px;color:var(--td);margin-bottom:3px;letter-spacing:1px}
+.msg-u{align-self:flex-end;background:#0a0a1e;border:1px solid #1e1e50;color:var(--a2)}
+.msg-a{align-self:flex-start;background:#060e08;border:1px solid #0e2e14;color:#88ffaa}
+.msg-s{align-self:center;background:#0e0c06;border:1px solid #2a2200;color:var(--y);
+  font-size:9px;padding:3px 10px;max-width:98%;white-space:pre-wrap}
+.msg-e{align-self:center;background:#0e0608;border:1px solid #2a0012;color:var(--r);
+  font-size:9px;padding:3px 10px;max-width:98%}
+.streaming::after{content:'▊';animation:pulse .6s infinite}
+.msg-a code{background:#021006;padding:1px 4px;color:#50ffaa;font-size:10.5px;border-radius:1px}
+/* RIGHT PANEL */
+#rpanel{
+  grid-row:2;grid-column:3;
+  background:var(--panel);border-left:1px solid var(--b1);
+  display:flex;flex-direction:column;overflow:hidden;
 }
-.mode-btn.active-free    { border-color: var(--green);  color: var(--green);  background: #001a0d; }
-.mode-btn.active-homemade{ border-color: var(--accent1); color: var(--accent1); background: #1a0800; }
-.skill-grid { display: flex; flex-wrap: wrap; gap: 3px; padding: 2px 0; }
-.sk {
-  font-size: 8.5px; padding: 2px 5px; border: 1px solid var(--border);
-  border-radius: 1px; color: var(--text-dim); cursor: pointer;
-  transition: all .1s; user-select: none; line-height: 1.6;
+#rp-tabs{display:flex;border-bottom:1px solid var(--b1);flex-shrink:0}
+.rp-tab{
+  flex:1;padding:6px 4px;font-size:9px;text-align:center;cursor:pointer;
+  color:var(--td);border-right:1px solid var(--b1);letter-spacing:1px;
+  transition:all .1s;
 }
-.sk:hover { border-color: var(--accent2); color: var(--accent2); background: #00111a; }
-
-/* ── MAIN CHAT ── */
-#main {
-  grid-row: 2; grid-column: 2;
-  display: flex; flex-direction: column; overflow: hidden;
+.rp-tab:last-child{border-right:none}
+.rp-tab.active{color:var(--a1);background:#10101e;border-bottom:1px solid var(--a1)}
+#rp-body{flex:1;overflow-y:auto;padding:6px 5px}
+.rp-section{display:none}
+.rp-section.active{display:block}
+.log-ln{padding:2px 2px;border-bottom:1px solid #0a0a16;font-size:9px;line-height:1.4}
+.lt{color:var(--td);margin-right:3px}
+.lc-ok{color:var(--g)}.lc-err{color:var(--r)}.lc-info{color:var(--a2)}.lc-warn{color:var(--y)}.lc-data{color:var(--p)}
+.snap-card{border:1px solid var(--b2);padding:6px 7px;margin-bottom:6px;border-radius:1px}
+.snap-hdr{font-size:9px;color:var(--a1);margin-bottom:3px;display:flex;justify-content:space-between}
+.snap-stat{font-size:8px;color:var(--g)}
+.snap-item{font-size:8.5px;color:var(--ts);padding:1px 0;border-bottom:1px solid #0c0c1a;cursor:pointer}
+.snap-item:hover{color:var(--a2)}
+.lat-row{display:flex;justify-content:space-between;padding:3px 3px;border-bottom:1px solid var(--b1);font-size:9px}
+.lat-v{color:var(--td)}
+/* INPUT */
+#bar{
+  grid-column:1/-1;background:var(--panel);
+  border-top:1px solid var(--b2);
+  display:flex;align-items:center;gap:6px;padding:7px 10px;
 }
-#agent-bar {
-  padding: 5px 12px; background: var(--panel2);
-  border-bottom: 1px solid var(--border);
-  display: flex; align-items: center; gap: 10px; font-size: 10px; flex-shrink: 0;
+#inp{
+  flex:1;background:#07070e;border:1px solid var(--b2);
+  border-radius:1px;color:var(--t);font-family:var(--font);
+  font-size:12px;padding:7px 10px;outline:none;
+  resize:none;height:42px;transition:border-color .2s;
 }
-.badge {
-  padding: 2px 9px; border-radius: 1px; font-size: 9px;
-  letter-spacing: 1.5px; font-weight: bold; flex-shrink: 0;
+#inp:focus{border-color:var(--a1)}
+#inp::placeholder{color:var(--td)}
+.btn{
+  padding:7px 11px;border:1px solid var(--b2);background:var(--panel2);
+  color:var(--t);font-family:var(--font);font-size:9.5px;border-radius:1px;
+  cursor:pointer;transition:all .12s;white-space:nowrap;letter-spacing:.5px;
 }
-.badge.free     { background: #001a0a; color: var(--green);  border: 1px solid var(--green); }
-.badge.homemade { background: #1a0800; color: var(--accent1); border: 1px solid var(--accent1); }
-#route-info { color: var(--text-dim); flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-#live-engine { color: var(--accent2); flex-shrink: 0; }
-#chat-log {
-  flex: 1; overflow-y: auto; padding: 12px 14px;
-  display: flex; flex-direction: column; gap: 8px;
+.btn:hover{border-color:var(--a1);color:var(--a1)}
+.btn-send{border-color:var(--a1);color:var(--a1)}
+.btn-send:hover{background:var(--a1);color:#000}
+.btn-ctrl{border-color:var(--p);color:var(--p)}
+.btn-ctrl:hover{background:var(--p);color:#000}
+#ep-sel{
+  background:var(--panel2);border:1px solid var(--b2);
+  color:var(--ts);font-family:var(--font);font-size:9.5px;
+  padding:4px 6px;border-radius:1px;outline:none;cursor:pointer;
 }
-.msg {
-  max-width: 88%; padding: 8px 11px; border-radius: 2px;
-  font-size: 12px; line-height: 1.55; white-space: pre-wrap; word-break: break-word;
-}
-.msg .lbl { font-size: 9px; color: var(--text-dim); margin-bottom: 3px; letter-spacing: 1px; }
-.msg-user   { align-self: flex-end; background: #0e0e22; border: 1px solid #22225a; color: var(--accent2); }
-.msg-agent  { align-self: flex-start; background: #081408; border: 1px solid #163016; color: #90ffb8; }
-.msg-sys    { align-self: center; background: #12100a; border: 1px solid #2a2000; color: var(--yellow); font-size: 9.5px; padding: 4px 10px; max-width: 96%; }
-.msg-err    { align-self: center; background: #120810; border: 1px solid #2a0018; color: var(--red); font-size: 9.5px; padding: 4px 10px; max-width: 96%; }
-.streaming::after { content: '▊'; animation: blink .7s infinite; }
-.msg-agent code { background: #001a08; padding: 1px 4px; border-radius: 1px; color: #50ffaa; font-size: 11px; }
-
-/* ── RIGHT LOG ── */
-#sidebar-right {
-  grid-row: 2; grid-column: 3;
-  background: var(--panel); border-left: 1px solid var(--border);
-  overflow-y: auto; padding: 8px 6px;
-  display: flex; flex-direction: column;
-}
-#log-list { flex: 1; overflow-y: auto; }
-.log-line { border-bottom: 1px solid #0e0e1a; padding: 3px 2px; font-size: 9.5px; line-height: 1.4; }
-.lt { color: var(--text-dim); margin-right: 4px; }
-.lc-ok   { color: var(--green); }
-.lc-err  { color: var(--red); }
-.lc-info { color: var(--accent2); }
-.lc-warn { color: var(--yellow); }
-.lc-data { color: var(--purple); }
-#diag-panel { margin-top: 6px; }
-.diag-row {
-  display: flex; justify-content: space-between; align-items: center;
-  padding: 3px 4px; border-bottom: 1px solid var(--border);
-  font-size: 9px;
-}
-.diag-lat { color: var(--text-dim); }
-
-/* ── BOTTOM BAR ── */
-#input-bar {
-  grid-column: 1 / -1; background: var(--panel);
-  border-top: 1px solid var(--border2);
-  display: flex; align-items: center; gap: 7px; padding: 8px 12px;
-}
-#msg-input {
-  flex: 1; background: #08080e; border: 1px solid var(--border2);
-  border-radius: 2px; color: var(--text); font-family: var(--font);
-  font-size: 13px; padding: 8px 12px; outline: none;
-  resize: none; height: 44px; transition: border-color .2s;
-}
-#msg-input:focus { border-color: var(--accent1); }
-#msg-input::placeholder { color: var(--text-dim); }
-.btn {
-  padding: 8px 13px; border: 1px solid var(--border2);
-  background: var(--panel2); color: var(--text); font-family: var(--font);
-  font-size: 10px; border-radius: 2px; cursor: pointer;
-  transition: all .15s; white-space: nowrap; letter-spacing: .5px;
-}
-.btn:hover { border-color: var(--accent1); color: var(--accent1); }
-.btn.send  { border-color: var(--accent1); color: var(--accent1); font-size: 12px; }
-.btn.send:hover { background: var(--accent1); color: #000; }
-.btn.danger:hover { border-color: var(--red); color: var(--red); }
-
-/* ── SCROLLBAR ── */
-::-webkit-scrollbar { width: 4px; height: 4px; }
-::-webkit-scrollbar-track { background: var(--bg); }
-::-webkit-scrollbar-thumb { background: #282840; border-radius: 2px; }
-
-/* ── RESPONSIVE LAYOUT TWEAKS ── */
-@media (max-width: 1100px) { #sidebar-right { display: none; } body { grid-template-columns: 200px 1fr; } }
+#ep-sel:focus{border-color:var(--a1)}
+::-webkit-scrollbar{width:3px;height:3px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:#1e1e36;border-radius:2px}
 </style>
 </head>
 <body>
 
-<!-- ═══════════════════════════════ HEADER ═══════════════════════════════ -->
-<div id="header">
-  <div id="logo">R<sup>3</sup><span>|VIB.E</span> ◆ DASHBOARD CENTRAL</div>
-  <div class="status-row" id="status-row"></div>
-  <div id="clock"></div>
+<!-- HEADER -->
+<div id="hdr">
+  <div id="logo">R³<span>|VIB.E</span> ◆ CENTRAL</div>
+  <div id="ep-8420" class="ep-chip chk" onclick="pingEp(8420)">
+    <div class="dot"></div>8420 PRIMARY
+  </div>
+  <div id="ep-8421" class="ep-chip chk" onclick="pingEp(8421)">
+    <div class="dot"></div>8421 SHADOW
+  </div>
+  <div id="ep-8422" class="ep-chip chk" onclick="query8422()">
+    <div class="dot"></div>8422 CTRL
+  </div>
+  <div id="active-ep"></div>
+  <div id="clk"></div>
 </div>
 
-<!-- ═══════════════════════════════ SIDEBAR LEFT ═══════════════════════ -->
-<div id="sidebar-left">
+<!-- LEFT NAV -->
+<div id="nav">
+  <div class="nav-sec">SYSTEM · 19 DOMAINS</div>
 
-  <div class="sec-title">ENGINES</div>
-  <div id="ep-list">
-    <div class="ep-row sel" id="ep-auto" onclick="selectEngine('auto')">
-      <div class="sdot online"></div><span>AUTO · smart routing</span>
-    </div>
+  <div style="font-size:7.5px;color:var(--ts);padding:4px 5px 2px;letter-spacing:1px">── INFRASTRUCTURE ──</div>
+  <div class="nav-item" id="ni-01" onclick="selectDomain('01')">
+    <span class="ni">01</span><span class="nt">Core Infrastructure</span><span class="nc">2f</span>
+  </div>
+  <div class="nav-item" id="ni-02" onclick="selectDomain('02')">
+    <span class="ni">02</span><span class="nt">AI Proxy Layer</span><span class="nc">4f</span>
+  </div>
+  <div class="nav-item" id="ni-03" onclick="selectDomain('03')">
+    <span class="ni">03</span><span class="nt">Control Plane</span><span class="nc">6f</span>
+  </div>
+
+  <div style="font-size:7.5px;color:var(--ts);padding:4px 5px 2px;letter-spacing:1px">── FRONTEND / API ──</div>
+  <div class="nav-item" id="ni-04" onclick="selectDomain('04')">
+    <span class="ni">04</span><span class="nt">Frontend UI</span><span class="nc">4f</span>
+  </div>
+  <div class="nav-item" id="ni-05" onclick="selectDomain('05')">
+    <span class="ni">05</span><span class="nt">ki-api Service</span><span class="nc">Flask</span>
+  </div>
+  <div class="nav-item" id="ni-06" onclick="selectDomain('06')">
+    <span class="ni">06</span><span class="nt">Automation Scripts</span><span class="nc">PS1</span>
+  </div>
+
+  <div style="font-size:7.5px;color:var(--ts);padding:4px 5px 2px;letter-spacing:1px">── AGENT LAYER ──</div>
+  <div class="nav-item" id="ni-07" onclick="selectDomain('07')">
+    <span class="ni">07</span><span class="nt">Agent Skills ×21</span><span class="nc">SKILL</span>
+  </div>
+  <div class="nav-item" id="ni-08" onclick="selectDomain('08')">
+    <span class="ni">08</span><span class="nt">Agent Reach HQ</span><span class="nc">HQ</span>
+  </div>
+  <div class="nav-item" id="ni-09" onclick="selectDomain('09')">
+    <span class="ni">09</span><span class="nt">Obliteratus ML</span><span class="nc">Py</span>
+  </div>
+  <div class="nav-item" id="ni-10" onclick="selectDomain('10')">
+    <span class="ni">10</span><span class="nt">re-gre-generator</span><span class="nc">pipe</span>
+  </div>
+  <div class="nav-item" id="ni-11" onclick="selectDomain('11')">
+    <span class="ni">11</span><span class="nt">n8n Workflows</span><span class="nc">n8n</span>
+  </div>
+
+  <div style="font-size:7.5px;color:var(--ts);padding:4px 5px 2px;letter-spacing:1px">── KNOWLEDGE ──</div>
+  <div class="nav-item" id="ni-12" onclick="selectDomain('12')">
+    <span class="ni">12</span><span class="nt">GH_MD Knowledge</span><span class="nc">939f</span>
+  </div>
+  <div class="nav-item" id="ni-13" onclick="selectDomain('13')">
+    <span class="ni">13</span><span class="nt">Source / Prompts</span><span class="nc">data</span>
+  </div>
+  <div class="nav-item" id="ni-14" onclick="selectDomain('14')">
+    <span class="ni">14</span><span class="nt">Canonical JS</span><span class="nc">ref</span>
+  </div>
+
+  <div style="font-size:7.5px;color:var(--ts);padding:4px 5px 2px;letter-spacing:1px">── SYSTEM ──</div>
+  <div class="nav-item" id="ni-15" onclick="selectDomain('15')">
+    <span class="ni">15</span><span class="nt">Network Inventory</span><span class="nc">11dev</span>
+  </div>
+  <div class="nav-item" id="ni-16" onclick="selectDomain('16')">
+    <span class="ni">16</span><span class="nt">Instructions / Setup</span><span class="nc">yaml</span>
+  </div>
+  <div class="nav-item" id="ni-17" onclick="selectDomain('17')">
+    <span class="ni">17</span><span class="nt">Small Modules</span><span class="nc">7mod</span>
+  </div>
+  <div class="nav-item" id="ni-18" onclick="selectDomain('18')">
+    <span class="ni">18</span><span class="nt">GH_MD JS Masters</span><span class="nc">3set</span>
+  </div>
+  <div class="nav-item" id="ni-19" onclick="selectDomain('19')">
+    <span class="ni">19</span><span class="nt">Collected Outputs</span><span class="nc">8mod</span>
   </div>
 
   <div class="sep"></div>
-  <div class="sec-title">AGENT MODE</div>
-  <button class="mode-btn active-free" id="btn-free" onclick="setMode('free')">
-    ◈ FREE-AGENT-ENGINE
-  </button>
-  <button class="mode-btn" id="btn-hm" onclick="setMode('homemade')">
-    ◉ HOMEMADE-AGENT
-  </button>
-
-  <div class="sep"></div>
-  <div class="sec-title">SKILLS · 21</div>
-  <div class="skill-grid" id="skill-grid"></div>
-
-  <div class="sep"></div>
-  <div class="sec-title">TOOLS</div>
-  <div class="skill-grid">
-    <div class="sk" onclick="injectPrompt('[DIAG] Run full system diagnostic')" title="Run diagnostic">DIAG</div>
-    <div class="sk" onclick="injectPrompt('[STATUS] Show all engine statuses')" title="Engine status">STATUS</div>
-    <div class="sk" onclick="injectPrompt('[ROUTE] Explain current routing logic')" title="Routing">ROUTE</div>
-    <div class="sk" onclick="injectPrompt('[ARCH] Summarize R3-DASHBOARD architecture in 5 key points')" title="Architecture">ARCH</div>
-    <div class="sk" onclick="injectPrompt('[KI-API] Explain the ki-api routing engine (services/ki-api/routing_engine.py)')" title="ki-api">KI-API</div>
-    <div class="sk" onclick="injectPrompt('[SKILLS] List all 21 agent skills with one-line descriptions')" title="Skills list">SKILLS</div>
-    <div class="sk" onclick="injectPrompt('[FREE-PLAN] What can I build using only free-tier resources in R3-DASHBOARD?')" title="Free plan">FREE-PLAN</div>
-    <div class="sk" onclick="injectPrompt('[NEXT] What are the 3 most impactful next development steps for R3-DASHBOARD?')" title="Next steps">NEXT</div>
-  </div>
+  <div class="nav-sec">GOALS</div>
+  <button class="goal-btn" onclick="setGoal('understand_architecture')">Understand Architecture</button>
+  <button class="goal-btn" onclick="setGoal('work_on_agent_system')">Work on Agent System</button>
+  <button class="goal-btn" onclick="setGoal('work_on_frontend')">Work on Frontend</button>
+  <button class="goal-btn" onclick="setGoal('work_on_generator_pipeline')">Generator Pipeline</button>
+  <button class="goal-btn" onclick="setGoal('debug_production_issues')">Debug Production</button>
+  <button class="goal-btn" onclick="setGoal('orient_new_agent')">Orient New Agent</button>
 </div>
 
-<!-- ═══════════════════════════════ MAIN CHAT ═══════════════════════════ -->
+<!-- MAIN CHAT -->
 <div id="main">
-  <div id="agent-bar">
-    <span class="badge free" id="mode-badge">FREE-AGENT-ENGINE</span>
-    <span id="route-info">Priority: Ollama RAZER → appsen → LiteLLM → ChatLegs 8420</span>
-    <span id="live-engine"></span>
+  <div id="ctx-bar">
+    <span id="ctx-domain">▸ SELECT DOMAIN</span>
+    <span id="ctx-desc">Click a domain in the left panel to load context</span>
+    <span id="ctx-paths"></span>
   </div>
-  <div id="chat-log"></div>
+  <div id="chat"></div>
 </div>
 
-<!-- ═══════════════════════════════ SIDEBAR RIGHT ═══════════════════════ -->
-<div id="sidebar-right">
-  <div class="sec-title">SYSTEM LOG</div>
-  <div id="log-list"></div>
-  <div class="sep"></div>
-  <div class="sec-title">LATENCY</div>
-  <div id="diag-panel"></div>
+<!-- RIGHT PANEL -->
+<div id="rpanel">
+  <div id="rp-tabs">
+    <div class="rp-tab active" onclick="showTab('log')">LOG</div>
+    <div class="rp-tab" onclick="showTab('snaps')">SCANS</div>
+    <div class="rp-tab" onclick="showTab('lat')">LATENCY</div>
+  </div>
+  <div id="rp-body">
+    <div id="tab-log"   class="rp-section active"></div>
+    <div id="tab-snaps" class="rp-section"></div>
+    <div id="tab-lat"   class="rp-section"></div>
+  </div>
 </div>
 
-<!-- ═══════════════════════════════ INPUT BAR ═══════════════════════════ -->
-<div id="input-bar">
-  <textarea id="msg-input"
-    placeholder="Prompt → FREE-AGENT-ENGINE  |  Enter = Send  |  Shift+Enter = Newline"
+<!-- INPUT BAR -->
+<div id="bar">
+  <select id="ep-sel" title="Chat backend">
+    <option value="auto">AUTO (8420→8421)</option>
+    <option value="8420">8420 Primary</option>
+    <option value="8421">8421 Shadow</option>
+  </select>
+  <textarea id="inp"
+    placeholder="Chat against selected domain context  |  Enter=Send  Shift+Enter=Newline"
     onkeydown="handleKey(event)"></textarea>
-  <button class="btn send" onclick="sendMessage()">SEND ▶</button>
+  <button class="btn btn-send" onclick="send()">SEND ▶</button>
   <button class="btn" onclick="clearChat()">CLR</button>
+  <button class="btn btn-ctrl" onclick="query8422()">8422</button>
   <button class="btn" onclick="runDiag()">DIAG</button>
-  <button class="btn danger" onclick="setMode(activeMode==='free'?'homemade':'free')">SWITCH</button>
 </div>
 
-<!-- ═══════════════════════════════ JAVASCRIPT ══════════════════════════ -->
 <script>
-// ──────────────────────────────────────────────────────────────────────────
-// CONFIG — all engine endpoints from mcp.json + r3-node-map.json
-// ──────────────────────────────────────────────────────────────────────────
-const EPS = {
-  ollama_razer:   {
-    id: 'ollama_razer',  label: '11434 Ollama·RAZER',
-    url: 'http://localhost:11434',
-    health: '/api/tags',  chat: '/api/chat', type: 'ollama',
-    model: 'gemma2:2b',  priority: 1
+// ── DATA embedded from r3-node-map.json ─────────────────────────────────
+const DOMAINS = {
+  '01': {
+    label:'01 · Core Infrastructure',
+    description:'Container stack, DB init, reverse proxy, engine-registry',
+    key_paths:['docker/docker-compose.yml','docker/init.sql','docker/nginx.conf','engine-registry.json'],
+    context:`You are the R3-DASHBOARD expert for domain 01: Core Infrastructure.
+Files: docker/docker-compose.yml (full container stack), docker/init.sql (PostgreSQL schema),
+docker/nginx.conf + nginx-vault.conf (reverse proxy config), docker/.env.example,
+engine-registry.json (live registry: 8420 ChatLegs primary, 8421 ChatLegs shadow, 8422 Matrix control,
+8511 Perplexity bridge, 8512 OpenAI bridge).
+Containers: PostgreSQL, Hasura GraphQL, nginx, ChatLegs (8420/8421), Matrix Control (8422).`
   },
-  ollama_appsen:  {
-    id: 'ollama_appsen', label: 'LAN·Ollama·appsen',
-    url: 'http://192.168.1.226:11434',
-    health: '/api/tags', chat: '/api/chat', type: 'ollama',
-    model: 'llama3.2',   priority: 2
+  '02': {
+    label:'02 · AI Proxy Layer',
+    description:'ChatLegs proxy 8420/8421, OpenAI 8512, Perplexity 8511, HF proxy',
+    key_paths:['SOURCE/chat-legs/lib/providers.js','SOURCE/chat-legs/lib/router.js',
+      'SOURCE/chat-legs/lib/registry.js','SOURCE/chat-legs/lib/runtime-env.js',
+      'SOURCE/chat-legs/lib/avatar-engine.js','SOURCE/chat-legs/lib/skills.js',
+      'SOURCE/chat-legs/bridges/openai-8512/','SOURCE/chat-legs/bridges/perplexity-8511/'],
+    context:`You are the R3-DASHBOARD expert for domain 02: AI Proxy Layer.
+ChatLegs runs on port 8420 (primary) and 8421 (shadow) — OpenAI-compatible proxy server.
+Core lib modules in SOURCE/chat-legs/lib/:
+  providers.js — provider definitions, credentials, model lists
+  router.js    — request routing, load balancing across providers
+  registry.js  — reads/updates engine-registry.json
+  runtime-env.js — env variable loading and validation
+  avatar-engine.js — avatar/persona system for AI personalities
+  skills.js    — skill loading and dispatch for agent capabilities
+Bridges: OpenAI bridge (8512), Perplexity bridge (8511), HF proxy.`
   },
-  litellm:        {
-    id: 'litellm',       label: '4000 LiteLLM·GW',
-    url: 'http://localhost:4000',
-    health: '/health',   chat: '/v1/chat/completions', type: 'openai',
-    model: 'auto',       priority: 3
+  '03': {
+    label:'03 · Control Plane',
+    description:'Matrix control plane port 8422, guardrail scheduler, overview APIs',
+    key_paths:['SOURCE/chat-legs/r3_control_plane_live_package/control-plane-dashboard-router.js',
+      'SOURCE/chat-legs/r3_fix_bundle_v6/r3-control-plane-overview-api-v3.cjs',
+      'SOURCE/chat-legs/r3_next_step_package/002_r3_guardrail_control_plane.sql'],
+    context:`You are the R3-DASHBOARD expert for domain 03: Control Plane (port 8422).
+Port 8422 = matrix-control server — manages the entire R3 stack.
+control-plane-dashboard-router.js — API routing for all control endpoints.
+r3-control-plane-overview-api-v3.cjs — latest overview API (v3, CommonJS).
+002_r3_guardrail_control_plane.sql — PostgreSQL guardrail scheduler schema.
+Provides: system status, guardrail enforcement, live metric collection, engine health.`
   },
-  chatlegs_1:     {
-    id: 'chatlegs_1',    label: '8420 ChatLegs·①',
-    url: 'http://localhost:8420',
-    health: '/health',   chat: '/v1/chat/completions', type: 'openai',
-    model: 'auto',       priority: 4
+  '04': {
+    label:'04 · Frontend UI',
+    description:'React/TSX frontend, dashboard.html, ConnectorsModal',
+    key_paths:['SOURCE/chat-legs/src/components/ConnectorsModal.tsx',
+      'SOURCE/chat-legs/src/lib/','SOURCE/chat-legs/public/index.html','dashboard.html'],
+    context:`You are the R3-DASHBOARD expert for domain 04: Frontend UI.
+React/TSX frontend in SOURCE/chat-legs/src/. Entry: public/index.html.
+Root entry: dashboard.html (the main R3-DASHBOARD entry point).
+Key component: ConnectorsModal.tsx (connector management modal, appears in src/ and src/components/).
+src/lib/: avatar-engine.js, config.js, db.js + frontend utilities.
+src/providers/ — frontend provider integration files.`
   },
-  chatlegs_2:     {
-    id: 'chatlegs_2',    label: '8421 ChatLegs·②',
-    url: 'http://localhost:8421',
-    health: '/health',   chat: '/v1/chat/completions', type: 'openai',
-    model: 'auto',       priority: 5
+  '05': {
+    label:'05 · ki-api Service',
+    description:'Python Flask AI routing API — provider selection, model dispatch',
+    key_paths:['services/ki-api/app.py','services/ki-api/routing_engine.py',
+      'services/ki-api/Dockerfile','services/r3-rec/index.js'],
+    context:`You are the R3-DASHBOARD expert for domain 05: ki-api Service.
+Python Flask at services/ki-api/. Dockerized in main docker-compose stack.
+app.py — REST API: endpoints for AI request routing.
+routing_engine.py — core: provider selection, load balancing, fallback chains.
+services/r3-rec/ — Node.js recommendation service (index.js).
+The ki-api is the intelligent routing layer ABOVE the ChatLegs proxy.`
   },
-  matrix:         {
-    id: 'matrix',        label: '8422 Matrix·Control',
-    url: 'http://localhost:8422',
-    health: '/health',   chat: null, type: 'control',
-    model: null,         priority: 0
+  '06': {
+    label:'06 · Automation Scripts',
+    description:'PowerShell guardrail, audit, canonical-JS activation scripts',
+    key_paths:['_automation/Run-R3-Canonical-JS-Guardrail-Daily.ps1',
+      '_automation/Run-R3-Canonical-JS-PostDeployment-Integrity-Audit.ps1',
+      '_automation/R3-Connector-Audit-PostRun.ps1','R3-BOOTSTRAP.ps1'],
+    context:`You are the R3-DASHBOARD expert for domain 06: Automation Scripts.
+_automation/: Canonical-JS guardrail daily runner, post-deployment integrity audit,
+connector audit (R3-Connector-Audit-PostRun.ps1), one-shot rebuild.
+Root: R3-BOOTSTRAP.ps1, R3-BUILD-BASIC.ps1, R3-DEEP-SCAN.ps1, R3-MERGE.ps1.
+SOURCE/chat-legs/scripts/windows/: apply-r3-live-status-patch.ps1 + rollback variant.
+Guardrail enforces deployed server.js/lib match canonical master copies.`
   },
-  n8n:            {
-    id: 'n8n',           label: '5678 n8n·Bridge',
-    url: 'http://localhost:5678',
-    health: '/healthz',  chat: null, type: 'workflow',
-    model: null,         priority: 0
+  '07': {
+    label:'07 · Agent Skills ×21',
+    description:'MODULES/agent-skills — 21 SKILL.md files, AGENTS.md, CLAUDE.md',
+    key_paths:['MODULES/agent-skills/skills/*/SKILL.md','MODULES/agent-skills/AGENTS.md',
+      'MODULES/agent-skills/CLAUDE.md'],
+    skills:['api-and-interface-design','browser-testing-with-devtools','ci-cd-and-automation',
+      'code-review-and-quality','code-simplification','context-engineering',
+      'debugging-and-error-recovery','deprecation-and-migration','documentation-and-adrs',
+      'frontend-ui-engineering','git-workflow-and-versioning','idea-refine',
+      'incremental-implementation','performance-optimization','planning-and-task-breakdown',
+      'security-and-hardening','shipping-and-launch','source-driven-development',
+      'spec-driven-development','test-driven-development','using-agent-skills'],
+    context:`You are the R3-DASHBOARD expert for domain 07: Agent Skills (21 SKILL.md files).
+Each skill = structured Markdown with trigger conditions, step-by-step workflows, examples.
+21 skills: api-and-interface-design, browser-testing-with-devtools, ci-cd-and-automation,
+code-review-and-quality, code-simplification, context-engineering, debugging-and-error-recovery,
+deprecation-and-migration, documentation-and-adrs, frontend-ui-engineering,
+git-workflow-and-versioning, idea-refine (+ examples.md, frameworks.md, refinement-criteria.md),
+incremental-implementation, performance-optimization, planning-and-task-breakdown,
+security-and-hardening, shipping-and-launch, source-driven-development, spec-driven-development,
+test-driven-development, using-agent-skills.
+Config: AGENTS.md (skill routing), CLAUDE.md (Claude managed blocks). Content scan: 238 KB.`
   },
+  '08': {
+    label:'08 · Agent Reach HQ',
+    description:'HQ prompts, connector matrix, router config',
+    key_paths:['MODULES/agent-reach-hq/agent-reach-router.yaml',
+      'MODULES/agent-reach-hq/connector-matrix.yaml',
+      'MODULES/agent-reach-hq/hq-coding-prompt.md',
+      'MODULES/agent-reach-hq/hq-scripter-prompt.md'],
+    context:`You are the R3-DASHBOARD expert for domain 08: Agent Reach HQ.
+MODULES/agent-reach-hq/ = command center for agent orchestration.
+agent-reach-router.yaml — routing config for all agent types.
+connector-matrix.yaml — matrix of all available connectors and status.
+Prompts: hq-coding-prompt.md, hq-scripter-prompt.md, deep-research-prompt.md,
+obliteratus.md, claude-code.md, vscode-gadget.md.
+Scripts: local.sh (local), vps.sh (VPS deployment).`
+  },
+  '09': {
+    label:'09 · Obliteratus ML',
+    description:'Python ML model abliteration toolkit — pip package, Dockerfile, HF Spaces',
+    key_paths:['MODULES/obliteratus/obliteratus/abliterate.py',
+      'MODULES/obliteratus/obliteratus/cli.py',
+      'MODULES/obliteratus/obliteratus/bayesian_optimizer.py',
+      'MODULES/obliteratus/app.py','MODULES/obliteratus/Dockerfile'],
+    context:`You are the R3-DASHBOARD expert for domain 09: Obliteratus ML toolkit.
+pip-installable Python package in MODULES/obliteratus/obliteratus/.
+Core: abliterate.py (abliteration logic), cli.py, adaptive_defaults.py,
+architecture_profiles.py, bayesian_optimizer.py, informed_pipeline.py,
+evaluator.py, presets.py, probing_classifiers.py, remote.py, reader.py.
+Flask entry: app.py. Dockerfile. HF Spaces. Tests: 15+ pytest files.
+Configs: examples/ (full_study.yaml, gpt2_head_ablation.yaml, etc.).`
+  },
+  '10': {
+    label:'10 · re-gre-generator',
+    description:'Core output generator — spec-driven pipeline',
+    key_paths:['MODULES/re-gre-generator/generator-spec.yaml',
+      'MODULES/re-gre-generator/preflight-spec.yaml',
+      'MODULES/re-gre-generator/policy.yaml',
+      'MODULES/re-gre-generator/install_plan.py','MODULES/re-gre-generator/build.py'],
+    context:`You are the R3-DASHBOARD expert for domain 10: re-gre-generator pipeline.
+Pipeline: preflight → policy_check → render_templates → write_outputs → package_zip.
+Policy: FREE-ONLY — no paid/premium dependencies.
+Preflight: python>=3.10, node, npm, git, pipx, gh, yt-dlp, mcp, rdt, twitter.
+Outputs: rendered_templates (9), config_copies (5), generated (5), zip.
+Consumers: engine-registry, port 8003, n8n, Ollama/LLM. Content scan: 17 files, 17 KB.`
+  },
+  '11': {
+    label:'11 · n8n Workflows',
+    description:'n8n workflow engine port 5678, browser-dash, MCP bridge',
+    key_paths:['n8n-workflows/browser-dash/r3-master-hub-v2.html',
+      'n8n-workflows/browser-dash/docker-compose.yml','n8n-mcp-bridge.mjs'],
+    context:`You are the R3-DASHBOARD expert for domain 11: n8n Workflows.
+n8n runs in Docker stack (port 5678). Browser dashboard: r3-master-hub-v2.html.
+n8n-mcp-bridge.mjs — ESM bridge: n8n webhooks ↔ MCP protocol (root level).
+Integrates with all connectors: Shopify, Reddit, YouTube, TikTok, etc.
+workflow-agents/.claude.json — Claude agent config for workflow automation.`
+  },
+  '12': {
+    label:'12 · GH_MD Knowledge Base',
+    description:'939 merged knowledge files — #AGENT #KNOWLEDGE #MEMORY #SKILLS #STRATEGY #SYSTEM',
+    key_paths:['GH_MD/#AGENT.MD/ (65 files)','GH_MD/#KNOWLEDGE.MD/ (18 files)',
+      'GH_MD/#MEMORY.MD/ (14 files)','GH_MD/#STRATEGY.MD/ (29 files)',
+      'GH_MD/#SYSTEM.MD/ (804 files)'],
+    context:`You are the R3-DASHBOARD expert for domain 12: GH_MD Knowledge Base (939 files).
+#AGENT.MD (65): AGENT.md, AGENTS.md, CLAUDE.md, cursor-setup.md, windsurf-setup.md,
+  vscode-gadget.md, avatar-engine.merged.js, R3 VOLT-AGENT_DESIGN.MD, etc.
+#KNOWLEDGE.MD (18): KNOWLEDGE.md, preset_knowledge.yaml, OLLAMA_OLLAMA.MD,
+  n8n Blueprint LLM Integration.md, THREAT_MODEL.md.
+#MEMORY.MD (14): MEMORY.md, mempalace.md, 5x Mountpoint-Matrix_*.merged.json.
+#SKILLS.MD (9): SKILL.merged.md, AI Marketing Skills.md, R3 MARKETINGSKILLS.MD.
+#STRATEGY.MD (29): R3 CORE STRATEGY.md, R3-DASHBOARD-SPEC.merged.md,
+  generator-spec.merged.yaml, MOD-07-STAMMDATEN-GENERATOR-SPEC.md, incident-log.merged.md.
+#SYSTEM.MD (804): flat merge-dump of ALL system files (Python, TS/JS, configs, .env per provider).`
+  },
+  '13': {
+    label:'13 · Source / Prompts',
+    description:'SOURCE/data (vibe registry), SOURCE/js (sync engine), SOURCE/prompts',
+    key_paths:['SOURCE/data/R3_VIBE_REGISTRY.json','SOURCE/js/sync-engine.js',
+      'SOURCE/prompts/R3-DASHBOARD-BAUANLEITUNG-v2.md'],
+    context:`You are the R3-DASHBOARD expert for domain 13: Source Data & Prompts.
+SOURCE/data/R3_VIBE_REGISTRY.json — all provider/vibe accounts (5 backup versions).
+SOURCE/js/: sync-engine.js, app.js, modules-loader.js, shopify workflow JSONs.
+SOURCE/prompts/: R3 VIB.E HD-PROMPT-GENERATOR.MD, MOD-07-STAMMDATEN-GENERATOR-SPEC.md,
+  R3-DASHBOARD-BAUANLEITUNG-v2.md, 4-Prompt Content Engine System.md, CLI-Aufruf.md.
+Content scan P1: 7 files, 65.1 KB including engine-registry + VIBE_REGISTRY.`
+  },
+  '14': {
+    label:'14 · Canonical JS Masters',
+    description:'_reference-js-master — canonical Node.js server, mount API',
+    key_paths:['_reference-js-master/server.js','_reference-js-master/R3-AUTO-MOUNT-HOOK.js',
+      '_reference-js-master/r3-mount-api.js','_reference-js-master/lib/'],
+    context:`You are the R3-DASHBOARD expert for domain 14: Canonical JS Masters.
+_reference-js-master/ = canonical source of truth for Node.js server stack.
+Files: server.js, R3-AUTO-MOUNT-HOOK.js, r3-mount-api.js, lib/ (6 canonical libs), src/lib/.
+Also tracked: GH_MD/CANONICAL_JS_MASTER/ and GH_MD/LOGICAL_MASTER_JS/.
+The guardrail system (domain 06) enforces deployed files match these canonical versions.`
+  },
+  '15': {
+    label:'15 · Network Inventory',
+    description:'11 physical/virtual devices mapped in NETWORK/',
+    key_paths:['NETWORK/'],
+    devices:['APPSEN_C (Win 500GB)','DOCKER MCP NVMe 1024GB','RAZER (990EVO NVMe 5.0)',
+      'FEDORA43 + KALI + TOOL-KITS (320GB)','STARLINK UTR-232','FRITZ.BOX Cable 6591',
+      'GALAXY TAB A8','NODE-EDGE 2.5 PIXEL PRO 7','UBUNTU-BOOT 128GB'],
+    context:`You are the R3-DASHBOARD expert for domain 15: Network Inventory.
+11 devices: APPSEN_C (Windows 500GB), DOCKER MCP NVMe (1024GB), RAZER (990EVO NVMe 5.0 primary dev),
+FEDORA43 (320GB + Kali Linux + Tool-Kits), FRITZ.BOX Cable 6591, GALAXY TAB A8,
+NODE-EDGE 2.5 PIXEL PRO 7, STARLINK ROUTER UTR-232, UBUNTU-BOOT (128GB),
+E: FREIES VOL (374GB), F: FORENSIK (1000GB).
+Local IP of appsen: 192.168.1.226 (Ollama llama3.2 on that machine).`
+  },
+  '16': {
+    label:'16 · Instructions / Setup',
+    description:'AI setup YAML, mempalace, Mountpoint matrices',
+    key_paths:['01.] R3 I VIB.E - INSTRUCTIONS/DASHBOARD_AI_SETUP.yaml',
+      '01.] R3 I VIB.E - INSTRUCTIONS/mempalace.md',
+      '01.] R3 I VIB.E - INSTRUCTIONS/Mountpoint-Matrix_network-basics.json'],
+    context:`You are the R3-DASHBOARD expert for domain 16: Instructions & Setup.
+01.] R3 I VIB.E - INSTRUCTIONS/ = canonical setup documentation.
+DASHBOARD_AI_SETUP.yaml — master AI config (provider keys, model assignments, routing rules).
+mempalace.md — memory palace architecture for AI context management.
+Mountpoint-Matrix_network-basics.json — network mount configuration.
+Mountpoint-Matrix_PostgreSQL-SETTINGS.json — database connection settings.
+3x Mountpoint-Matrix_workplace-live*.json — live workplace mount configs.`
+  },
+  '17': {
+    label:'17 · Small Modules',
+    description:'7 agent sub-modules: dispatcher, collector, router, connectors, g0dm0d3',
+    key_paths:['MODULES/re-agent-dispatcher/dispatcher.py',
+      'MODULES/re-output-collector/collector.py',
+      'MODULES/re-prompt-router/prompt_router.py',
+      'MODULES/re-social-connectors/social-connectors.yaml',
+      'MODULES/g0dm0d3_hybrid_agent/'],
+    context:`You are the R3-DASHBOARD expert for domain 17: Small Agent Modules.
+re-agent-dispatcher: dispatcher.py — routes tasks to agents.
+re-output-collector: collector.py — aggregates agent run outputs.
+re-preflight-agent: preflight_agent.py + preflight-report.json.
+re-prompt-router: prompt_router.py + router-config.yaml.
+re-social-connectors: social-connectors.yaml, specialty-connectors.yaml.
+re-local-agent-int: Anthropics Claude SDK reference docs (CLI, Python, TypeScript).
+g0dm0d3_hybrid_agent: full Node.js hybrid agent + Docker.`
+  },
+  '18': {
+    label:'18 · GH_MD JS Masters',
+    description:'Canonical + Logical JS masters + Dashboard_START launcher',
+    key_paths:['GH_MD/CANONICAL_JS_MASTER/server.js','GH_MD/LOGICAL_MASTER_JS/server.js',
+      'GH_MD/Dashboard_START/R3-RUN.ps1','GH_MD/Dashboard_START/r3-hidden-launcher.vbs'],
+    context:`You are the R3-DASHBOARD expert for domain 18: GH_MD JS Masters.
+Three tracked JS master sets:
+CANONICAL_JS_MASTER/ — server.js, R3-AUTO-MOUNT-HOOK.js, r3-mount-api.js, lib/(6), src/.
+LOGICAL_MASTER_JS/   — same structure, logical (non-hardened) variant.
+Dashboard_START/     — launcher: server.js, registry.js, ConnectorsModal.tsx,
+  r3-hidden-launcher.vbs (silent VBS), R3-RUN.ps1, R3-START-SILENT.ps1,
+  R3-STOP-SERVERS.ps1, R3-NODE-CONNECTOR.ps1.`
+  },
+  '19': {
+    label:'19 · Collected Outputs',
+    description:'COLLECTED-OUTPUTS/ — generated agent output bundles',
+    key_paths:['COLLECTED-OUTPUTS/collection-index.json'],
+    modules:['agent-reach-hq','re-agent-dispatcher','re-gre-generator','re-output-collector',
+      're-preflight-agent','re-prompt-router','re-provider-registry','re-social-connectors'],
+    context:`You are the R3-DASHBOARD expert for domain 19: Collected Outputs.
+COLLECTED-OUTPUTS/ = generated bundles from all agent module pipeline runs.
+8 module folders (each with SKILL.md + artifacts): agent-reach-hq, re-agent-dispatcher,
+re-gre-generator, re-output-collector, re-preflight-agent, re-prompt-router,
+re-provider-registry, re-social-connectors.
+collection-index.json — master index. These are the OUTPUTS of re-gre-generator runs.`
+  }
 };
 
-const SKILLS = [
-  'api-and-interface-design','browser-testing-with-devtools','ci-cd-and-automation',
-  'code-review-and-quality','code-simplification','context-engineering',
-  'debugging-and-error-recovery','deprecation-and-migration','documentation-and-adrs',
-  'frontend-ui-engineering','git-workflow-and-versioning','idea-refine',
-  'incremental-implementation','performance-optimization','planning-and-task-breakdown',
-  'security-and-hardening','shipping-and-launch','source-driven-development',
-  'spec-driven-development','test-driven-development','using-agent-skills'
+const GOALS = {
+  understand_architecture:    ['01','02','03','05','11'],
+  work_on_agent_system:       ['07','08','12'],
+  work_on_frontend:           ['04','02','13'],
+  work_on_generator_pipeline: ['10','12','13'],
+  debug_production_issues:    ['03','06','12'],
+  orient_new_agent:           ['16','12','07']
+};
+
+const SNAPS = [
+  {id:'P1',name:'Registry Files',      fc:7,  kb:65.1,  finds:['engine-registry.json (8420/8421/8422)','R3_VIBE_REGISTRY.json','docker-compose.yml','r3-vibe-dash-struktur.yaml']},
+  {id:'P2',name:'GRE Generator Specs', fc:17, kb:17.0,  finds:['Pipeline: preflight→render→write→zip','Policy: free-only','Preflight: python>=3.10, node, git']},
+  {id:'P3',name:'ki-api',              fc:4,  kb:7.9,   finds:['Flask routing gateway','routing_engine.py: provider selection','Dockerized in main stack']},
+  {id:'P4',name:'ChatLegs Lib',        fc:6,  kb:35.6,  finds:['providers.js router.js registry.js','runtime-env.js avatar-engine.js skills.js','Core of 8420/8421 proxy']},
+  {id:'P5',name:'Agent Skills x21',    fc:21, kb:238.0, finds:['All 21 SKILL.md captured (238 KB)','Full instruction content for all skills','idea-refine has extra files']},
+  {id:'P6',name:'Strategy Docs',       fc:10, kb:83.0,  finds:['R3 CORE STRATEGY.md','R3-DASHBOARD-SPEC.merged.md','MOD-07-STAMMDATEN-GENERATOR-SPEC.md']},
+  {id:'BX',name:'Agent Skills Config', fc:4,  kb:27.9,  finds:['AGENTS.md (skill routing)','CLAUDE.md (managed blocks)','CONTRIBUTING.md README.md']}
 ];
 
-// ──────────────────────────────────────────────────────────────────────────
-// SYSTEM PROMPTS
-// ──────────────────────────────────────────────────────────────────────────
-const SP = {
-  free: `You are the FREE-AGENT-ENGINE — the primary AI intelligence layer of the R³|VIB.E DASHBOARD.
+// ── STATE ────────────────────────────────────────────────────────────────
+let activeDomain = null;
+let chatHistory  = [];
+let streaming    = false;
+let epHealth     = {8420:'chk',8421:'chk',8422:'chk'};
+let epLatency    = {8420:null,8421:null,8422:null};
 
-SYSTEM: R3-DASHBOARD (C:\\Users\\mail\\R3-DASHBOARD)
-ENGINE STACK:
-  • Ollama RAZER  → localhost:11434  (gemma2:2b)  — FREE LOCAL
-  • Ollama appsen → 192.168.1.226:11434 (llama3.2) — FREE LAN
-  • LiteLLM GW   → localhost:4000                 — FREE GATEWAY
-  • ChatLegs ①   → localhost:8420                 — PRIMARY PROXY
-  • ChatLegs ②   → localhost:8421                 — SHADOW PROXY
-  • Matrix Ctrl  → localhost:8422                 — CONTROL PLANE
-  • n8n Bridge   → localhost:5678                 — WORKFLOW ENGINE
-
-ARCHITECTURE (19 domains):
-  01 Container stack (docker-compose, nginx, PostgreSQL)
-  02 AI proxy layer (chat-legs lib: providers, router, registry, runtime-env, avatar-engine, skills)
-  03 Control plane (matrix-8422, guardrail scheduler, overview APIs)
-  04 Frontend (React/TSX, dashboard.html, ConnectorsModal.tsx)
-  05 ki-api (Python Flask routing engine, provider dispatch)
-  06 Automation (PowerShell guardrail + audit scripts)
-  07 Agent skills (21 SKILL.md modules)
-  08 Agent-reach HQ (prompts, connector matrix, router yaml)
-  09 Obliteratus (Python ML abliteration toolkit)
-  10 re-gre-generator (spec-driven output pipeline)
-  11 n8n workflows
-  12 GH_MD knowledge base (AGENT/KNOWLEDGE/MEMORY/SKILLS/STRATEGY/SYSTEM)
-  13 SOURCE data + prompts (VIBE_REGISTRY, HD prompt specs)
-  14 Canonical JS masters
-  15 Network inventory (11 devices)
-  16 Instructions + setup matrices
-  17 Small agent modules (dispatcher, collector, router, connectors, g0dm0d3)
-  18 GH_MD JS masters + Dashboard_START
-  19 COLLECTED-OUTPUTS (agent output bundles)
-
-SKILLS LOADED: ${SKILLS.join(', ')}
-
-POLICY: free-only; no paid dependencies. Prefer local Ollama first.
-BEHAVIOR: Be precise and technical. Reference actual file paths, ports, module names. If a skill applies, name it.`,
-
-  homemade: `You are HOMEMADE-AGENT — an autonomous, purpose-built AI intelligence embedded in R³|VIB.E DASHBOARD.
-
-IDENTITY: You are not a generic assistant. You are custom-built for this exact stack. You have deep knowledge of every layer.
-
-FULL SYSTEM CONTEXT:
-━━ LIVE ENDPOINTS ━━
-  8420 ChatLegs Primary  |  8421 ChatLegs Shadow  |  8422 Matrix Control
-  4000 LiteLLM Gateway   |  5678 n8n Bridge
-  11434 Ollama RAZER (gemma2:2b)  |  192.168.1.226:11434 Ollama appsen (llama3.2)
-  8512 OpenAI Bridge  |  8511 Perplexity Bridge
-
-━━ CORE FILES ━━
-  engine-registry.json          → live port/status registry
-  SOURCE/data/R3_VIBE_REGISTRY.json → provider accounts
-  r3-node-map.json              → deep-read index (19 domains + 7 content snapshots)
-  MODULES/re-gre-generator/     → core output pipeline (preflight→policy→render→package)
-  services/ki-api/routing_engine.py → model selection logic
-  SOURCE/chat-legs/lib/         → providers.js, router.js, registry.js, runtime-env.js, avatar-engine.js, skills.js
-  MODULES/agent-skills/skills/  → 21 SKILL.md definitions
-  GH_MD/#STRATEGY.MD/R³ CORE STRATEGY.md → system blueprint
-  GH_MD/#SYSTEM.MD/             → 804 merged system files
-
-━━ GENERATOR PIPELINE ━━
-  preflight → policy_check → render_templates → write_outputs → package_zip
-  Policy: free-only, no paid deps
-  Preflight: python>=3.10, node, npm, git, pipx, gh, yt-dlp, mcp, rdt, twitter
-  Output: 9 templates, 5 configs, 5 generated files, 1 zip
-
-━━ 21 SKILLS ━━
-  ${SKILLS.join(' | ')}
-
-OPERATING PRINCIPLES:
-  1. AUTONOMOUS — propose complete solutions, not fragments
-  2. SYSTEM-AWARE — reference actual files, ports, modules by exact name
-  3. SKILL-DRIVEN — apply the appropriate SKILL.md for each task domain
-  4. FREE-FIRST — all solutions use free-tier resources only
-  5. PROACTIVE — anticipate follow-up needs, name the next logical step
-  6. PRECISE — exact commands, paths, configs — no vagueness
-
-You are the primary AI brain of R³|VIB.E. Operate accordingly.`
-};
-
-// ──────────────────────────────────────────────────────────────────────────
-// STATE
-// ──────────────────────────────────────────────────────────────────────────
-let activeMode     = 'free';
-let selectedEngine = 'auto';
-let epStatus       = {};    // 'online' | 'offline' | 'checking'
-let epLatency      = {};    // ms
-let chatHistory    = [];    // {role, content}[]
-let streaming      = false;
-
-// ──────────────────────────────────────────────────────────────────────────
-// INIT
-// ──────────────────────────────────────────────────────────────────────────
+// ── INIT ─────────────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
-  renderEpList();
-  renderSkills();
-  updateClock();
-  setInterval(updateClock, 1000);
-  Object.keys(EPS).forEach(k => { epStatus[k] = 'checking'; });
-  renderStatusRow();
-  runInitHealthCheck();
-  setInterval(pollHealth, 10000);
-  sysMsg('R³|VIB.E Dashboard Central v2.0 — FREE-AGENT-ENGINE active. Running health checks...');
-  log('info', 'Dashboard initialized');
+  renderSnaps();
+  updateLatPanel();
+  setInterval(() => {
+    const c = document.getElementById('clk');
+    if (c) c.textContent = new Date().toLocaleTimeString('de-DE');
+  }, 1000);
+  runInitHealth();
+  setInterval(runInitHealth, 12000);
+  sysMsg('R3|VIB.E Dashboard Central v3\nBackends: 8420 primary  |  8421 shadow  |  8422 matrix-control\nSelect a domain left → load context → chat.');
+  log('info','Dashboard ready — checking endpoints...');
 });
 
-function updateClock() {
-  const n = new Date();
-  document.getElementById('clock').textContent =
-    n.toLocaleDateString('de-DE') + ' ' + n.toTimeString().slice(0,8);
-}
-
-// ──────────────────────────────────────────────────────────────────────────
-// ENGINE RENDER
-// ──────────────────────────────────────────────────────────────────────────
-function renderEpList() {
-  const list = document.getElementById('ep-list');
-  list.innerHTML = `
-    <div class="ep-row${selectedEngine==='auto'?' sel':''}" id="ep-auto" onclick="selectEngine('auto')">
-      <div class="sdot online"></div><span>AUTO · smart routing</span>
-    </div>`;
-  Object.values(EPS).forEach(ep => {
-    const s = epStatus[ep.id] || 'checking';
-    const el = document.createElement('div');
-    el.className = `ep-row${selectedEngine===ep.id?' sel':''}`;
-    el.id = 'ep-row-' + ep.id;
-    el.title = ep.url + (epLatency[ep.id] ? ` — ${epLatency[ep.id]}ms` : '');
-    el.innerHTML = `<div class="sdot ${s}"></div><span>${ep.label}${ep.model?` <em style="color:var(--text-dim)">(${ep.model})</em>`:''}</span>`;
-    el.onclick = () => selectEngine(ep.id);
-    list.appendChild(el);
-  });
-}
-
-function renderStatusRow() {
-  const row = document.getElementById('status-row');
-  row.innerHTML = '';
-  Object.values(EPS).forEach(ep => {
-    const s = epStatus[ep.id] || 'checking';
-    const pill = document.createElement('div');
-    pill.className = `ep-pill ${s}`;
-    pill.title = ep.url;
-    pill.innerHTML = `<div class="dot"></div><span>${ep.label}</span>`;
-    pill.onclick = () => selectEngine(ep.id);
-    row.appendChild(pill);
-  });
-}
-
-function selectEngine(id) {
-  selectedEngine = id;
-  renderEpList();
-  log('info', 'Engine: ' + id);
-}
-
-function renderSkills() {
-  const g = document.getElementById('skill-grid');
-  SKILLS.forEach(s => {
-    const el = document.createElement('div');
-    el.className = 'sk';
-    el.textContent = s.replace(/-/g,' ').replace(/\b(\w)/g,c=>c.toUpperCase()).slice(0,18);
-    el.title = s;
-    el.onclick = () => injectPrompt(`[SKILL:${s}] `);
-    g.appendChild(el);
-  });
-}
-
-// ──────────────────────────────────────────────────────────────────────────
-// HEALTH CHECK
-// ──────────────────────────────────────────────────────────────────────────
-async function checkOne(id) {
-  const ep = EPS[id];
+// ── HEALTH ───────────────────────────────────────────────────────────────
+async function pingEp(port) {
+  setChip(port,'chk');
   const t0 = Date.now();
-  try {
-    const ctrl = new AbortController();
-    const tid = setTimeout(() => ctrl.abort(), 3000);
-    const r = await fetch(ep.url + ep.health, { method: 'GET', signal: ctrl.signal });
-    clearTimeout(tid);
-    const ms = Date.now() - t0;
-    epStatus[id] = (r.ok || r.status < 500) ? 'online' : 'offline';
-    epLatency[id] = ms;
-    updateDiagPanel();
-  } catch {
-    epStatus[id] = 'offline';
-    epLatency[id] = null;
+  const probes = ['/health','/api/health','/status','/'];
+  for (const p of probes) {
+    try {
+      const ctrl = new AbortController();
+      setTimeout(() => ctrl.abort(), 2500);
+      const r = await fetch('http://localhost:'+port+p, {method:'GET',signal:ctrl.signal});
+      if (r.status < 500) {
+        epHealth[port] = 'on';
+        epLatency[port] = Date.now() - t0;
+        setChip(port,'on');
+        log('ok',':'+port+' ONLINE '+epLatency[port]+'ms');
+        updateLatPanel();
+        return;
+      }
+    } catch(e) {}
   }
-  renderEpList();
-  renderStatusRow();
+  epHealth[port] = 'off';
+  epLatency[port] = null;
+  setChip(port,'off');
+  log('err',':'+port+' OFFLINE');
+  updateLatPanel();
 }
 
-async function runInitHealthCheck() {
-  await Promise.allSettled(Object.keys(EPS).map(k => checkOne(k)));
-  const on = Object.values(epStatus).filter(v => v === 'online').length;
-  const total = Object.keys(EPS).length;
-  log(on > 0 ? 'ok' : 'err', `Health: ${on}/${total} online`);
-  sysMsg(`Engine check complete: ${on}/${total} reachable. ${on===0?'All offline — check servers.':''}`);
+async function runInitHealth() {
+  await Promise.allSettled([pingEp(8420), pingEp(8421), pingEp(8422)]);
 }
 
-function pollHealth() {
-  Object.keys(EPS).forEach(k => checkOne(k));
+function setChip(port, state) {
+  const el = document.getElementById('ep-'+port);
+  if (el) el.className = 'ep-chip '+state;
 }
 
-function updateDiagPanel() {
-  const p = document.getElementById('diag-panel');
-  p.innerHTML = '';
-  Object.values(EPS).forEach(ep => {
-    const s = epStatus[ep.id] || 'checking';
-    const lat = epLatency[ep.id];
-    const row = document.createElement('div');
-    row.className = 'diag-row';
-    row.innerHTML = `
-      <span class="lc-${s==='online'?'ok':s==='offline'?'err':'warn'}">${ep.label}</span>
-      <span class="diag-lat">${lat != null ? lat+'ms' : '—'}</span>`;
-    p.appendChild(row);
-  });
+// ── DOMAIN SELECT ────────────────────────────────────────────────────────
+function selectDomain(id) {
+  activeDomain = id;
+  document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+  const ni = document.getElementById('ni-'+id);
+  if (ni) ni.classList.add('active');
+  const d = DOMAINS[id];
+  if (!d) return;
+  document.getElementById('ctx-domain').textContent = d.label;
+  document.getElementById('ctx-desc').textContent   = d.description;
+  document.getElementById('ctx-paths').textContent  = (d.key_paths||[]).slice(0,2).join(' · ');
+  chatHistory = [];
+  sysMsg('Domain: '+d.label+'\nPaths: '+(d.key_paths||[]).slice(0,3).join(' | ')+'\nContext loaded — chat ready.');
+  log('info','Domain → '+id+': '+d.label);
 }
 
-// ──────────────────────────────────────────────────────────────────────────
-// AGENT MODE
-// ──────────────────────────────────────────────────────────────────────────
-function setMode(mode) {
-  activeMode = mode;
-  const badge  = document.getElementById('mode-badge');
-  const btnF   = document.getElementById('btn-free');
-  const btnH   = document.getElementById('btn-hm');
-  const ri     = document.getElementById('route-info');
-  const input  = document.getElementById('msg-input');
-  if (mode === 'free') {
-    badge.className = 'badge free'; badge.textContent = 'FREE-AGENT-ENGINE';
-    btnF.className  = 'mode-btn active-free';
-    btnH.className  = 'mode-btn';
-    ri.textContent  = 'Priority: Ollama RAZER → appsen → LiteLLM → ChatLegs 8420';
-    input.placeholder = 'Prompt → FREE-AGENT-ENGINE  |  Enter = Send  |  Shift+Enter = Newline';
-    sysMsg('⇄ Switched to FREE-AGENT-ENGINE — local-first routing, free-only resources.');
-  } else {
-    badge.className = 'badge homemade'; badge.textContent = 'HOMEMADE-AGENT';
-    btnF.className  = 'mode-btn';
-    btnH.className  = 'mode-btn active-homemade';
-    ri.textContent  = 'Full R3-DASHBOARD context loaded — 19 domains, 21 skills, autonomous mode';
-    input.placeholder = 'HOMEMADE-AGENT online — full system context active …';
-    sysMsg('⇄ Switched to HOMEMADE-AGENT — full R3-DASHBOARD context, autonomous mode.');
-  }
-  chatHistory = [];   // fresh context on mode switch
-  log('info', 'Mode → ' + mode);
+function setGoal(goal) {
+  const ids   = GOALS[goal] || [];
+  const label = goal.replace(/_/g,' ').toUpperCase();
+  const path  = ids.map(id => (DOMAINS[id]||{label:id}).label).join(' → ');
+  sysMsg('GOAL: '+label+'\n'+path);
+  if (ids.length) selectDomain(ids[0]);
+  log('info','Goal → '+goal);
 }
 
-// ──────────────────────────────────────────────────────────────────────────
-// ROUTING
-// ──────────────────────────────────────────────────────────────────────────
-function resolveEngine() {
-  // Manual selection
-  if (selectedEngine !== 'auto') {
-    if (epStatus[selectedEngine] === 'online') return EPS[selectedEngine];
-    sysMsg(`Selected engine ${selectedEngine} is offline — falling back to AUTO.`);
-  }
-  // AUTO: pick highest-priority online engine that supports chat
-  const candidates = Object.values(EPS)
-    .filter(ep => ep.chat && epStatus[ep.id] === 'online')
-    .sort((a, b) => a.priority - b.priority);
-  if (candidates.length) return candidates[0];
-  // Last resort: chatlegs even if health unknown
-  return EPS['chatlegs_1'];
-}
-
-// ──────────────────────────────────────────────────────────────────────────
-// CHAT
-// ──────────────────────────────────────────────────────────────────────────
+// ── SEND ─────────────────────────────────────────────────────────────────
 function handleKey(e) {
-  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+  if (e.key==='Enter' && !e.shiftKey) { e.preventDefault(); send(); }
 }
 
-async function sendMessage() {
+async function send() {
   if (streaming) return;
-  const inp  = document.getElementById('msg-input');
+  const inp  = document.getElementById('inp');
   const text = inp.value.trim();
   if (!text) return;
   inp.value = '';
+  addMsg('u', text);
+  chatHistory.push({role:'user', content:text});
 
-  addMsg('user', text);
-  chatHistory.push({ role: 'user', content: text });
-
-  const ep = resolveEngine();
-  document.getElementById('live-engine').textContent = '▶ ' + ep.label;
-  log('info', `→ ${ep.label} (${ep.type})`);
+  const sel = document.getElementById('ep-sel').value;
+  const ep  = resolveEp(sel);
+  document.getElementById('active-ep').textContent = '▶ :'+ep;
 
   streaming = true;
-  const agentEl = addMsg('agent', '', true);
-  const contentEl = agentEl.querySelector('.msg-content');
+  const agEl      = addMsg('a','',true);
+  const contentEl = agEl.querySelector('.msg-content');
 
   try {
-    let full = '';
-    const sys = SP[activeMode];
-    const ctx = chatHistory.slice(-10);   // last 10 for rolling context
-
-    if (ep.type === 'ollama') {
-      full = await streamOllama(ep, sys, ctx, chunk => {
-        contentEl.textContent += chunk;
-        scrollBottom();
-      });
-    } else {
-      full = await streamOpenAI(ep, sys, ctx, chunk => {
-        contentEl.textContent += chunk;
-        scrollBottom();
-      });
-    }
-
-    agentEl.classList.remove('streaming');
-    chatHistory.push({ role: 'assistant', content: full });
-    log('ok', `Done ${full.length} chars via ${ep.label}`);
-
-  } catch (err) {
-    agentEl.classList.remove('streaming');
-    contentEl.textContent = `[ERROR: ${err.message}]`;
-    agentEl.style.color = 'var(--red)';
-    log('err', `Failed: ${err.message}`);
-  }
-
-  streaming = false;
-  document.getElementById('live-engine').textContent = '';
-}
-
-// ──────────────────────────────────────────────────────────────────────────
-// OLLAMA STREAMING  — POST /api/chat, ndjson
-// ──────────────────────────────────────────────────────────────────────────
-async function streamOllama(ep, sys, ctx, onChunk) {
-  const body = {
-    model: ep.model,
-    messages: [
-      { role: 'system', content: sys },
-      ...ctx
-    ],
-    stream: true
-  };
-  const resp = await fetch(ep.url + ep.chat, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(body)
-  });
-  if (!resp.ok) throw new Error(`HTTP ${resp.status} ${resp.statusText}`);
-  const reader  = resp.body.getReader();
-  const decoder = new TextDecoder();
-  let full = '', leftover = '';
-
-  while (true) {
-    const { done, value } = await reader.read();
-    if (done) break;
-    const text = leftover + decoder.decode(value, { stream: true });
-    const lines = text.split('\n');
-    leftover = lines.pop();           // last incomplete line
-    for (const line of lines) {
-      if (!line.trim()) continue;
+    const msgs = [
+      {role:'system', content:buildSystemPrompt()},
+      ...chatHistory.slice(-8)
+    ];
+    let full = await streamChat(ep, msgs, (chunk) => {
+      contentEl.innerHTML += escHtml(chunk);
+      agEl.scrollIntoView({behavior:'smooth',block:'end'});
+    });
+    agEl.classList.remove('streaming');
+    chatHistory.push({role:'assistant', content:full});
+    log('ok','Done '+full.length+'ch via :'+ep);
+  } catch(err) {
+    // Try fallback
+    const fb = fallbackEp(ep);
+    if (fb) {
+      log('warn',':'+ep+' failed, trying :'+fb);
+      contentEl.innerHTML = '';
+      document.getElementById('active-ep').textContent = '▶ :'+fb+' (fallback)';
       try {
-        const obj = JSON.parse(line);
-        const c = obj.message?.content || '';
-        if (c) { full += c; onChunk(c); }
-        if (obj.done) break;
-      } catch {}
+        const msgs = [{role:'system',content:buildSystemPrompt()},...chatHistory.slice(-8)];
+        let full = await streamChat(fb, msgs, (c) => {
+          contentEl.innerHTML += escHtml(c);
+          agEl.scrollIntoView({behavior:'smooth',block:'end'});
+        });
+        agEl.classList.remove('streaming');
+        chatHistory.push({role:'assistant',content:full});
+        log('ok','Fallback done '+full.length+'ch via :'+fb);
+      } catch(err2) {
+        agEl.classList.remove('streaming');
+        contentEl.textContent = '[ERROR: '+err2.message+']';
+        agEl.style.borderColor='var(--r)';
+        log('err','Fallback failed: '+err2.message);
+        errMsg(err2.message);
+      }
+    } else {
+      agEl.classList.remove('streaming');
+      contentEl.textContent = '[ERROR: '+err.message+']';
+      agEl.style.borderColor='var(--r)';
+      log('err','Send failed: '+err.message);
+      errMsg(err.message);
     }
   }
-  return full;
+  streaming = false;
+  document.getElementById('active-ep').textContent = '';
 }
 
-// ──────────────────────────────────────────────────────────────────────────
-// OPENAI SSE STREAMING  — POST /v1/chat/completions
-// ──────────────────────────────────────────────────────────────────────────
-async function streamOpenAI(ep, sys, ctx, onChunk) {
-  const body = {
-    model: ep.model || 'auto',
-    messages: [
-      { role: 'system', content: sys },
-      ...ctx
-    ],
-    stream: true
-  };
-  const resp = await fetch(ep.url + ep.chat, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(body)
+async function streamChat(port, msgs, onChunk) {
+  const ctrl = new AbortController();
+  setTimeout(() => ctrl.abort(), 60000);
+  const resp = await fetch('http://localhost:'+port+'/v1/chat/completions', {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({model:'auto', messages:msgs, stream:true}),
+    signal:ctrl.signal
   });
-  if (!resp.ok) throw new Error(`HTTP ${resp.status} ${resp.statusText}`);
-  const reader  = resp.body.getReader();
-  const decoder = new TextDecoder();
-  let full = '', buf = '';
+  if (!resp.ok) throw new Error('HTTP '+resp.status+' from :'+port);
+  return await readSSE(resp, onChunk);
+}
 
+async function readSSE(resp, onChunk) {
+  const reader = resp.body.getReader();
+  const dec    = new TextDecoder();
+  let full='', buf='';
   while (true) {
-    const { done, value } = await reader.read();
+    const {done, value} = await reader.read();
     if (done) break;
-    buf += decoder.decode(value, { stream: true });
+    buf += dec.decode(value, {stream:true});
     const lines = buf.split('\n');
     buf = lines.pop();
     for (const line of lines) {
-      if (!line.startsWith('data: ')) continue;
-      const raw = line.slice(6).trim();
-      if (raw === '[DONE]') return full;
+      if (!line.startsWith('data:')) continue;
+      const raw = line.slice(5).trim();
+      if (raw==='[DONE]') return full;
       try {
         const obj = JSON.parse(raw);
-        const c = obj.choices?.[0]?.delta?.content || '';
+        const c   = obj.choices?.[0]?.delta?.content || '';
         if (c) { full += c; onChunk(c); }
       } catch {}
     }
@@ -738,103 +776,140 @@ async function streamOpenAI(ep, sys, ctx, onChunk) {
   return full;
 }
 
-// ──────────────────────────────────────────────────────────────────────────
-// UI HELPERS
-// ──────────────────────────────────────────────────────────────────────────
-function addMsg(role, content, stream = false) {
-  const wrap = document.getElementById('chat-log');
-  const el = document.createElement('div');
-  el.className = `msg msg-${role}${stream?' streaming':''}`;
-  const lbl =
-    role === 'user'   ? 'YOU' :
-    role === 'agent'  ? `${activeMode.toUpperCase()} AGENT` : '';
-  el.innerHTML = `<div class="lbl">${lbl}</div><div class="msg-content">${content}</div>`;
-  wrap.appendChild(el);
-  scrollBottom();
+function resolveEp(sel) {
+  if (sel==='8420') return 8420;
+  if (sel==='8421') return 8421;
+  return epHealth[8420]==='on' ? 8420 : 8421;
+}
+function fallbackEp(ep) {
+  if (ep===8420) return 8421;
+  if (ep===8421) return 8420;
+  return null;
+}
+
+function buildSystemPrompt() {
+  const base = 'You are the R3-DASHBOARD AI assistant. System root: C:\\Users\\mail\\R3-DASHBOARD. Backends: ChatLegs 8420/8421 (OpenAI-compatible), Matrix Control 8422. Be precise, technical, reference exact paths.';
+  if (!activeDomain) return base;
+  return base+'\n\n'+DOMAINS[activeDomain].context;
+}
+
+// ── 8422 CONTROL PLANE ───────────────────────────────────────────────────
+async function query8422() {
+  log('info','Querying 8422...');
+  for (const path of ['/health','/status','/api/health','/api/status','/']) {
+    try {
+      const ctrl = new AbortController();
+      setTimeout(() => ctrl.abort(), 3000);
+      const r   = await fetch('http://localhost:8422'+path, {signal:ctrl.signal});
+      let txt   = await r.text().catch(()=>'(no body)');
+      try { txt = JSON.stringify(JSON.parse(txt),null,2); } catch {}
+      sysMsg('8422 '+path+' HTTP '+r.status+'\n'+(txt.length>2000?txt.slice(0,2000)+'\n...[truncated]':txt));
+      log('ok','8422 '+path+': '+r.status);
+      return;
+    } catch(e) { log('warn','8422 '+path+': '+e.message); }
+  }
+  errMsg('8422 Matrix Control — not reachable. Start the matrix-control server.');
+  log('err','8422: all probes failed');
+}
+
+async function runDiag() {
+  sysMsg('Running diagnostic...');
+  await runInitHealth();
+  const lines = [8420,8421,8422].map(p => {
+    const s = epHealth[p], ms = epLatency[p];
+    return '  '+(s==='on'?'OK':'XX')+' :'+p+'  '+(s==='on'?'ONLINE':'OFFLINE')+(ms?' '+ms+'ms':'');
+  });
+  sysMsg('Diagnostic:\n'+lines.join('\n'));
+  showTab('lat');
+}
+
+// ── UI HELPERS ───────────────────────────────────────────────────────────
+function addMsg(type, text, stream=false) {
+  const chat = document.getElementById('chat');
+  const el   = document.createElement('div');
+  el.className = 'msg msg-'+type+(stream?' streaming':'');
+  el.innerHTML = '<div class="lbl">'+(type==='u'?'YOU':'R3 AGENT')+'</div><div class="msg-content">'+escHtml(text)+'</div>';
+  chat.appendChild(el);
+  chat.scrollTop = chat.scrollHeight;
   return el;
 }
-
-function sysMsg(txt) {
-  const wrap = document.getElementById('chat-log');
+function sysMsg(t) {
   const el = document.createElement('div');
-  el.className = 'msg msg-sys';
-  el.textContent = '⚡ ' + txt;
-  wrap.appendChild(el);
-  scrollBottom();
+  el.className='msg msg-s'; el.textContent=t;
+  const chat=document.getElementById('chat');
+  chat.appendChild(el); chat.scrollTop=chat.scrollHeight;
 }
-
-function errMsg(txt) {
-  const wrap = document.getElementById('chat-log');
-  const el = document.createElement('div');
-  el.className = 'msg msg-err';
-  el.textContent = '✗ ' + txt;
-  wrap.appendChild(el);
-  scrollBottom();
+function errMsg(t) {
+  const el=document.createElement('div');
+  el.className='msg msg-e'; el.textContent='ERR: '+t;
+  const chat=document.getElementById('chat');
+  chat.appendChild(el); chat.scrollTop=chat.scrollHeight;
 }
-
-function scrollBottom() {
-  const c = document.getElementById('chat-log');
-  c.scrollTop = c.scrollHeight;
-}
-
 function clearChat() {
-  document.getElementById('chat-log').innerHTML = '';
-  chatHistory = [];
-  sysMsg('Chat cleared — context reset.');
-  log('info', 'Chat cleared');
+  document.getElementById('chat').innerHTML='';
+  chatHistory=[];
+  sysMsg('Chat cleared.');
+}
+function escHtml(t) {
+  return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
 
-function injectPrompt(text) {
-  const inp = document.getElementById('msg-input');
+// ── RIGHT PANEL ──────────────────────────────────────────────────────────
+function showTab(id) {
+  document.querySelectorAll('.rp-section').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.rp-tab').forEach(el => el.classList.remove('active'));
+  const map = {log:['tab-log',0], snaps:['tab-snaps',1], lat:['tab-lat',2]};
+  const [secId, tabIdx] = map[id] || ['tab-log',0];
+  const sec = document.getElementById(secId);
+  if (sec) sec.classList.add('active');
+  const tabs = document.querySelectorAll('.rp-tab');
+  if (tabs[tabIdx]) tabs[tabIdx].classList.add('active');
+}
+
+function renderSnaps() {
+  const cont = document.getElementById('tab-snaps');
+  cont.innerHTML = '';
+  SNAPS.forEach(s => {
+    const card = document.createElement('div');
+    card.className = 'snap-card';
+    card.innerHTML =
+      '<div class="snap-hdr"><span>'+s.id+' · '+s.name+'</span><span class="snap-stat">FULL</span></div>'+
+      '<div style="font-size:8px;color:var(--ts);margin-bottom:3px">'+s.fc+' files · '+s.kb+' KB</div>'+
+      s.finds.map(f=>'<div class="snap-item" onclick="injectFinding(\''+f.replace(/'/g,"\\'")+'\')" >· '+f+'</div>').join('');
+    cont.appendChild(card);
+  });
+}
+
+function injectFinding(text) {
+  const inp = document.getElementById('inp');
   inp.value = text;
   inp.focus();
 }
 
-// ──────────────────────────────────────────────────────────────────────────
-// LOG
-// ──────────────────────────────────────────────────────────────────────────
-function log(type, text) {
-  const list = document.getElementById('log-list');
-  const el = document.createElement('div');
-  el.className = 'log-line';
-  const t = new Date().toTimeString().slice(0, 8);
-  el.innerHTML = `<span class="lt">${t}</span><span class="lc-${type}">${text}</span>`;
-  list.insertBefore(el, list.firstChild);
-  while (list.children.length > 300) list.removeChild(list.lastChild);
+function updateLatPanel() {
+  const cont = document.getElementById('tab-lat');
+  if (!cont) return;
+  cont.innerHTML = '';
+  [8420,8421,8422].forEach(p => {
+    const s = epHealth[p]||'chk', ms = epLatency[p];
+    const el = document.createElement('div');
+    el.className = 'lat-row';
+    el.innerHTML =
+      '<span class="'+(s==='on'?'lc-ok':s==='off'?'lc-err':'lc-warn')+'">:'+p+' '+(s==='on'?'ONLINE':s==='off'?'OFFLINE':'...')+'</span>'+
+      '<span class="lat-v">'+(ms!=null?ms+'ms':'—')+'</span>';
+    cont.appendChild(el);
+  });
 }
 
-// ──────────────────────────────────────────────────────────────────────────
-// DIAGNOSTIC
-// ──────────────────────────────────────────────────────────────────────────
-async function runDiag() {
-  sysMsg('Running full diagnostic...');
-  log('info', 'Diagnostic start');
-  Object.keys(EPS).forEach(k => { epStatus[k] = 'checking'; });
-  renderStatusRow(); renderEpList();
-
-  const results = [];
-  for (const [id, ep] of Object.entries(EPS)) {
-    const t0 = Date.now();
-    try {
-      const ctrl = new AbortController();
-      setTimeout(() => ctrl.abort(), 3000);
-      const r = await fetch(ep.url + ep.health, { signal: ctrl.signal });
-      const ms = Date.now() - t0;
-      const ok = r.ok || r.status < 500;
-      epStatus[id] = ok ? 'online' : 'offline';
-      epLatency[id] = ms;
-      results.push(`  ${ok?'✓':'✗'} ${ep.label.padEnd(22)} ${ok?'ONLINE':'DEGRADED'} ${ms}ms`);
-      log(ok?'ok':'warn', `${ep.label}: ${ok?'ONLINE':'DEGRADED'} ${ms}ms`);
-    } catch (e) {
-      epStatus[id] = 'offline'; epLatency[id] = null;
-      results.push(`  ✗ ${ep.label.padEnd(22)} OFFLINE`);
-      log('err', `${ep.label}: OFFLINE`);
-    }
-  }
-
-  renderEpList(); renderStatusRow(); updateDiagPanel();
-  const on = Object.values(epStatus).filter(v => v==='online').length;
-  sysMsg(`Diagnostic complete: ${on}/${Object.keys(EPS).length} online\n${results.join('\n')}`);
+function log(type, text) {
+  const list = document.getElementById('tab-log');
+  if (!list) return;
+  const el = document.createElement('div');
+  el.className = 'log-ln';
+  const t = new Date().toTimeString().slice(0,8);
+  el.innerHTML = '<span class="lt">'+t+'</span><span class="lc-'+type+'">'+escHtml(text)+'</span>';
+  list.insertBefore(el, list.firstChild);
+  while (list.children.length > 500) list.removeChild(list.lastChild);
 }
 </script>
 </body>
