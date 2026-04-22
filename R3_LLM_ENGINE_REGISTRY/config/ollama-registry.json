@@ -1,0 +1,383 @@
+{
+  "_meta": {
+    "id": "r3-ollama-registry",
+    "version": "1.0.0",
+    "scanned": "2026-04-22T19:24:22",
+    "description": "Complete Ollama model inventory across all R3 network nodes. Single source of truth for model routing, LiteLLM registration, and agent task dispatch.",
+    "litellm_gateway": "http://localhost:4000/v1",
+    "litellm_key": "r3-local"
+  },
+
+  "nodes": {
+    "razer": {
+      "name": "RAZER",
+      "host": "localhost",
+      "url": "http://localhost:11434",
+      "api": "http://localhost:11434/api",
+      "status_endpoint": "http://localhost:11434/api/tags",
+      "role": "primary",
+      "total_models": 18,
+      "total_size_gb": 97.94,
+      "models": [
+        {
+          "id": "codellama:7b",
+          "size_gb": 3.56,
+          "family": "llama",
+          "params": "7B",
+          "quant": "Q4_0",
+          "capability": ["code", "completion", "chat"]
+        },
+        {
+          "id": "deepseek-coder:6.7b",
+          "size_gb": 3.56,
+          "family": "llama",
+          "params": "7B",
+          "quant": "Q4_0",
+          "capability": ["code", "completion"]
+        },
+        {
+          "id": "deepseek-r1:latest",
+          "size_gb": 4.87,
+          "family": "qwen3",
+          "params": "8.2B",
+          "quant": "Q4_K_M",
+          "capability": ["reasoning", "analysis", "chat", "code"]
+        },
+        {
+          "id": "gemma:2b",
+          "size_gb": 1.56,
+          "family": "gemma",
+          "params": "3B",
+          "quant": "Q4_0",
+          "capability": ["chat", "fast"]
+        },
+        {
+          "id": "gemma:7b",
+          "size_gb": 4.67,
+          "family": "gemma",
+          "params": "9B",
+          "quant": "Q4_0",
+          "capability": ["chat", "general"]
+        },
+        {
+          "id": "gemma2:2b",
+          "size_gb": 1.52,
+          "family": "gemma2",
+          "params": "2.6B",
+          "quant": "Q4_0",
+          "capability": ["chat", "fast", "autocomplete"]
+        },
+        {
+          "id": "gemma4:latest",
+          "size_gb": 8.95,
+          "family": "gemma4",
+          "params": "8B",
+          "quant": "Q4_K_M",
+          "capability": ["chat", "general", "multimodal"]
+        },
+        {
+          "id": "llama3:8b",
+          "size_gb": 4.34,
+          "family": "llama",
+          "params": "8B",
+          "quant": "Q4_0",
+          "capability": ["chat", "general", "instruction"]
+        },
+        {
+          "id": "mistral:latest",
+          "size_gb": 4.07,
+          "family": "llama",
+          "params": "7.2B",
+          "quant": "Q4_K_M",
+          "capability": ["chat", "general", "instruction"]
+        },
+        {
+          "id": "mixtral:latest",
+          "size_gb": 24.63,
+          "family": "llama",
+          "params": "46.7B",
+          "quant": "Q4_0",
+          "capability": ["chat", "general", "large-context", "complex"]
+        },
+        {
+          "id": "nemotron-cascade-2:latest",
+          "size_gb": 22.61,
+          "family": "nemotron",
+          "params": "31.6B",
+          "quant": "Q4_K_M",
+          "capability": ["chat", "reasoning", "large-context"]
+        },
+        {
+          "id": "nemotron-mini:latest",
+          "size_gb": 2.51,
+          "family": "nemotron",
+          "params": "4.2B",
+          "quant": "Q4_K_M",
+          "capability": ["chat", "fast", "instruction"]
+        },
+        {
+          "id": "phi3:mini",
+          "size_gb": 2.03,
+          "family": "phi3",
+          "params": "3.8B",
+          "quant": "Q4_0",
+          "capability": ["chat", "fast", "autocomplete", "code"]
+        },
+        {
+          "id": "qwen2.5-coder:latest",
+          "size_gb": 4.36,
+          "family": "qwen2",
+          "params": "7.6B",
+          "quant": "Q4_K_M",
+          "capability": ["code", "completion", "chat"]
+        },
+        {
+          "id": "qwen2.5:14b",
+          "size_gb": 8.37,
+          "family": "qwen2",
+          "params": "14.8B",
+          "quant": "Q4_K_M",
+          "capability": ["chat", "reasoning", "general", "long-context"]
+        },
+        {
+          "id": "qwen2.5:3b",
+          "size_gb": 1.8,
+          "family": "qwen2",
+          "params": "3.1B",
+          "quant": "Q4_K_M",
+          "capability": ["chat", "fast"]
+        },
+        {
+          "id": "qwen2.5:7b",
+          "size_gb": 4.36,
+          "family": "qwen2",
+          "params": "7.6B",
+          "quant": "Q4_K_M",
+          "capability": ["chat", "general"]
+        },
+        {
+          "id": "qwen3:latest",
+          "size_gb": 4.87,
+          "family": "qwen3",
+          "params": "8.2B",
+          "quant": "Q4_K_M",
+          "capability": ["reasoning", "chat", "general", "code"]
+        }
+      ]
+    },
+    "appsen": {
+      "name": "APPSEN_C",
+      "host": "192.168.1.226",
+      "url": "http://192.168.1.226:11434",
+      "api": "http://192.168.1.226:11434/api",
+      "status_endpoint": "http://192.168.1.226:11434/api/tags",
+      "role": "secondary",
+      "total_models": 2,
+      "total_size_gb": 2.14,
+      "models": [
+        {
+          "id": "llama3.2:latest",
+          "size_gb": 1.88,
+          "family": "llama",
+          "params": "3.2B",
+          "quant": "Q4_K_M",
+          "capability": ["chat", "fast", "general"]
+        },
+        {
+          "id": "nomic-embed-text:latest",
+          "size_gb": 0.26,
+          "family": "nomic-bert",
+          "params": "137M",
+          "quant": "F16",
+          "capability": ["embedding", "semantic-search", "rag"]
+        }
+      ]
+    }
+  },
+
+  "routing_rules": {
+    "_description": "Task-type to model chain. First available model wins. LiteLLM prefix: ollama_chat/ (RAZER) or ollama_chat/192.168.1.226:11434/ (APPSEN).",
+
+    "code": {
+      "description": "Code generation, debugging, refactoring",
+      "priority_chain": [
+        "ollama_chat/deepseek-coder:6.7b",
+        "ollama_chat/qwen2.5-coder:latest",
+        "ollama_chat/codellama:7b",
+        "ollama_chat/qwen3:latest"
+      ],
+      "fallback": "groq/llama-3.3-70b"
+    },
+
+    "reasoning": {
+      "description": "Complex analysis, multi-step reasoning, research",
+      "priority_chain": [
+        "ollama_chat/deepseek-r1:latest",
+        "ollama_chat/qwen3:latest",
+        "ollama_chat/qwen2.5:14b",
+        "ollama_chat/nemotron-cascade-2:latest"
+      ],
+      "fallback": "groq/llama-3.3-70b"
+    },
+
+    "fast": {
+      "description": "Quick responses, autocomplete, lightweight tasks",
+      "priority_chain": [
+        "ollama_chat/gemma2:2b",
+        "ollama_chat/qwen2.5:3b",
+        "ollama_chat/nemotron-mini:latest",
+        "ollama_chat/phi3:mini"
+      ],
+      "fallback": "groq/llama-3.1-8b"
+    },
+
+    "chat": {
+      "description": "General chat, instruction following, Q&A",
+      "priority_chain": [
+        "ollama_chat/mistral:latest",
+        "ollama_chat/llama3:8b",
+        "ollama_chat/qwen2.5:7b",
+        "ollama_chat/gemma4:latest"
+      ],
+      "fallback": "groq/llama-3.3-70b"
+    },
+
+    "large_context": {
+      "description": "Long documents, large codebases, complex context",
+      "priority_chain": [
+        "ollama_chat/mixtral:latest",
+        "ollama_chat/nemotron-cascade-2:latest",
+        "ollama_chat/qwen2.5:14b"
+      ],
+      "fallback": "openrouter/auto"
+    },
+
+    "autocomplete": {
+      "description": "Tab completion, fill-in-the-middle",
+      "priority_chain": [
+        "ollama_chat/phi3:mini",
+        "ollama_chat/gemma2:2b",
+        "ollama_chat/qwen2.5:3b"
+      ],
+      "fallback": "groq/llama-3.1-8b"
+    },
+
+    "embedding": {
+      "description": "Vector embeddings for RAG, semantic search",
+      "priority_chain": ["ollama/nomic-embed-text:latest@192.168.1.226:11434"],
+      "note": "APPSEN only — nomic-embed-text is the ONLY embedding model in cluster"
+    },
+
+    "offline_fallback": {
+      "description": "When internet/cloud unavailable — pure local",
+      "priority_chain": [
+        "ollama_chat/deepseek-r1:latest",
+        "ollama_chat/qwen3:latest",
+        "ollama_chat/mistral:latest",
+        "ollama_chat/llama3:8b",
+        "ollama_chat/gemma2:2b"
+      ]
+    }
+  },
+
+  "litellm_model_list": [
+    {
+      "model_name": "r3/code",
+      "litellm_params": {
+        "model": "ollama_chat/deepseek-coder:6.7b",
+        "api_base": "http://localhost:11434"
+      }
+    },
+    {
+      "model_name": "r3/code-alt",
+      "litellm_params": {
+        "model": "ollama_chat/qwen2.5-coder:latest",
+        "api_base": "http://localhost:11434"
+      }
+    },
+    {
+      "model_name": "r3/code-fallback",
+      "litellm_params": {
+        "model": "ollama_chat/codellama:7b",
+        "api_base": "http://localhost:11434"
+      }
+    },
+    {
+      "model_name": "r3/reasoning",
+      "litellm_params": {
+        "model": "ollama_chat/deepseek-r1:latest",
+        "api_base": "http://localhost:11434"
+      }
+    },
+    {
+      "model_name": "r3/reasoning-alt",
+      "litellm_params": {
+        "model": "ollama_chat/qwen3:latest",
+        "api_base": "http://localhost:11434"
+      }
+    },
+    {
+      "model_name": "r3/fast",
+      "litellm_params": {
+        "model": "ollama_chat/gemma2:2b",
+        "api_base": "http://localhost:11434"
+      }
+    },
+    {
+      "model_name": "r3/fast-alt",
+      "litellm_params": {
+        "model": "ollama_chat/qwen2.5:3b",
+        "api_base": "http://localhost:11434"
+      }
+    },
+    {
+      "model_name": "r3/chat",
+      "litellm_params": {
+        "model": "ollama_chat/mistral:latest",
+        "api_base": "http://localhost:11434"
+      }
+    },
+    {
+      "model_name": "r3/chat-heavy",
+      "litellm_params": {
+        "model": "ollama_chat/qwen2.5:14b",
+        "api_base": "http://localhost:11434"
+      }
+    },
+    {
+      "model_name": "r3/large",
+      "litellm_params": {
+        "model": "ollama_chat/mixtral:latest",
+        "api_base": "http://localhost:11434"
+      }
+    },
+    {
+      "model_name": "r3/large-alt",
+      "litellm_params": {
+        "model": "ollama_chat/nemotron-cascade-2:latest",
+        "api_base": "http://localhost:11434"
+      }
+    },
+    {
+      "model_name": "r3/autocomplete",
+      "litellm_params": {
+        "model": "ollama_chat/phi3:mini",
+        "api_base": "http://localhost:11434"
+      }
+    },
+    {
+      "model_name": "r3/embed",
+      "litellm_params": {
+        "model": "ollama/nomic-embed-text:latest",
+        "api_base": "http://192.168.1.226:11434"
+      }
+    },
+    {
+      "model_name": "r3/appsen-chat",
+      "litellm_params": {
+        "model": "ollama_chat/llama3.2:latest",
+        "api_base": "http://192.168.1.226:11434"
+      }
+    }
+  ]
+}

@@ -30,9 +30,87 @@ every Copilot Chat session, CLI interaction, and agentic workload in this worksp
 | n8n Automation | 5678 | GitHub API workflows + webhooks | HTTP |
 | openai-bridge | 8512 | OpenAI connector | HTTP |
 | perplexity-bridge | 8511 | Perplexity connector | HTTP |
-| Ollama (RAZER) | 11434 | Local LLM (gemma2, llama3) | HTTP |
+| Ollama RAZER | 11434 | 18 local LLMs (localhost) | HTTP |
+| Ollama APPSEN | 11434 | 2 models (192.168.1.226) | HTTP |
 
 All local endpoints: `http://localhost:<port>/`
+
+---
+
+## Ollama Node Inventory (2026-04-22)
+
+### RAZER — localhost:11434 — 18 Modelle
+
+| Modell | Größe | Familie | Capability |
+|--------|-------|---------|-----------|
+| `deepseek-coder:6.7b` | 3.56 GB | llama | **code**, completion |
+| `deepseek-r1:latest` | 4.87 GB | qwen3 8.2B | **reasoning**, analysis, code |
+| `qwen2.5-coder:latest` | 4.36 GB | qwen2 7.6B | **code**, completion |
+| `codellama:7b` | 3.56 GB | llama | code, completion |
+| `qwen3:latest` | 4.87 GB | qwen3 8.2B | reasoning, chat, code |
+| `qwen2.5:14b` | 8.37 GB | qwen2 14.8B | **reasoning**, long-context |
+| `mixtral:latest` | 24.63 GB | llama 46.7B | **large-context**, complex |
+| `nemotron-cascade-2:latest` | 22.61 GB | nemotron 31.6B | reasoning, large-context |
+| `gemma4:latest` | 8.95 GB | gemma4 8B | chat, multimodal |
+| `llama3:8b` | 4.34 GB | llama | chat, instruction |
+| `mistral:latest` | 4.07 GB | llama 7.2B | **chat**, instruction |
+| `qwen2.5:7b` | 4.36 GB | qwen2 | chat, general |
+| `nemotron-mini:latest` | 2.51 GB | nemotron 4.2B | fast, instruction |
+| `phi3:mini` | 2.03 GB | phi3 3.8B | **autocomplete**, fast |
+| `gemma2:2b` | 1.52 GB | gemma2 | **fast**, autocomplete |
+| `gemma:2b` | 1.56 GB | gemma | fast, chat |
+| `qwen2.5:3b` | 1.80 GB | qwen2 | fast, chat |
+| `gemma:7b` | 4.67 GB | gemma | chat, general |
+
+### APPSEN — 192.168.1.226:11434 — 2 Modelle
+
+| Modell | Größe | Familie | Capability |
+|--------|-------|---------|-----------|
+| `llama3.2:latest` | 1.88 GB | llama 3.2B | chat, fast |
+| `nomic-embed-text:latest` | 262 MB | nomic-bert | **embedding**, RAG, semantic search |
+
+> **nomic-embed-text ist das EINZIGE Embedding-Modell im Cluster** — für RAG/Vektorsuche immer APPSEN nutzen.
+
+---
+
+## Intelligentes Routing — Task → Modell
+
+Alle Routen erreichbar via LiteLLM Gateway `http://localhost:4000/v1`, Key `r3-local`:
+
+| Task-Typ | Route | Modell (Primary) | Fallback |
+|----------|-------|-------------------|---------|
+| Code / Debug | `r3/code` | `deepseek-coder:6.7b` (RAZER) | `r3/code-alt` → groq |
+| Code (alt) | `r3/code-alt` | `qwen2.5-coder:latest` (RAZER) | `r3/code-fallback` |
+| Reasoning | `r3/reasoning` | `deepseek-r1:latest` (RAZER) | `r3/reasoning-alt` → groq |
+| Reasoning (alt) | `r3/reasoning-alt` | `qwen3:latest` (RAZER) | groq/llama-3.3-70b |
+| Fast / Quick | `r3/fast` | `gemma2:2b` (RAZER) | `r3/fast-alt` → groq/8b |
+| General Chat | `r3/chat` | `mistral:latest` (RAZER) | `r3/chat-heavy` |
+| Heavy (14B) | `r3/chat-heavy` | `qwen2.5:14b` (RAZER) | groq |
+| Large Context | `r3/large` | `mixtral:latest` 46.7B (RAZER) | `r3/large-alt` |
+| Autocomplete | `r3/autocomplete` | `phi3:mini` (RAZER) | `r3/fast` |
+| **Embeddings** | `r3/embed` | `nomic-embed-text` (APPSEN) | — |
+| APPSEN fallback | `r3/appsen-chat` | `llama3.2:latest` (APPSEN) | — |
+
+### Routing-Catches (Abhängigkeiten)
+
+```
+Code-Task         → r3/code → r3/code-alt → r3/code-fallback → groq/llama-3.3-70b
+Reasoning-Task    → r3/reasoning → r3/reasoning-alt → groq/llama-3.3-70b
+Fast/Autocomplete → r3/fast → r3/fast-alt → groq/llama-3.1-8b
+Embedding/RAG     → r3/embed (APPSEN ONLY — kein Fallback auf anderen Ollama)
+Large Context     → r3/large → r3/large-alt → openrouter/auto
+Offline (kein Net)→ r3/reasoning → r3/chat → r3/fast (alles lokal RAZER)
+```
+
+### Registrierung in LiteLLM (einmalig ausführen)
+
+```powershell
+iwr https://raw.githubusercontent.com/RETOURENROYAL/session-state/main/R3_LLM_ENGINE_REGISTRY/install/Register-R3-Ollama.ps1 | iex
+```
+
+Oder lokal: `C:\Users\mail\R3-DASHBOARD\R3_LLM_ENGINE_REGISTRY\install\Register-R3-Ollama.ps1`
+
+Registry JSON: `R3_LLM_ENGINE_REGISTRY/config/ollama-registry.json`
 
 ---
 
