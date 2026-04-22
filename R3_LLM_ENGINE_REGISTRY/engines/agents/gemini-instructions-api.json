@@ -1,0 +1,13 @@
+{
+  "id": "gemini-instructions-api",
+  "label": "Gemini Instructions API",
+  "category": "agent-module",
+  "type": "api-agent",
+  "path": "MODULES/gemini-instructions-api",
+  "local_path": "C:\\Users\\mail\\R3-DASHBOARD\\MODULES\\gemini-instructions-api",
+  "role": "Gemini model instruction API bridge — feeds system prompts and instructions to Gemini endpoints",
+  "port": null,
+  "status": "offline",
+  "reachable_from": ["windows-local", "cloud"],
+  "tags": ["gemini", "api", "instructions", "google"]
+}

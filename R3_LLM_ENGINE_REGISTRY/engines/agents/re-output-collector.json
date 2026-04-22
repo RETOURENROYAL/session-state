@@ -1,0 +1,20 @@
+{
+  "id": "re-output-collector",
+  "label": "RE Output Collector",
+  "category": "agent-module",
+  "type": "python-agent",
+  "path": "MODULES/re-output-collector",
+  "local_path": "C:\\Users\\mail\\R3-DASHBOARD\\MODULES\\re-output-collector",
+  "role": "Collects and aggregates output bundles from all agent runs — writes to COLLECTED-OUTPUTS/",
+  "entry": "collector.py",
+  "files": {
+    "python": ["collector.py"]
+  },
+  "output_dir": "COLLECTED-OUTPUTS",
+  "depends_on": [],
+  "port": null,
+  "status": "offline",
+  "reachable_from": ["windows-local"],
+  "start_cmd": "python collector.py",
+  "tags": ["collector", "output", "aggregator", "bundle"]
+}

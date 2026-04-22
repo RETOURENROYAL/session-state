@@ -1,0 +1,21 @@
+{
+  "id": "g0dm0d3-hybrid-agent",
+  "label": "G0DM0D3 Hybrid Agent",
+  "category": "agent-module",
+  "type": "node-agent",
+  "path": "MODULES/g0dm0d3_hybrid_agent",
+  "local_path": "C:\\Users\\mail\\R3-DASHBOARD\\MODULES\\g0dm0d3_hybrid_agent",
+  "role": "Hybrid AI agent (Node.js) — full runtime env, public assets, scripts, skills, docker-compose",
+  "files": {
+    "dirs": ["data", "public", "scripts", "skills"],
+    "env": [".env.example", ".env.local", ".env.runtime"],
+    "runtime": [".runtime-env-summary.json"],
+    "infra": ["docker-compose.yml"],
+    "meta": ["package.json"]
+  },
+  "port": null,
+  "status": "offline",
+  "reachable_from": ["windows-local", "docker"],
+  "start_cmd": "npm start",
+  "tags": ["hybrid", "node", "agent", "docker", "runtime"]
+}

@@ -1,0 +1,13 @@
+{
+  "id": "github-copilot-cloud-agent",
+  "label": "GitHub Copilot Cloud Agent",
+  "category": "agent-module",
+  "type": "cloud-agent",
+  "path": "MODULES/github-copilot-cloud-agent",
+  "local_path": "C:\\Users\\mail\\R3-DASHBOARD\\MODULES\\github-copilot-cloud-agent",
+  "role": "GitHub Copilot cloud agent integration — codespace-native, VS Code agent setup",
+  "port": null,
+  "status": "active",
+  "reachable_from": ["codespace", "cloud", "vscode"],
+  "tags": ["copilot", "github", "cloud", "vscode", "codespace"]
+}

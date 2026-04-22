@@ -1,0 +1,73 @@
+{
+  "id": "agent-skills",
+  "label": "Agent Skills Module",
+  "category": "agent-module",
+  "type": "skill-library",
+  "path": "MODULES/agent-skills",
+  "entry": "AGENTS.md",
+  "role": "21 SKILL.md definitions for all AI coding agents (Claude Code, Cursor, Copilot, etc.)",
+  "port": null,
+  "skills_count": 21,
+  "local_path": "C:\\Users\\mail\\R3-DASHBOARD\\MODULES\\agent-skills",
+  "files": {
+    "meta": [
+      "AGENTS.md",
+      "CLAUDE.md",
+      "CONTRIBUTING.md",
+      "LICENSE",
+      "README.md"
+    ],
+    "dirs": [
+      ".claude",
+      ".claude-plugin",
+      ".github",
+      "agents",
+      "docs",
+      "hooks",
+      "references"
+    ]
+  },
+  "skills": [
+    { "id": "api-and-interface-design", "files": ["SKILL.md"] },
+    { "id": "browser-testing-with-devtools", "files": ["SKILL.md"] },
+    { "id": "ci-cd-and-automation", "files": ["SKILL.md"] },
+    { "id": "code-review-and-quality", "files": ["SKILL.md"] },
+    { "id": "code-simplification", "files": ["SKILL.md"] },
+    { "id": "context-engineering", "files": ["SKILL.md"] },
+    { "id": "debugging-and-error-recovery", "files": ["SKILL.md"] },
+    { "id": "deprecation-and-migration", "files": ["SKILL.md"] },
+    { "id": "documentation-and-adrs", "files": ["SKILL.md"] },
+    { "id": "frontend-ui-engineering", "files": ["SKILL.md"] },
+    { "id": "git-workflow-and-versioning", "files": ["SKILL.md"] },
+    {
+      "id": "idea-refine",
+      "files": [
+        "SKILL.md",
+        "examples.md",
+        "frameworks.md",
+        "refinement-criteria.md",
+        "scripts/idea-refine.sh"
+      ]
+    },
+    { "id": "incremental-implementation", "files": ["SKILL.md"] },
+    { "id": "performance-optimization", "files": ["SKILL.md"] },
+    { "id": "planning-and-task-breakdown", "files": ["SKILL.md"] },
+    { "id": "security-and-hardening", "files": ["SKILL.md"] },
+    { "id": "shipping-and-launch", "files": ["SKILL.md"] },
+    { "id": "source-driven-development", "files": ["SKILL.md"] },
+    { "id": "spec-driven-development", "files": ["SKILL.md"] },
+    { "id": "test-driven-development", "files": ["SKILL.md"] },
+    { "id": "using-agent-skills", "files": ["SKILL.md"] }
+  ],
+  "status": "active",
+  "reachable_from": ["all"],
+  "tags": [
+    "skills",
+    "skill-library",
+    "claude",
+    "cursor",
+    "copilot",
+    "windsurf",
+    "codex"
+  ]
+}

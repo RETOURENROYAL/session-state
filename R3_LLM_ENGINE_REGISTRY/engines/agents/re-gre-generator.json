@@ -1,0 +1,49 @@
+{
+  "id": "re-gre-generator",
+  "label": "RE GRE Generator Pipeline",
+  "category": "agent-module",
+  "type": "python-agent",
+  "path": "MODULES/re-gre-generator",
+  "local_path": "C:\\Users\\mail\\R3-DASHBOARD\\MODULES\\re-gre-generator",
+  "role": "Core spec-driven output generator — install-plan runner, module definer, registry expander",
+  "entry_points": {
+    "build": "build.py",
+    "serve": "serve.py",
+    "first_run": "first_run.py",
+    "install_plan": "install_plan.py"
+  },
+  "files": {
+    "specs": [
+      "generator-spec.yaml",
+      "generator-output-spec.yaml",
+      "preflight-spec.yaml"
+    ],
+    "config": [
+      "policy.yaml",
+      "agent-reach-config.yaml",
+      "bundle-manifest.yaml"
+    ],
+    "python": [
+      "install_plan.py",
+      "build.py",
+      "serve.py",
+      "define_next_module.py",
+      "define_output.py",
+      "expand_registry.py",
+      "first_run.py",
+      "register_connector.py"
+    ],
+    "powershell": ["run_install_plan.ps1", "build.ps1"],
+    "meta": ["pyproject.toml", "requirements.txt", "README.md"]
+  },
+  "depends_on": [
+    "re-agent-dispatcher",
+    "re-output-collector",
+    "re-provider-registry"
+  ],
+  "port": null,
+  "status": "offline",
+  "reachable_from": ["windows-local", "codespace"],
+  "start_cmd": "python build.py",
+  "tags": ["generator", "core", "spec-driven", "install-plan", "registry"]
+}

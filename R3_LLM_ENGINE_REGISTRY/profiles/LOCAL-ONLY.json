@@ -1,0 +1,34 @@
+{
+  "id": "LOCAL-ONLY",
+  "label": "Local Ollama Only (Rate-Limit Safe)",
+  "description": "Uses only local Ollama engines — zero cloud API calls. Use when rate-limited, offline, or privacy-required.",
+  "default_engine": "ollama-razer",
+  "default_model": "gemma2:2b",
+  "fallback_chain": ["ollama-razer", "ollama-appsen"],
+  "allowed_engines": ["ollama-razer", "ollama-appsen"],
+  "blocked_engines": [
+    "groq",
+    "cerebras",
+    "sambanova",
+    "openrouter",
+    "glama",
+    "chutes",
+    "huggingface",
+    "openai",
+    "claude",
+    "gemini",
+    "mistral",
+    "perplexity"
+  ],
+  "use_when": [
+    "cloud-rate-limited",
+    "offline",
+    "privacy-required",
+    "testing-local"
+  ],
+  "litellm_gateway": {
+    "api_base": "http://localhost:4000",
+    "model_prefix": "ollama/"
+  },
+  "notes": "Start Ollama on RAZER before activating: 'ollama serve'. Default model gemma2:2b is fast and lightweight. Switch to llama3.2:3b for stronger reasoning."
+}

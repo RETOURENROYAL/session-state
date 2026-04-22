@@ -1,0 +1,20 @@
+{
+  "id": "re-agent-dispatcher",
+  "label": "RE Agent Dispatcher",
+  "category": "agent-module",
+  "type": "python-agent",
+  "path": "MODULES/re-agent-dispatcher",
+  "local_path": "C:\\Users\\mail\\R3-DASHBOARD\\MODULES\\re-agent-dispatcher",
+  "role": "Routes agent tasks to the correct module based on task type — requires preflight check + prompt routing",
+  "entry": "dispatcher.py",
+  "files": {
+    "python": ["dispatcher.py"],
+    "meta": ["README.md"]
+  },
+  "depends_on": ["re-preflight-agent", "re-prompt-router"],
+  "port": null,
+  "status": "offline",
+  "reachable_from": ["windows-local"],
+  "start_cmd": "python dispatcher.py",
+  "tags": ["dispatcher", "router", "orchestrator", "task-routing"]
+}

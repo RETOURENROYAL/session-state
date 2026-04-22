@@ -1,0 +1,38 @@
+{
+  "id": "re-local-agent-int",
+  "label": "RE Local Agent Integration (Anthropic SDK Docs)",
+  "category": "agent-module",
+  "type": "reference-docs",
+  "path": "MODULES/re-local-agent-int",
+  "local_path": "C:\\Users\\mail\\R3-DASHBOARD\\MODULES\\re-local-agent-int",
+  "role": "Anthropic Claude SDK reference documentation — Python, TypeScript, Java, OpenAI-compat, CLI",
+  "files": {
+    "docs": [
+      "Anthropics_Claude Client CLI.md",
+      "Anthropics_Claude Client Java SDK.md",
+      "Anthropics_Claude Client OpenAI SDK compatibility.md",
+      "Anthropics_Claude Client Python SDK.md",
+      "Anthropics_Claude Client SDKs.md",
+      "Anthropics_Claude Client TypeScript SDK.md"
+    ]
+  },
+  "covers": [
+    "python-sdk",
+    "typescript-sdk",
+    "java-sdk",
+    "openai-compat",
+    "cli"
+  ],
+  "port": null,
+  "status": "active",
+  "reachable_from": ["all"],
+  "tags": [
+    "anthropic",
+    "claude",
+    "sdk",
+    "reference",
+    "python",
+    "typescript",
+    "java"
+  ]
+}

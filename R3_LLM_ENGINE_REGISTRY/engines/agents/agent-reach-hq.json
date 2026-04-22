@@ -1,0 +1,27 @@
+{
+  "id": "agent-reach-hq",
+  "label": "Agent Reach HQ",
+  "category": "agent-module",
+  "type": "yaml-config-agent",
+  "path": "MODULES/agent-reach-hq",
+  "entry": "agent-reach-router.yaml",
+  "role": "HQ prompt orchestrator, connector matrix, router config",
+  "port": null,
+  "files": {
+    "routing": ["agent-reach-router.yaml", "connector-matrix.yaml"],
+    "prompts": [
+      "hq-coding-prompt.md",
+      "hq-scripter-prompt.md",
+      "deep-research-prompt.md"
+    ],
+    "agent_setups": ["obliteratus.md", "claude-code.md", "vscode-gadget.md"],
+    "scripts": ["local.sh", "vps.sh"],
+    "meta": ["README.md"]
+  },
+  "depends_on": [],
+  "status": "active",
+  "reachable_from": ["windows-local", "vps", "codespace"],
+  "local_path": "C:\\Users\\mail\\R3-DASHBOARD\\MODULES\\agent-reach-hq",
+  "start_cmd": null,
+  "tags": ["hq", "orchestrator", "router", "prompts", "connectors"]
+}

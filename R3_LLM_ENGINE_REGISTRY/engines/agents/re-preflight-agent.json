@@ -1,0 +1,21 @@
+{
+  "id": "re-preflight-agent",
+  "label": "RE Preflight Agent",
+  "category": "agent-module",
+  "type": "python-agent",
+  "path": "MODULES/re-preflight-agent",
+  "local_path": "C:\\Users\\mail\\R3-DASHBOARD\\MODULES\\re-preflight-agent",
+  "role": "Pre-run validation — checks environment, config, API keys, dependencies before any dispatch runs",
+  "entry": "preflight_agent.py",
+  "files": {
+    "python": ["preflight_agent.py"],
+    "output": ["preflight-report.json"]
+  },
+  "output_report": "preflight-report.json",
+  "depends_on": [],
+  "port": null,
+  "status": "offline",
+  "reachable_from": ["windows-local"],
+  "start_cmd": "python preflight_agent.py",
+  "tags": ["preflight", "validation", "health-check", "env-check"]
+}

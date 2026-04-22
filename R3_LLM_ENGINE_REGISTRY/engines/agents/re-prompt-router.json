@@ -1,0 +1,20 @@
+{
+  "id": "re-prompt-router",
+  "label": "RE Prompt Router",
+  "category": "agent-module",
+  "type": "python-agent",
+  "path": "MODULES/re-prompt-router",
+  "local_path": "C:\\Users\\mail\\R3-DASHBOARD\\MODULES\\re-prompt-router",
+  "role": "Routes prompts to appropriate provider/model based on router-config.yaml rules",
+  "entry": "prompt_router.py",
+  "files": {
+    "python": ["prompt_router.py"],
+    "config": ["router-config.yaml"]
+  },
+  "depends_on": ["re-provider-registry"],
+  "port": null,
+  "status": "offline",
+  "reachable_from": ["windows-local"],
+  "start_cmd": "python prompt_router.py",
+  "tags": ["router", "prompt", "provider-selection", "model-routing"]
+}

@@ -1,0 +1,22 @@
+{
+  "id": "mod-01-06",
+  "label": "MOD-01 through MOD-06 — Stammdaten Pipeline",
+  "category": "agent-module",
+  "type": "multi-module",
+  "path": "MODULES/MOD-01-06",
+  "local_path": "C:\\Users\\mail\\R3-DASHBOARD\\MODULES\\MOD-01-06",
+  "role": "Modules 01–06 — Stammdaten-Generator spec-driven pipeline suite (data master records + output generation)",
+  "spec": "MOD-07-STAMMDATEN-GENERATOR-SPEC.md",
+  "modules": [
+    { "id": "MOD-01", "role": "Stammdaten input / data ingest" },
+    { "id": "MOD-02", "role": "Validation + normalization" },
+    { "id": "MOD-03", "role": "Generator core" },
+    { "id": "MOD-04", "role": "Output formatting" },
+    { "id": "MOD-05", "role": "Connector / export" },
+    { "id": "MOD-06", "role": "Review + finalize" }
+  ],
+  "port": null,
+  "status": "offline",
+  "reachable_from": ["windows-local"],
+  "tags": ["mod", "stammdaten", "pipeline", "generator", "spec-driven"]
+}

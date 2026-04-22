@@ -1,0 +1,18 @@
+{
+  "id": "re-provider-registry",
+  "label": "RE Provider Registry",
+  "category": "agent-module",
+  "type": "yaml-config",
+  "path": "MODULES/re-provider-registry",
+  "local_path": "C:\\Users\\mail\\R3-DASHBOARD\\MODULES\\re-provider-registry",
+  "role": "Canonical provider + account registry — all API keys, model lists, rate limits per provider",
+  "entry": "provider-account-registry.yaml",
+  "files": {
+    "registry": ["provider-account-registry.yaml"]
+  },
+  "depends_on": [],
+  "port": null,
+  "status": "active",
+  "reachable_from": ["all"],
+  "tags": ["registry", "providers", "accounts", "keys", "rate-limits"]
+}

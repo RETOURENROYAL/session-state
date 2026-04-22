@@ -1,0 +1,84 @@
+{
+  "id": "obliteratus",
+  "label": "Obliteratus — ML Abliteration Toolkit",
+  "category": "agent-module",
+  "type": "python-ml",
+  "path": "MODULES/obliteratus",
+  "local_path": "C:\\Users\\mail\\R3-DASHBOARD\\MODULES\\obliteratus",
+  "role": "Python ML model abliteration + mechanistic interpretability toolkit (Flask + HuggingFace Transformers)",
+  "entry": "app.py",
+  "port": 7860,
+  "files": {
+    "root": [
+      "app.py",
+      "index.html",
+      "Dockerfile",
+      "pyproject.toml",
+      "requirements.txt",
+      "requirements-apple.txt",
+      "CONTRIBUTING.md",
+      "SECURITY.md",
+      "README.md"
+    ],
+    "docs": [
+      "EFFICIENCY_AUDIT.md",
+      "RESEARCH_SURVEY.md",
+      "SENSITIVE_DATA_AUDIT.md",
+      "mechanistic_interpretability_research.md",
+      "theory_journal.md",
+      "index.html"
+    ],
+    "examples": [
+      "full_study.yaml",
+      "gpt2_head_ablation.yaml",
+      "gpt2_layer_ablation.yaml",
+      "preset_attention.yaml",
+      "preset_knowledge.yaml",
+      "preset_quick.yaml",
+      "remote_gpu_node.yaml"
+    ],
+    "hf_spaces": ["README.md"],
+    "notebooks": ["abliterate.ipynb"],
+    "tests": [
+      "__init__.py",
+      "test_informed_pipeline.py",
+      "test_logit_lens.py",
+      "test_metrics.py",
+      "test_module_imports.py",
+      "test_new_analysis_modules.py",
+      "test_novel_analysis.py",
+      "test_refusal_detection.py",
+      "test_report.py",
+      "test_strategies.py",
+      "test_study_presets.py"
+    ],
+    "package": [
+      "__init__.py",
+      "__main__.py",
+      "abliterate.py",
+      "adaptive_defaults.py",
+      "architecture_profiles.py",
+      "bayesian_optimizer.py",
+      "cli.py",
+      "community.py",
+      "config.py",
+      "device.py",
+      "informed_pipeline.py",
+      "evaluator.py",
+      "presets.py",
+      "probing_classifiers.py"
+    ]
+  },
+  "status": "offline",
+  "reachable_from": ["windows-local", "docker", "hf-spaces"],
+  "start_cmd": "python app.py",
+  "tags": [
+    "ml",
+    "abliteration",
+    "flask",
+    "huggingface",
+    "interpretability",
+    "bayesian",
+    "transformers"
+  ]
+}

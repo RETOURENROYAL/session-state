@@ -1,0 +1,18 @@
+{
+  "id": "re-social-connectors",
+  "label": "RE Social Connectors",
+  "category": "agent-module",
+  "type": "yaml-config",
+  "path": "MODULES/re-social-connectors",
+  "entry": "social-connectors.yaml",
+  "role": "Social media + specialty connector definitions (Reddit, YouTube, TikTok, Shopify, SevDesk, etc.)",
+  "port": null,
+  "local_path": "C:\\Users\\mail\\R3-DASHBOARD\\MODULES\\re-social-connectors",
+  "files": {
+    "connectors": ["social-connectors.yaml", "specialty-connectors.yaml"]
+  },
+  "platforms": ["shopify", "reddit", "youtube", "tiktok", "sevdesk", "indeed", "ebay", "replit", "huggingface", "emergent", "merchant", "postgresql"],
+  "status": "active",
+  "reachable_from": ["windows-local", "n8n"],
+  "tags": ["social", "connectors", "shopify", "reddit", "youtube", "tiktok", "sevdesk"]
+
