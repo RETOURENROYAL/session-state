@@ -27,51 +27,36 @@ $pkg = Get-Content $pkgPath -Raw | ConvertFrom-Json
 # Fix: concurrently 'cmd' → concurrently "cmd"  (Windows needs double quotes)
 $pkg.scripts.dev        = "cross-env NODE_ENV=development concurrently `"npm run watch`" `"npm run serve:http`""
 $pkg.scripts.watch      = "cross-env INPUT=mcp-app.html vite build --watch"
-$pkg.scripts."start:http"  = "cross-env NODE_ENV=development npm run build && npm run serve:http"
-$pkg.scripts."start:stdio" = "cross-env NODE_ENV=development npm run build && npm run serve:stdio"
+# start:http: build first, then serve (node direct — no bun dependency)
+$pkg.scripts."start:http"  = "npm run build && npm run serve:http"
+$pkg.scripts."start:stdio" = "npm run build && npm run serve:stdio"
 
 $pkg | ConvertTo-Json -Depth 10 | Set-Content $pkgPath -Encoding UTF8
 Write-Host "  [OK] scripts.dev fixed (double quotes)" -ForegroundColor Green
 
-# ── Fix 2: scripts/run-mcp-server.bat — rewrite ─────────────────
+# ── Fix 2: scripts/run-mcp-server.bat — simple, no bun check ────
 Write-Host "[2/3] Rewriting scripts/run-mcp-server.bat ..."
 
 @'
 @echo off
 REM R3 VIB.E — Start threejs-server on Windows
-REM Called by r-vib3 dev:mcp script
-
 cd /d "%~dp0..\threejs-server"
-
-REM Check if bun is available
-where bun >nul 2>&1
-if %ERRORLEVEL% == 0 (
-  echo [mcp] Starting threejs-server with bun...
-  bun run serve:http
-) else (
-  REM Fallback: npx tsx
-  where npx >nul 2>&1
-  if %ERRORLEVEL% == 0 (
-    echo [mcp] Starting threejs-server with tsx...
-    call npm run start:http
-  ) else (
-    echo [ERROR] Neither bun nor npx found. Install bun: https://bun.sh
-    exit /b 1
-  )
-)
+echo [mcp] Building + starting threejs-server on :3108...
+call npm run start:http
 '@ | Set-Content "$ROOT\scripts\run-mcp-server.bat" -Encoding ASCII
-Write-Host "  [OK] run-mcp-server.bat rewritten" -ForegroundColor Green
+Write-Host "  [OK] run-mcp-server.bat rewritten (npm only)" -ForegroundColor Green
 
-# ── Fix 3: r-vib3/package.json dev:mcp — skip .sh on Windows ────
+# ── Fix 3: r-vib3/package.json dev:mcp — npm --prefix (no bat) ──
 Write-Host "[3/3] Fixing root package.json dev:mcp script ..."
 
 $rootPkg = Get-Content "$ROOT\package.json" -Raw | ConvertFrom-Json
 
-# Windows: skip .sh, call .bat directly
-$rootPkg.scripts."dev:mcp" = "scripts\run-mcp-server.bat"
+# Use npm --prefix to run in threejs-server subdirectory directly
+# This avoids BAT/SH entirely and works on all platforms
+$rootPkg.scripts."dev:mcp" = "npm --prefix threejs-server run start:http"
 
 $rootPkg | ConvertTo-Json -Depth 10 | Set-Content "$ROOT\package.json" -Encoding UTF8
-Write-Host "  [OK] dev:mcp → scripts\run-mcp-server.bat" -ForegroundColor Green
+Write-Host "  [OK] dev:mcp → npm --prefix threejs-server run start:http" -ForegroundColor Green
 
 # ── Done — start ─────────────────────────────────────────────────
 Write-Host ""
@@ -79,8 +64,9 @@ Write-Host "══════════════════════�
 Write-Host "  Fix applied. Now run:" -ForegroundColor Green
 Write-Host ""
 Write-Host "    cd C:\Users\mail\R3-DASHBOARD\r-vib3"
-Write-Host "    npm run dev:ui    (Next.js :3000 only)"
+Write-Host "    npm run dev         (ui :3000 + mcp :3108 together)"
+Write-Host "    npm run dev:ui      (Next.js :3000 only)"
 Write-Host ""
-Write-Host "  Or to start mcp server separately:"
+Write-Host "  Or start mcp server separately:"
 Write-Host "    cd threejs-server && npm run start:http"
 Write-Host "══════════════════════════════════════════════════" -ForegroundColor Green
