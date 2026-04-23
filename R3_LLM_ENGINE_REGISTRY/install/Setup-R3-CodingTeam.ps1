@@ -237,14 +237,13 @@ if (-not $pythonCmd) {
   }
 }
 
-# Aider config für R3 LiteLLM
-# WICHTIG: "openai/" Prefix zwingt aider den Proxy zu nutzen statt direkt Groq/Ollama aufzurufen
+# Aider config — Default: Ollama lokal (kein API-Key nötig)
+# Groq via openai/ Prefix möglich wenn GROQ_API_KEY gesetzt: --model openai/groq/llama-3.3-70b-versatile
 $aiderConfig = @{
-  "openai-api-base"  = $LiteLLMUrl
-  "openai-api-key"   = $LiteLLMKey
-  "model"            = "openai/groq/llama-3.3-70b-versatile"
-  "weak-model"       = "openai/ollama/gemma2:2b"
-  "editor-model"     = "openai/ollama/deepseek-coder:6.7b"
+  "ollama-api-base"  = "http://localhost:11434"
+  "model"            = "ollama/deepseek-coder:6.7b"
+  "weak-model"       = "ollama/gemma2:2b"
+  "editor-model"     = "ollama/qwen2.5-coder:latest"
   "no-auto-commits"  = $true
   "stream"           = $true
   "pretty"           = $true
@@ -312,20 +311,19 @@ Write-OK "Coding Team Readme: $teamReadme"
 $aiderLaunch = @"
 @echo off
 :: R3|VIB.E Coding Team — Quick Launch
-:: Nutzt LiteLLM Gateway (Free)
-:: aider-install legt aider in %USERPROFILE%\.local\bin — PATH hier sicherstellen
-:: WICHTIG: "openai/" Prefix zwingt aider den LiteLLM-Proxy zu nutzen (nicht direkt Groq/Ollama)
+:: Default: Ollama lokal (kein API-Key nötig)
+:: Groq: set GROQ_API_KEY=gsk_... dann: aider --model groq/llama-3.3-70b-versatile
 
 set PATH=%USERPROFILE%\.local\bin;%PATH%
-set OPENAI_API_BASE=http://localhost:4000/v1
-set OPENAI_API_KEY=r3-local
+set OLLAMA_API_BASE=http://localhost:11434
 
-:: Standard: Groq via LiteLLM (openai/ prefix = Proxy-Route)
-if "%1"==""        aider --openai-api-base http://localhost:4000/v1 --openai-api-key r3-local --model openai/groq/llama-3.3-70b-versatile
-if "%1"=="local"   aider --openai-api-base http://localhost:4000/v1 --openai-api-key r3-local --model openai/ollama/deepseek-coder:6.7b
-if "%1"=="fast"    aider --openai-api-base http://localhost:4000/v1 --openai-api-key r3-local --model openai/ollama/gemma2:2b
-if "%1"=="heavy"   aider --openai-api-base http://localhost:4000/v1 --openai-api-key r3-local --model openai/ollama/deepseek-r1:latest
-if "%1"=="coder"   aider --openai-api-base http://localhost:4000/v1 --openai-api-key r3-local --model openai/ollama/qwen2.5-coder:latest
+:: Standard: deepseek-coder lokal
+if "%1"==""        aider --model ollama/deepseek-coder:6.7b
+if "%1"=="fast"    aider --model ollama/gemma2:2b
+if "%1"=="heavy"   aider --model ollama/deepseek-r1:latest
+if "%1"=="coder"   aider --model ollama/qwen2.5-coder:latest
+if "%1"=="large"   aider --model ollama/qwen2.5:14b
+if "%1"=="groq"    aider --model openai/groq/llama-3.3-70b-versatile --openai-api-base http://localhost:4000/v1 --openai-api-key r3-local
 "@
 $batPath = Join-Path $R3Root "r3-code.bat"
 $aiderLaunch | Set-Content $batPath -Encoding ASCII
