@@ -21,9 +21,21 @@ Write-Host "╚═════════════════════�
 function Fetch-File($src, $dest) {
   $dir = Split-Path $dest
   if (!(Test-Path $dir)) { New-Item -ItemType Directory -Force -Path $dir | Out-Null }
-  $content = (iwr "$BASE/$src?r=$(Get-Random)").Content
-  [System.IO.File]::WriteAllText($dest, $content, [System.Text.Encoding]::UTF8)
-  Write-Host "  [OK] $dest" -ForegroundColor Green
+  $retries = 5; $ok = $false
+  for ($i = 0; $i -lt $retries; $i++) {
+    try {
+      $resp = iwr "$BASE/$src?r=$(Get-Random)" -ErrorAction Stop
+      if ($resp.StatusCode -ne 200 -or $resp.Content.Length -lt 50) {
+        throw "Short/bad response ($($resp.StatusCode), $($resp.Content.Length) bytes)"
+      }
+      [System.IO.File]::WriteAllText($dest, $resp.Content, [System.Text.UTF8Encoding]::new($false))
+      Write-Host "  [OK] $(Split-Path $dest -Leaf)" -ForegroundColor Green
+      $ok = $true; break
+    } catch {
+      if ($i -lt $retries-1) { Write-Host "  [retry $($i+1)] $src — $_" -ForegroundColor Yellow; Start-Sleep 3 }
+      else { Write-Host "  [FAIL] $src — $_" -ForegroundColor Red; throw }
+    }
+  }
 }
 
 # ── 1. Write source files ─────────────────────────────────────────
