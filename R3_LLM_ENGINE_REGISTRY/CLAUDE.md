@@ -122,6 +122,19 @@ Invoke-RestMethod http://localhost:4000/health
 
 Wenn nicht erreichbar: `Start-R3-LiteLLM.ps1` ausführen.
 
+### RULE-008: aider via aider-install → PATH in neuer Session neu setzen (added 2026-04-23)
+
+`aider-install` installiert aider nach `%USERPROFILE%\.local\bin` (= `C:\Users\mail\.local\bin`).
+Diese Shell kennt den neuen PATH erst nach Neustart ODER manuellem Setzen:
+
+```powershell
+$env:PATH = "C:\Users\mail\.local\bin;$env:PATH"
+aider --version   # → aider 0.86.2 ✓
+```
+
+**NIEMALS** `pip install aider-chat` (ohne aider-install) auf Python 3.13 — numpy 1.24.3 baut nicht.
+Immer `aider-install` nutzen (installiert numpy 1.26.4 via uv in eigene venv).
+
 ### RULE-006: aider nicht im PATH — immer python -m aider nutzen (added 2026-04-23)
 
 `aider` ist nach `pip install aider-chat` NICHT automatisch im PATH.

@@ -312,17 +312,18 @@ $aiderLaunch = @"
 @echo off
 :: R3|VIB.E Coding Team — Quick Launch
 :: Nutzt LiteLLM Gateway (Free)
-:: HINWEIS: Nutzt "python -m aider" statt "aider" — kein PATH-Fix nötig
+:: aider-install legt aider in %USERPROFILE%\.local\bin — PATH hier sicherstellen
 
+set PATH=%USERPROFILE%\.local\bin;%PATH%
 set OPENAI_API_BASE=http://localhost:4000/v1
 set OPENAI_API_KEY=r3-local
 
 :: Standard: Groq (schnell, kostenlos)
-if "%1"==""        (python -m aider --model groq/llama-3.3-70b-versatile)
-if "%1"=="local"   (python -m aider --model ollama/deepseek-coder:6.7b)
-if "%1"=="fast"    (python -m aider --model ollama/gemma2:2b)
-if "%1"=="heavy"   (python -m aider --model ollama/deepseek-r1:latest)
-if "%1"=="coder"   (python -m aider --model ollama/qwen2.5-coder:latest)
+if "%1"==""        aider --model groq/llama-3.3-70b-versatile
+if "%1"=="local"   aider --model ollama/deepseek-coder:6.7b
+if "%1"=="fast"    aider --model ollama/gemma2:2b
+if "%1"=="heavy"   aider --model ollama/deepseek-r1:latest
+if "%1"=="coder"   aider --model ollama/qwen2.5-coder:latest
 "@
 $batPath = Join-Path $R3Root "r3-code.bat"
 $aiderLaunch | Set-Content $batPath -Encoding ASCII
