@@ -311,25 +311,30 @@ Write-OK "Coding Team Readme: $teamReadme"
 $aiderLaunch = @"
 @echo off
 :: R3|VIB.E Coding Team — Quick Launch
-:: Default: Ollama lokal (kein API-Key nötig)
-:: Groq: set GROQ_API_KEY=gsk_... dann: aider --model groq/llama-3.3-70b-versatile
+:: Default: qwen2.5-coder (Instruction-tuned, Chat + Code, kein API-Key)
+:: MODELLE:
+::   (default)  qwen2.5-coder:latest  — Chat + Code erklären + schreiben
+::   chat       mistral:latest        — Allgemeine Fragen / Erklärungen
+::   fast       gemma2:2b             — Ultra-schnell, einfache Tasks
+::   heavy      deepseek-r1:latest    — Reasoning / Analyse
+::   large      qwen2.5:14b           — Große Kontexte / komplexe Tasks
+::   groq       groq/llama-3.3-70b    — Via LiteLLM Gateway (benötigt localhost:4000)
 
 set PATH=%USERPROFILE%\.local\bin;%PATH%
 set OLLAMA_API_BASE=http://localhost:11434
 
-:: Standard: deepseek-coder lokal
-if "%1"==""        aider --model ollama/deepseek-coder:6.7b
+if "%1"==""        aider --model ollama/qwen2.5-coder:latest
+if "%1"=="chat"    aider --model ollama/mistral:latest
 if "%1"=="fast"    aider --model ollama/gemma2:2b
 if "%1"=="heavy"   aider --model ollama/deepseek-r1:latest
-if "%1"=="coder"   aider --model ollama/qwen2.5-coder:latest
 if "%1"=="large"   aider --model ollama/qwen2.5:14b
 if "%1"=="groq"    aider --model openai/groq/llama-3.3-70b-versatile --openai-api-base http://localhost:4000/v1 --openai-api-key r3-local
 "@
 $batPath = Join-Path $R3Root "r3-code.bat"
 $aiderLaunch | Set-Content $batPath -Encoding ASCII
 Write-OK "Quick-launch: $batPath"
-Write-INF "  r3-code.bat          → Groq llama-3.3-70b (Standard)"
-Write-INF "  r3-code.bat local    → deepseek-coder (Ollama, offline)"
+Write-INF "  r3-code.bat          → qwen2.5-coder (Chat + Code, Standard)"
+Write-INF "  r3-code.bat chat     → mistral (Erklaerungen / allg. Chat)"
 Write-INF "  r3-code.bat fast     → gemma2:2b (ultra-schnell)"
 Write-INF "  r3-code.bat heavy    → deepseek-r1 (Reasoning)"
 Write-INF "  r3-code.bat coder    → qwen2.5-coder"
